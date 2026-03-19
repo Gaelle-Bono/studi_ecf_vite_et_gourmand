@@ -19,6 +19,8 @@ class RegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $minPasswordLength = 10;
+
         $builder
             ->add('firstName', TextType::class, [
                 'label' => 'Prénom',
@@ -98,7 +100,7 @@ class RegistrationFormType extends AbstractType
                         message: 'Entrez un mot de passe',
                     ),
                     new Length(
-                        min: 10,
+                        min: $minPasswordLength,
                         minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères',
                         // max length allowed by Symfony for security reasons
                         max: 4096,
@@ -108,7 +110,7 @@ class RegistrationFormType extends AbstractType
                         message : 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.',
                     ),     
                 ],
-                'help' => 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.'
+                'help' => "Le mot de passe doit contenir au moins {$minPasswordLength} caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.",
             ])
 
             // // Liste déroulante
