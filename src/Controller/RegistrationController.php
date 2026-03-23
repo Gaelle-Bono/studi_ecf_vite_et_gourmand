@@ -43,7 +43,7 @@ class RegistrationController extends AbstractController
             $mailService->sendMail($user, 'Bienvenue sur Vite et Gourmand!', 'emails/welcome.html.twig', ['user' => $user]);
 
 
-            return $this->redirectToRoute('app_home');
+            return $this->redirectToRoute('app_login');
         }
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form,

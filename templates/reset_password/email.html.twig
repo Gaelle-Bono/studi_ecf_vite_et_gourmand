@@ -1,0 +1,11 @@
+<h1>Bonjour {{ user.email }} !</h1>
+
+<p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le lien suivant</p>
+
+<a href="{{ url('app_reset_password', {token: resetToken.token}) }}">{{ url('app_reset_password', {token: resetToken.token}) }}</a>
+
+<p>Ce lien expirera dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+
+<p>Bien à vous !</p>
+
+<p>L'équipe de Vite et Gourmand</p>
