@@ -1,3 +1,5 @@
+@import './components/menu.css';
+
 body {
     background-color: skyblue;
 }

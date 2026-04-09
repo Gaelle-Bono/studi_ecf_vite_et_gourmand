@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des menus{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Liste des menus</h1>
+    <div data-controller="menu-filter">
+        <form data-menu-filter-target="form"
+            data-action="submit->menu-filter#submit"
+            data-url="{{ path('app_menu_filter') }}">
+
+            <div>
+                <label for="diet">Régime alimentaire</label>
+                <select name="diet" id="diet">
+                    <option value="">Tous</option>
+                    {% for diet in diets %}
+                        <option value="{{ diet.id }}">{{ diet.name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="error" data-menu-filter-target="diet"></p>
+            </div>
+
+            <div>
+                <label for="theme">Thème</label>
+                <select name="theme" id="theme">
+                    <option value="">Tous</option>
+                    {% for theme in themes %}
+                        <option value="{{ theme.id }}">{{ theme.name }}</option>
+                    {% endfor %}
+                </select>
+                <p class="error" data-menu-filter-target="theme"></p>
+            </div>
+
+            <div>
+                <label for="minPricePerPerson">Prix minimum</label>
+                <input type="number" step="0.01" min="0" max="1000" name="minPricePerPerson" id="minPricePerPerson">
+                <p class="error" data-menu-filter-target="minPricePerPerson"></p>
+            </div>
+
+            <div>
+                <label for="maxPricePerPerson">Prix maximum</label>
+                <input type="number" step="0.01" min="0" max="1000" name="maxPricePerPerson" id="maxPricePerPerson">
+                <p class="error" data-menu-filter-target="maxPricePerPerson"></p>
+            </div>
+
+            <div>
+                <label for="minimumNumberOfPeople">Nombre minimum de personnes</label>
+                <input type="number" step="1" min="1" max="1000" name="minimumNumberOfPeople" id="minimumNumberOfPeople">
+                <p class="error" data-menu-filter-target="minimumNumberOfPeople"></p>
+            </div>
+
+            <button type="submit" data-menu-filter-target="submit">Filtrer</button>
+            <button type="button" data-action="click->menu-filter#reset">Réinitialiser</button>
+        </form>
+        <div data-menu-filter-target="loading" class="hidden">Chargement...</div>
+
+        <div data-menu-filter-target="results">
+            {% include 'menu/_list.html.twig' with { menus: menus } %}
+        </div>
+    </div>
+
+    
+</div>
+{% endblock %}
