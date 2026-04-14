@@ -2,16 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\RoleRepository;
+use App\Repository\AllergenRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RoleRepository::class)]
-class Role
+#[ORM\Entity(repositoryClass: AllergenRepository::class)]
+class Allergen
 {
-    public const USER = 'USER_ROLE';
-    public const ADMIN = 'ADMIN_ROLE';
-    public const EMPLOYEE = 'EMPLOYEE_ROLE';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

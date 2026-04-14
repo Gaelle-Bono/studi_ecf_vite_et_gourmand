@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MenuRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -43,7 +45,20 @@ class Menu
     #[ORM\JoinColumn(nullable: false)]
     private ?Theme $theme = null;
 
-    
+    /**
+     * @var Collection<int, Dish>
+     */
+    #[ORM\ManyToMany(targetEntity: Dish::class)]
+    #[Assert\Count(
+        min: 1,
+        minMessage: "Vous devez sélectionner au moins un plat."
+    )]
+    private Collection $dishes;
+
+    public function __construct()
+    {
+        $this->dishes = new ArrayCollection();
+    }
 
 
     public function getId(): ?int
@@ -80,9 +95,9 @@ class Menu
         return $this->pricePerPerson;
     }
 
-    public function getTotalPriceForMinimumPeople(): float
+    public function getTotalPriceForMinimumPeople(): string
     {
-        return (float)$this->pricePerPerson * $this->minimumNumberOfPeople;
+        return (string) ((float) $this->pricePerPerson * $this->minimumNumberOfPeople);
     }
 
     public function setPricePerPerson(string $pricePerPerson): static
@@ -152,5 +167,28 @@ class Menu
         return $this;
     }
 
+    /**
+     * @return Collection<int, Dish>
+     */
+    public function getDishes(): Collection
+    {
+        return $this->dishes;
+    }
+
+    public function addDish(Dish $dish): static
+    {
+        if (!$this->dishes->contains($dish)) {
+            $this->dishes->add($dish);
+        }
+
+        return $this;
+    }
+
+    public function removeDish(Dish $dish): static
+    {
+        $this->dishes->removeElement($dish);
+
+        return $this;
+    }
 
 }

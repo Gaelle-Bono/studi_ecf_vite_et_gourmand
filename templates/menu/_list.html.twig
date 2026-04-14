@@ -2,10 +2,12 @@
     <div>
         <h2>{{ menu.title }}</h2>
         <p>{{ menu.description }}</p>
-        <p>{{ menu.pricePerPerson }} € / personne - {{ menu.minimumNumberOfPeople }} personne{{ menu.minimumNumberOfPeople > 1 ? 's' : '' }} minimum</p>
-        {# <a href="{{ path('app_menu_show', { id: menu.id }) }}">Détails du menu</a> #}
+        <p>{{ menu.pricePerPerson|number_format(2, ',', ' ') }} € / personne 
+            - {{ menu.minimumNumberOfPeople }} personne{{ menu.minimumNumberOfPeople > 1 ? 's' : '' }} minimum
+            - prix associé : {{ menu.getTotalPriceForMinimumPeople()|number_format(2, ',', ' ') }} €
+        </p>
+        <a href="{{ path('app_menu_show', { id: menu.id }) }}">Détails du menu</a>
     </div>
 {% else %}
     <p>Aucun menu trouvé</p>
 {% endfor %}
-

@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ menu.title }}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <h1>{{ menu.title }}</h1>
+    <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
+    <p><strong>Nombre de personnes minimum :</strong> {{ menu.minimumNumberOfPeople }}</p>
+    <p><strong>Prix associé au nombre minimum de personnes :</strong> {{ menu.getTotalPriceForMinimumPeople()|number_format(2, ',', ' ') }} €</p>
+    <p><strong>Régime :</strong> {{ menu.diet.name }}</p>
+    <p><strong>Thème :</strong> {{ menu.theme.name }}</p>
+    <p><strong>Description :</strong> {{ menu.description }}</p>
+    
+
+    {#  remaining stocks #}
+    {% if stockAlert %}
+        <div class="alert alert-{{ stockAlert.type }}">
+            <i class="{{ stockAlert.icon }} me-2"></i>
+            {{ stockAlert.message }}
+        </div>
+    {% else %}
+        <p><strong>Quantité restante :</strong> {{ menu.remainingQuantity }}</p>
+    {% endif %}
+
+    {% if menu.conditions is not empty %}
+        <div class="alert alert-warning" role="alert">
+            <strong><i class="bi bi-exclamation-triangle me-2"></i>Conditions :</strong> 
+                <ul>
+                    {% for condition in menu.conditions %}
+                        <li>{{ condition }}</li>
+                    {% endfor %}
+                </ul>
+        </div>
+    {% endif %}
+
+
+    <h2>Plats inclus dans ce menu :</h2>
+
+    {# displaying dishes photos #}
+    <div class="gallery">
+        {% for dish in allDishes %}
+            {% if dish.photoPath %}
+                <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+    {# displaying dishes by dishes category #}
+    {% for title, dishesCategory in dishesCategories %}
+        <h3>{{ title }}</h3>
+
+        {% if dishesCategory.dishes is not empty %}
+            <ul>
+                {% for dish in dishesCategory.dishes %}
+                    {% include 'menu/dish/_dish_item.html.twig' with {'dish': dish} %}
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>{{ dishesCategory.emptyText }}</p>
+        {% endif %}
+    {% endfor %}
+
+
+    <a href="{{ path('app_menu_index') }}">Retour à la liste des menus</a>
+
+    {# <a href="{{ path('app_menu_command', {'id': menu.id}) }}">commander</a> #}
+</div>
+{% endblock %}
+

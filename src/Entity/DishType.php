@@ -2,15 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\RoleRepository;
+use App\Repository\DishTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RoleRepository::class)]
-class Role
+#[ORM\Entity(repositoryClass: DishTypeRepository::class)]
+class DishType
 {
-    public const USER = 'USER_ROLE';
-    public const ADMIN = 'ADMIN_ROLE';
-    public const EMPLOYEE = 'EMPLOYEE_ROLE';
+
+    public const STARTER = 'entrée';
+    public const MAIN = 'plat principal';
+    public const DESSERT = 'dessert';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

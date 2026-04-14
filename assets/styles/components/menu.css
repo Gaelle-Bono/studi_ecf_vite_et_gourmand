@@ -1,3 +1,15 @@
 .hidden {
     visibility: hidden;
 }
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.gallery img {
+    width: 150px;
+    height: 120px;
+    object-fit: cover;
+}
