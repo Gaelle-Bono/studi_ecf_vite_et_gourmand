@@ -33,21 +33,30 @@ class RegistrationController extends AbstractController
 
             //add 'USER_ROLE' to a new subscriber
             $role = $roleRepository->findOneBy(['name' => Role::USER]);
-            if ($role) {
-                $user->setRole($role);
-            }
-
+            if (!$role) {
+                throw new \Exception('Role USER introuvable');
+            } 
+            
+            $user->setRole($role);
+        
+            
             $entityManager->persist($user);
             $entityManager->flush();
 
-             // send an email tio the new subscriber
-            $mailService->sendMail($user, 'Bienvenue sur Vite et Gourmand!', 'emails/welcome.html.twig', ['user' => $user]);
+            $success = $mailService->sendMail($user, 'Bienvenue sur Vite et Gourmand!','emails/welcome.html.twig',
+                ['user' => $user]
+            );
 
+            if (!$success) {
+                $this->addFlash('warning', 'Compte créé mais l’email de confirmation n’a pas pu être envoyé.');
+            } else {
+                $this->addFlash('success', 'Compte créé avec succès. Un email de bienvenue vous a été envoyé.');
+            }
 
             return $this->redirectToRoute('app_login');
         }
         return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form,
+            'registrationForm' => $form->createView(),
         ]);
     }
 }

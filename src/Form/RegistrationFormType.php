@@ -8,11 +8,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Constraints\Regex;
 
 
 class RegistrationFormType extends AbstractType
@@ -24,7 +24,6 @@ class RegistrationFormType extends AbstractType
         $builder
             ->add('firstName', TextType::class, [
                 'label' => 'Prénom',
-                'required' => true,
                 'attr' => [
                     'maxlength' => 50
                 ]
@@ -32,7 +31,6 @@ class RegistrationFormType extends AbstractType
 
             ->add('lastName', TextType::class, [
                 'label' => 'Nom',
-                'required' => true,
                 'attr' => [
                     'maxlength' => 50
                 ]
@@ -40,23 +38,21 @@ class RegistrationFormType extends AbstractType
 
             ->add('phoneNumber', TextType::class, [
                 'label' => 'Télephone',
-                'required' => true,
                 'attr' => [
-                    'maxlength' => 50
-                ]
+                    'maxlength' => 20
+                ],
+                'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +.",
             ])
 
             ->add('address', TextType::class, [
                 'label' => 'Adresse',
-                'required' => true,
                 'attr' => [
-                    'maxlength' => 100
+                    'maxlength' => 255
                 ]
             ])
 
             ->add('zipCode', TextType::class, [
                 'label' => 'Code postal',
-                'required' => true,
                 'attr' => [
                     'maxlength' => 10
                 ]
@@ -64,7 +60,6 @@ class RegistrationFormType extends AbstractType
 
             ->add('city', TextType::class, [
                 'label' => 'Ville',
-                'required' => true,
                 'attr' => [
                     'maxlength' => 50
                 ]
@@ -72,7 +67,6 @@ class RegistrationFormType extends AbstractType
 
             ->add('country', TextType::class, [
                 'label' => 'Pays',
-                'required' => true,
                 'attr' => [
                     'maxlength' => 50
                 ]
@@ -80,9 +74,9 @@ class RegistrationFormType extends AbstractType
 
             ->add('email', EmailType::class, [
                 'label' => 'Adresse e-mail',
-                'required' => true,
                 'attr' => [
-                    'maxlength' => 50
+                    'maxlength' => 180,
+                    'required' => true
                 ]
             ])
 
@@ -112,17 +106,6 @@ class RegistrationFormType extends AbstractType
                 ],
                 'help' => "Le mot de passe doit contenir au moins {$minPasswordLength} caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.",
             ])
-
-            // // Liste déroulante
-            // ->add('role', ChoiceType::class, [
-            //     'label' => 'Rôle',
-            //     'choices' => [
-            //         'Utilisateur' => 'USER_ROLE',
-            //         'Administrateur' => 'ADMIN_ROLE'
-            //     ],
-            //     'expanded' => false, // true = boutons radio
-            //     'multiple' => false
-            // ])
 
             // Submit button
             ->add('save', SubmitType::class, [

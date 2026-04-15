@@ -8,17 +8,15 @@ use Psr\Log\LoggerInterface;
 
 class MailService
 {
-    public function __construct(private MailerInterface $mailer,private LoggerInterface $logger)
+    public function __construct(private MailerInterface $mailer,private LoggerInterface $logger, private string $mailFrom)
     {
-        $this->mailer = $mailer;
-        $this->logger = $logger;
     }
 
-    public function sendMail(User $user, string $subject, string $template, array $context = [])
+    public function sendMail(User $user, string $subject, string $template, array $context = []):bool
     {
 
         $email = (new TemplatedEmail())
-            ->from('noreply@vite-et-gourmand.com')
+            ->from($this->mailFrom)
             ->to($user->getEmail())
             ->subject($subject)
             ->htmlTemplate($template)
@@ -26,11 +24,14 @@ class MailService
         try 
         {
             $this->mailer->send($email);
-        } catch (\Exception $e) {
+            return true;
+        } catch (\Throwable $e) {
             $this->logger->error('Erreur envoi mail',[
                 'email' => $user->getEmail(), 
                 'error' => $e->getMessage()
+                
             ]);
+            return false;
         }    
     }
 }

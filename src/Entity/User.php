@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'Il existe déjà un compte avec cet email')]
@@ -19,6 +20,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank(message: "L'email est obligatoire")]
+    #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
+    #[Assert\Length(max: 180)]
     private ?string $email = null;
 
     /**
@@ -27,26 +31,87 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le prénom est obligatoire")]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: "Le prénom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le prénom ne peut pas dépasser {{ limit }} caractères"
+    )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ' -]+$/",
+        message: "Le prénom contient des caractères invalides"
+    )]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 50)]
+
+   #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères"
+    )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ' -]+$/",
+        message: "Le nom contient des caractères invalides"
+    )]
     private ?string $lastName = null;
 
-    #[ORM\Column(length: 50)]
+
+    #[ORM\Column(length: 20)]
+    #[Assert\NotBlank(message: "Le numéro de téléphone est obligatoire")]
+    #[Assert\Regex(
+        pattern: "/^\+?[0-9\s]{10,20}$/",
+        message: "Le numéro de téléphone est invalide"
+    )]
     private ?string $phoneNumber = null;
 
+
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "L'adresse est obligatoire")]
+    #[Assert\Length(
+        min: 5,
+        max: 255,
+        minMessage: "L'adresse doit contenir au moins {{ limit }} caractères",
+        maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères"
+    )]
     private ?string $address = null;
 
+
     #[ORM\Column(length: 10)]
+    #[Assert\NotBlank(message: "Le code postal est obligatoire")]
+    #[Assert\Regex(
+        pattern: "/^\d+$/",
+        message: "Le code postal doit contenir uniquement des chiffres"
+    )]
+    #[Assert\Length(
+        max: 10,
+        maxMessage: "Le code postal ne peut pas dépasser {{ limit }} caractères"
+    )]
     private ?string $zipCode = null;
 
+
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "La ville est obligatoire")]
+     #[Assert\Length(
+        max: 50,
+        maxMessage: "La ville ne peut pas dépasser {{ limit }} caractères"
+    )]
     private ?string $city = null;
 
-    #[ORM\Column(length: 255)]
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le pays est obligatoire")]
+     #[Assert\Length(
+        max: 50,
+        maxMessage: "Le pays ne peut pas dépasser {{ limit }} caractères"
+    )]    
     private ?string $country = null;
+
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -64,8 +129,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email = strtolower($email);
-
+        $this->email = strtolower(trim($email));
         return $this;
     }
 
@@ -197,7 +261,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return $this->role ? [$this->role->getname()] : [];
+        return $this->role ? [$this->role->getName()] : [];
     }
 
     public function getRole(): ?Role
