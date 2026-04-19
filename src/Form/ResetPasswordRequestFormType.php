@@ -7,6 +7,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email;
 
 class ResetPasswordRequestFormType extends AbstractType
 {
@@ -19,9 +20,11 @@ class ResetPasswordRequestFormType extends AbstractType
                     new NotBlank(
                         message: 'Entrez votre adresse mail pour recevoir un lien de réinitialisation de mot de passe',
                     ),
+                    new Email(
+                        message: 'Adresse email invalide',
+                    ),
                 ],
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

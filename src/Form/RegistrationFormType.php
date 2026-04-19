@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Constant\AppConstant;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -19,8 +20,6 @@ class RegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $minPasswordLength = 10;
-
         $builder
             ->add('firstName', TextType::class, [
                 'label' => 'Prénom',
@@ -74,10 +73,6 @@ class RegistrationFormType extends AbstractType
 
             ->add('email', EmailType::class, [
                 'label' => 'Adresse e-mail',
-                'attr' => [
-                    'maxlength' => 180,
-                    'required' => true
-                ]
             ])
 
             ->add('plainPassword', PasswordType::class, [
@@ -94,7 +89,7 @@ class RegistrationFormType extends AbstractType
                         message: 'Entrez un mot de passe',
                     ),
                     new Length(
-                        min: $minPasswordLength,
+                        min: AppConstant::MIN_PASSWORD_LENGTH,
                         minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères',
                         // max length allowed by Symfony for security reasons
                         max: 4096,
@@ -104,7 +99,7 @@ class RegistrationFormType extends AbstractType
                         message : 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.',
                     ),     
                 ],
-                'help' => "Le mot de passe doit contenir au moins {$minPasswordLength} caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.",
+                'help' => "Le mot de passe doit contenir au moins " . AppConstant::MIN_PASSWORD_LENGTH . " caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.",
             ])
 
             // Submit button

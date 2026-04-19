@@ -2,7 +2,7 @@
 
 namespace App\Service;
 use App\Entity\Menu;
-use App\Entity\DishType;
+use App\Constant\AppConstant;
 
 
 class DishesMenuService
@@ -30,11 +30,11 @@ class DishesMenuService
             $type = $dish->getDishType()->getName();
             $allDishes[] = $dish;
 
-            if ($type === DishType::STARTER) {
+            if ($type === AppConstant::STARTER) {
                 $dishesCategories['Entrées']['dishes'][] = $dish;
-            } elseif ($type === DishType::MAIN) {
+            } elseif ($type === AppConstant::MAIN) {
                 $dishesCategories['Plats']['dishes'][] = $dish;
-            } elseif ($type === DishType::DESSERT) {
+            } elseif ($type === AppConstant::DESSERT) {
                 $dishesCategories['Desserts']['dishes'][] = $dish;
             }
         }

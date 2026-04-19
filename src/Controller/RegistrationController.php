@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\Role;
+use App\Constant\AppConstant;
 use App\Form\RegistrationFormType;
 use App\Repository\RoleRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,7 +32,7 @@ class RegistrationController extends AbstractController
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
             //add 'USER_ROLE' to a new subscriber
-            $role = $roleRepository->findOneBy(['name' => Role::USER]);
+            $role = $roleRepository->findOneBy(['name' => AppConstant::USER]);
             if (!$role) {
                 throw new \Exception('Role USER introuvable');
             } 

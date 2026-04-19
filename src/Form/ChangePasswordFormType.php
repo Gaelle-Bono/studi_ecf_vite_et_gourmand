@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Constant\AppConstant;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -15,8 +16,6 @@ class ChangePasswordFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $minPasswordLength = 10;
-        
         $builder
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -31,7 +30,7 @@ class ChangePasswordFormType extends AbstractType
                         message: 'Entrez un mot de passe',
                     ),
                     new Length(
-                        min: $minPasswordLength,
+                        min: AppConstant::MIN_PASSWORD_LENGTH,
                         minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères',
                         // max length allowed by Symfony for security reasons
                         max: 4096,
@@ -41,7 +40,7 @@ class ChangePasswordFormType extends AbstractType
                         message : 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.',
                     ),     
                 ],
-                    'help' => "Le mot de passe doit contenir au moins {$minPasswordLength} caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.",
+                    'help' => "Le mot de passe doit contenir au moins " . AppConstant::MIN_PASSWORD_LENGTH . " caractères, une minuscule, une majuscule, un chiffre et un caractère spécial.",
                     'label' => 'Nouveau mot de passe',
                 ],
                 'second_options' => [

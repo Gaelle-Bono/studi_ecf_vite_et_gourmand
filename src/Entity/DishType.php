@@ -9,10 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
 class DishType
 {
 
-    public const STARTER = 'entrée';
-    public const MAIN = 'plat principal';
-    public const DESSERT = 'dessert';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
