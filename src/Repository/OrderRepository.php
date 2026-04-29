@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\DishType;
+use App\Entity\Order;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<DishType>
+ * @extends ServiceEntityRepository<Order>
  */
-class DishTypeRepository extends ServiceEntityRepository
+class OrderRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, DishType::class);
+        parent::__construct($registry, Order::class);
     }
 
 //    /**
-//     * @return DishType[] Returns an array of DishType objects
+//     * @return Order[] Returns an array of Order objects
 //     */
 //    public function findByExampleField($value): array
 //    {
-//        return $this->createQueryBuilder('d')
-//            ->andWhere('d.exampleField = :val')
+//        return $this->createQueryBuilder('o')
+//            ->andWhere('o.exampleField = :val')
 //            ->setParameter('val', $value)
-//            ->orderBy('d.id', 'ASC')
+//            ->orderBy('o.id', 'ASC')
 //            ->setMaxResults(10)
 //            ->getQuery()
 //            ->getResult()
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?DishType
+//    public function findOneBySomeField($value): ?Order
 //    {
-//        return $this->createQueryBuilder('d')
-//            ->andWhere('d.exampleField = :val')
+//        return $this->createQueryBuilder('o')
+//            ->andWhere('o.exampleField = :val')
 //            ->setParameter('val', $value)
 //            ->getQuery()
 //            ->getOneOrNullResult()

@@ -1,0 +1,5 @@
+{% if menu %}
+    <p><strong>Menu :</strong> {{ menu.title }}</p>
+{% else %}
+    {{ form_row(form.menu) }}
+{% endif %}

@@ -1,18 +1,16 @@
-<?php
+<?php 
 
-namespace App\Entity;
-
-use App\Repository\UserRepository;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+namespace App\Entity; 
+use App\Repository\UserRepository; 
+use Doctrine\DBAL\Types\Types; 
+use Doctrine\ORM\Mapping as ORM; 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity; 
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface; 
+use Symfony\Component\Security\Core\User\UserInterface; 
 use Symfony\Component\Validator\Constraints as Assert;
-
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'Il existe déjà un compte avec cet email')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)] 
+#[UniqueEntity(fields: ['email'], message: 'Il existe déjà un compte avec cet email')] 
+class User implements UserInterface, PasswordAuthenticatedUserInterface 
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,13 +21,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: "L'email est obligatoire")]
     #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
     #[Assert\Length(max: 180)]
-    private ?string $email = null;
+    private string $email;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    private ?string $password = null;
+    private string $password;
 
 
     #[ORM\Column(length: 50)]
@@ -44,7 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         pattern: "/^[a-zA-ZÀ-ÿ' -]+$/",
         message: "Le prénom contient des caractères invalides"
     )]
-    private ?string $firstName = null;
+    private string $firstName;
 
 
    #[ORM\Column(length: 50)]
@@ -59,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         pattern: "/^[a-zA-ZÀ-ÿ' -]+$/",
         message: "Le nom contient des caractères invalides"
     )]
-    private ?string $lastName = null;
+    private string $lastName;
 
 
     #[ORM\Column(length: 20)]
@@ -68,7 +66,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         pattern: "/^\+?[0-9\s]{10,20}$/",
         message: "Le numéro de téléphone est invalide"
     )]
-    private ?string $phoneNumber = null;
+    private string $phoneNumber;
 
 
     #[ORM\Column(type: Types::TEXT)]
@@ -79,7 +77,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         minMessage: "L'adresse doit contenir au moins {{ limit }} caractères",
         maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères"
     )]
-    private ?string $address = null;
+    private string $address;
 
 
     #[ORM\Column(length: 10)]
@@ -92,7 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         max: 10,
         maxMessage: "Le code postal ne peut pas dépasser {{ limit }} caractères"
     )]
-    private ?string $zipCode = null;
+    private string $zipCode;
 
 
     #[ORM\Column(length: 50)]
@@ -101,7 +99,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         max: 50,
         maxMessage: "La ville ne peut pas dépasser {{ limit }} caractères"
     )]
-    private ?string $city = null;
+    private string $city;
 
 
     #[ORM\Column(length: 50)]
@@ -110,19 +108,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         max: 50,
         maxMessage: "Le pays ne peut pas dépasser {{ limit }} caractères"
     )]    
-    private ?string $country = null;
+    private string $country;
 
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Role $role = null;
+    private Role $role;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -146,7 +144,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -158,24 +156,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
-    public function __serialize(): array
-    {
-        $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
-        return $data;
-    }
-
     #[\Deprecated]
     public function eraseCredentials(): void
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
+        
     }
 
-    public function getFirstName(): ?string
+    public function getFirstName(): string
     {
         return $this->firstName;
     }
@@ -187,7 +174,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getLastName(): ?string
+    public function getLastName(): string
     {
         return $this->lastName;
     }
@@ -199,7 +186,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPhoneNumber(): ?string
+    public function getPhoneNumber(): string
     {
         return $this->phoneNumber;
     }
@@ -211,7 +198,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getAddress(): ?string
+    public function getAddress(): string
     {
         return $this->address;
     }
@@ -223,7 +210,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getZipCode(): ?string
+    public function getZipCode(): string
     {
         return $this->zipCode;
     }
@@ -235,7 +222,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCity(): ?string
+    public function getCity(): string
     {
         return $this->city;
     }
@@ -247,7 +234,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCountry(): ?string
+    public function getCountry(): string
     {
         return $this->country;
     }
@@ -261,15 +248,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return $this->role ? [$this->role->getName()] : [];
+        return [$this->role->getName()];
     }
 
-    public function getRole(): ?Role
+    public function getRole(): Role
     {
         return $this->role;
     }
 
-    public function setRole(?Role $role): static
+    public function setRole(Role $role): static
     {
         $this->role = $role;
 

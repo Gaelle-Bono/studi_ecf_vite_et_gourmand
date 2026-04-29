@@ -20,30 +20,43 @@ class Menu
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $title = null;
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
+    private string $title;
 
     #[ORM\Column]
-    private ?int $minimumNumberOfPeople = null;
+    #[Assert\NotNull]
+    #[Assert\GreaterThanOrEqual(1)]
+    private int $minimumNumberOfPeople = 1;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private ?string $pricePerPerson = null;
+    #[Assert\NotNull]
+    #[Assert\Positive]
+    private string $pricePerPerson;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 1000)]
+    private string $description;
+
+    #[ORM\Column]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
+    private int $remainingQuantity;
 
     #[ORM\Column(nullable: true)]
-    private ?int $remainingQuantity = null;
-
-    #[ORM\Column(nullable: true)]
+    #[Assert\Type('array')]
     private ?array $conditions = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Diet $diet = null;
+    #[Assert\NotNull]
+    private Diet $diet;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Theme $theme = null;
+    #[Assert\NotNull]
+    private Theme $theme;
 
     /**
      * @var Collection<int, Dish>
@@ -66,7 +79,7 @@ class Menu
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -78,7 +91,7 @@ class Menu
         return $this;
     }
 
-    public function getMinimumNumberOfPeople(): ?int
+    public function getMinimumNumberOfPeople(): int
     {
         return $this->minimumNumberOfPeople;
     }
@@ -90,7 +103,7 @@ class Menu
         return $this;
     }
 
-    public function getPricePerPerson(): ?string
+    public function getPricePerPerson(): string
     {
         return $this->pricePerPerson;
     }
@@ -107,7 +120,7 @@ class Menu
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -119,7 +132,7 @@ class Menu
         return $this;
     }
 
-    public function getRemainingQuantity(): ?int
+    public function getRemainingQuantity(): int
     {
         return $this->remainingQuantity;
     }
@@ -143,24 +156,24 @@ class Menu
         return $this;
     }
 
-    public function getDiet(): ?Diet
+    public function getDiet(): Diet
     {
         return $this->diet;
     }
 
-    public function setDiet(?Diet $diet): static
+    public function setDiet(Diet $diet): static
     {
         $this->diet = $diet;
 
         return $this;
     }
 
-    public function getTheme(): ?Theme
+    public function getTheme(): Theme
     {
         return $this->theme;
     }
 
-    public function setTheme(?Theme $theme): static
+    public function setTheme(Theme $theme): static
     {
         $this->theme = $theme;
 

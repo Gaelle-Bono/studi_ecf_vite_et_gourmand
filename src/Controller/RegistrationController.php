@@ -31,15 +31,15 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            //add 'USER_ROLE' to a new subscriber
+            //add 'ROLE_USER' to a new subscriber
             $role = $roleRepository->findOneBy(['name' => AppConstant::USER]);
             if (!$role) {
-                throw new \Exception('Role USER introuvable');
+               throw new \LogicException('Le rôle ROLE_USER doit exister en base.');
             } 
             
             $user->setRole($role);
         
-            
+            // register the user in DB with his role 
             $entityManager->persist($user);
             $entityManager->flush();
 
