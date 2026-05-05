@@ -18,10 +18,10 @@ class ResetPasswordRequestFormType extends AbstractType
                 'attr' => ['autocomplete' => 'email'],
                 'constraints' => [
                     new NotBlank(
-                        message: 'Entrez votre adresse mail pour recevoir un lien de réinitialisation de mot de passe',
+                        message: 'Entrez votre adresse mail pour recevoir un lien de réinitialisation de mot de passe'
                     ),
                     new Email(
-                        message: 'Adresse email invalide',
+                        message: 'Adresse email invalide'
                     ),
                 ],
             ]);

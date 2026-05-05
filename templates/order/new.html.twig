@@ -1,5 +1,66 @@
-{% if menu %}
-    <p><strong>Menu :</strong> {{ menu.title }}</p>
-{% else %}
-    {{ form_row(form.menu) }}
-{% endif %}
+{% extends 'base.html.twig' %}
+
+{% block title %}Passer une commande{% endblock %}
+
+{% block body %}
+    <h1>Passer une commande</h1>
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+
+        <h3>Informations client</h3>
+        {{ form_row(form.customerFirstNameAtOrder) }}
+        {{ form_row(form.customerLastNameAtOrder) }}
+        {{ form_row(form.customerEmailAtOrder) }}
+        {{ form_row(form.customerPhoneAtOrder) }}
+
+        <h3>Prestation</h3>
+        {{ form_row(form.serviceDate) }}
+        {{ form_row(form.requestedTime) }}
+        {{ form_row(form.serviceAddress) }}
+        {{ form_row(form.serviceAddressComplement) }}
+        {{ form_row(form.serviceZipCode) }}
+        {{ form_row(form.serviceCity) }}
+        {{ form_row(form.serviceCountry) }}
+
+        <h3>Commande</h3>
+        {{ form_row(form.menu) }}
+
+        {% if menu %}
+            <h4>{{ menu.title }}</h4>
+
+            <p>{{ menu.description }}</p>
+
+            {% if menu.dishes is defined %}
+                <ul>
+                    {% for dish in menu.dishes %}
+                        <li>
+                            <strong>{{ dish.dishType.label() }} :</strong>
+                            {{ dish.title }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endif %}
+
+        {{ form_row(form.numberOfPeople) }}
+
+        {% if menu and menu.conditions is not empty %}
+            <div class="alert alert-warning"  role="alert">
+                <strong><i class="bi bi-exclamation-triangle me-2"></i>Conditions :</strong>
+                <ul>
+                    {% for condition in menu.conditions %}
+                        <li>{{ condition }}</li>
+                    {% endfor %}
+                </ul>
+                <p class="mb-0">
+                    {{ menu.minimumNumberOfPeople }} personne{{ menu.minimumNumberOfPeople > 1 ? 's' : '' }} minimum
+                </p>
+            </div>
+            {{ form_row(form.acceptConditions) }}
+        {% endif %}
+
+        <button>
+            Commander
+        </button>
+    {{ form_end(form, {'render_rest': false}) }}
+{% endblock %}

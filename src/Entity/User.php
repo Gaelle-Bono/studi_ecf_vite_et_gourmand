@@ -73,7 +73,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: "L'adresse est obligatoire")]
     #[Assert\Length(
         min: 5,
-        max: 255,
+        max: 180,
         minMessage: "L'adresse doit contenir au moins {{ limit }} caractères",
         maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères"
     )]
@@ -248,8 +248,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return [$this->role->getName()];
+        if (!$this->role) {
+            throw new \LogicException('Aucun rôle attribué à cet utilisateur.');
+        }
+
+        $role = $this->role->getName();
+
+        if ($role === 'ROLE_ADMIN') {
+            return ['ROLE_ADMIN', 'ROLE_EMPLOYEE', 'ROLE_USER'];
+        }
+
+        if ($role === 'ROLE_EMPLOYEE') {
+            return ['ROLE_EMPLOYEE', 'ROLE_USER'];
+        }
+
+        if ($role === 'ROLE_USER') {
+            return ['ROLE_USER'];
+        }
+
+        throw new \LogicException('Rôle inconnu "' . $role . '"');
     }
+
 
     public function getRole(): Role
     {

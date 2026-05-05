@@ -12,7 +12,7 @@ enum DishType: string
     {
         return [
             'starter' => 'Entrée',
-            'main' => 'Plat principal',
+            'main' => 'Plat',
             'dessert' => 'Dessert',
         ][$this->value] ?? $this->value;
     }

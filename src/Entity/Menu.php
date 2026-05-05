@@ -19,25 +19,23 @@ class Menu
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
-    #[Assert\Length(max: 50)]
+    #[Assert\Length(max: 100)]
     private string $title;
-
-    #[ORM\Column]
-    #[Assert\NotNull]
-    #[Assert\GreaterThanOrEqual(1)]
-    private int $minimumNumberOfPeople = 1;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    #[Assert\NotNull]
-    #[Assert\Positive]
-    private string $pricePerPerson;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 1000)]
     private string $description;
+
+    #[ORM\Column]
+    #[Assert\GreaterThanOrEqual(1)]
+    private int $minimumNumberOfPeople = 1;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[Assert\Positive]
+    private string $pricePerPerson;
 
     #[ORM\Column]
     #[Assert\NotNull]
@@ -48,6 +46,7 @@ class Menu
     #[Assert\Type('array')]
     private ?array $conditions = null;
 
+    // Relations
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
