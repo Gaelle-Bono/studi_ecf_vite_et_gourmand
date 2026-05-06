@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Enum\DishType;
+
 
 #[ORM\Entity(repositoryClass: DishRepository::class)]
 class Dish
@@ -24,10 +24,6 @@ class Dish
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoPath = null;
-
-    #[ORM\Column(enumType: DishType::class)]
-    #[Assert\NotNull]
-    private DishType $dishType;
 
     /**
      * @var Collection<int, Allergen>
@@ -94,15 +90,4 @@ class Dish
         return $this;
     }
 
-    public function getDishType(): DishType
-    {
-        return $this->dishType;
-    }
-
-    public function setDishType(DishType $dishType): static
-    {
-        $this->dishType = $dishType;
-
-        return $this;
-    }
 }

@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Repository\DietRepository;
 use App\Repository\ThemeRepository;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 class FilterMenuService
 {
@@ -43,7 +44,7 @@ class FilterMenuService
         ];
     }
 
-    private function parseNumber($value, string $fieldName, array &$errors, string $type = 'int'): int|float|null
+    private function parseNumber(mixed $value, string $fieldName, array &$errors, string $type = 'int'): int|float|null
     {
         if ($value === null || $value === '') {
             return null;
@@ -69,7 +70,7 @@ class FilterMenuService
         return null;
     }
 
-    private function validateSelectField($value, string $fieldName, array &$errors, $repository): ?int
+    private function validateSelectField(mixed $value, string $fieldName, array &$errors, ServiceEntityRepository $repository): ?int
     {
         $id = $this->parseNumber($value, $fieldName, $errors, 'int');
 
@@ -85,7 +86,7 @@ class FilterMenuService
         return $id;
     }
 
-    private function validatePriceField($value, string $fieldName, array &$errors): ?float
+    private function validatePriceField(mixed $value, string $fieldName, array &$errors): ?float
     {
         $value = $this->parseNumber($value, $fieldName, $errors, 'float');
 
@@ -97,7 +98,7 @@ class FilterMenuService
         return $value;
     }
 
-    private function validateMinPeopleField($value, string $fieldName, array &$errors): ?int
+    private function validateMinPeopleField(mixed $value, string $fieldName, array &$errors): ?int
     {
         $value = $this->parseNumber($value, $fieldName, $errors, 'int');
 

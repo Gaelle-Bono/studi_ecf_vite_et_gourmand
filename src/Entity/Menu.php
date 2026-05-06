@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\MenuRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -58,20 +56,19 @@ class Menu
     #[Assert\NotNull]
     private Theme $theme;
 
-    /**
-     * @var Collection<int, Dish>
-     */
-    #[ORM\ManyToMany(targetEntity: Dish::class)]
-    #[Assert\Count(
-        min: 1,
-        minMessage: "Vous devez sélectionner au moins un plat."
-    )]
-    private Collection $dishes;
+    //relations
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Dish $starter = null;
 
-    public function __construct()
-    {
-        $this->dishes = new ArrayCollection();
-    }
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
+    private Dish $main;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Dish $dessert = null;
 
 
     public function getId(): ?int
@@ -110,8 +107,9 @@ class Menu
 
     public function getTotalPriceForMinimumPeople(): string
     {
-        return (string) ((float) $this->pricePerPerson * $this->minimumNumberOfPeople);
+        return bcmul($this->pricePerPerson, (string) $this->minimumNumberOfPeople, 2);
     }
+
 
     public function setPricePerPerson(string $pricePerPerson): static
     {
@@ -180,26 +178,38 @@ class Menu
         return $this;
     }
 
-    /**
-     * @return Collection<int, Dish>
-     */
-    public function getDishes(): Collection
+    public function getStarter(): ?Dish
     {
-        return $this->dishes;
+        return $this->starter;
     }
 
-    public function addDish(Dish $dish): static
+    public function setStarter(?Dish $starter): static
     {
-        if (!$this->dishes->contains($dish)) {
-            $this->dishes->add($dish);
-        }
+        $this->starter = $starter;
 
         return $this;
     }
 
-    public function removeDish(Dish $dish): static
+    public function getMain(): Dish
     {
-        $this->dishes->removeElement($dish);
+        return $this->main;
+    }
+
+    public function setMain(Dish $main): static
+    {
+        $this->main = $main;
+
+        return $this;
+    }
+
+    public function getDessert(): ?Dish
+    {
+        return $this->dessert;
+    }
+
+    public function setDessert(?Dish $dessert): static
+    {
+        $this->dessert = $dessert;
 
         return $this;
     }

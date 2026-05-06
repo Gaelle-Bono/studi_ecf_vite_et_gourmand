@@ -1,16 +1,14 @@
-<li>
-    {{ dish.title }}
+{{ dish.title }}
 
-    {% set count = dish.allergens|length %}
+{% set count = dish.allergens|length %}
 
-    {% if count > 0 %}
-        (Allergène{% if count > 1 %}s{% endif %} :
-        {% for allergen in dish.allergens %}
-            {{ allergen.name }}
-            {% if not loop.last %}
-              , 
-            {% endif %}
-        {% endfor %}
-        )
-    {% endif %}
-</li>
+{% if count > 0 %}
+    (allergène{% if count > 1 %}s{% endif %} :
+    {% for allergen in dish.allergens %}
+        {{ allergen.name }}
+        {% if not loop.last %}
+            , 
+        {% endif %}
+    {% endfor %}
+    )
+{% endif %}

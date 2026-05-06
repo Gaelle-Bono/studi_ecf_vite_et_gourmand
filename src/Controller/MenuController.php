@@ -75,23 +75,15 @@ class MenuController extends AbstractController
 
     #[Route('/{id}', name: 'app_menu_show', requirements: ['id' => '\d+'], methods: ['GET'])] 
     public function show(
-        Menu $menu,
-        DishesMenuService $dishesMenuService,
-        StockMenuService $stockMenuService): Response 
+        Menu $menu, StockMenuService $stockMenuService): Response 
     {
-
-        $dishesData = $dishesMenuService->prepareDishesByType($menu);
 
         return $this->render('menu/show.html.twig', [
             'menu' => $menu,
-
-            // dishes
-            'dishesCategories' => $dishesData['dishesCategories'],
-            'allDishes' => $dishesData['allDishes'],
-
             // stock
             'stockAlert' => $stockMenuService->getStockAlert($menu),
         ]);
     }
+
 }
 

@@ -24,8 +24,9 @@
         <p><strong>Quantité restante :</strong> {{ menu.remainingQuantity }}</p>
     {% endif %}
 
+    {#  list of conditions if exist #}
     {% if menu.conditions is not empty %}
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-warning">
             <strong><i class="bi bi-exclamation-triangle me-2"></i>Conditions :</strong> 
                 <ul>
                     {% for condition in menu.conditions %}
@@ -35,35 +36,25 @@
         </div>
     {% endif %}
 
-
-    <h2>Plats inclus dans ce menu :</h2>
+    <h2>Plats du menu :</h2>
 
     {# displaying dishes photos #}
     <div class="gallery">
-        {% for dish in allDishes %}
-            {% if dish.photoPath %}
+        {% set dishes = [menu.starter, menu.main, menu.dessert] %}
+        {% for dish in dishes %}
+            {% if dish and dish.photoPath %}
                 <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
             {% endif %}
         {% endfor %}
     </div>
 
-
     {# displaying dishes by dishes category #}
-    {% for title, dishesCategory in dishesCategories %}
-        <h3>{{ title }}</h3>
-
-        {% if dishesCategory.dishes is not empty %}
-            <ul>
-                {% for dish in dishesCategory.dishes %}
-                    {% include 'menu/dish/_dish_item.html.twig' with {'dish': dish} %}
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>{{ dishesCategory.emptyText }}</p>
-        {% endif %}
-    {% endfor %}
-
-
+    <p>
+        {% include 'menu/_dish_list.html.twig' with {'menu': menu} %}
+    </p>
+    
+               
+    {#  Buttons  #} 
     <a href="{{ path('app_menu_index') }}">Retour à la liste des menus</a>
 
     <i class="bi bi-cart4 me-2"></i><a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}">commander</a>

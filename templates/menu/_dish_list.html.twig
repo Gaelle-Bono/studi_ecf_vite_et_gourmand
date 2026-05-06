@@ -1,0 +1,14 @@
+{% set dishes = {
+    'Entrée': menu.starter,
+    'Plat': menu.main,
+    'Dessert': menu.dessert
+} %}
+
+{% for label, dish in dishes %}
+    {% if dish %}
+        <p>
+            <strong>{{ label }} :</strong>
+            {% include 'menu/dish/_dish_item.html.twig' with { dish: dish } %}
+        </p>
+    {% endif %}
+{% endfor %}
