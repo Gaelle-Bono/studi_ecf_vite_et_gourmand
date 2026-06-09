@@ -15,8 +15,6 @@ class Diet
     private ?int $id = null;
 
     #[ORM\Column(length: 50, unique:true)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 2, max: 50)]
     private string $name;
 
     public function getId(): ?int

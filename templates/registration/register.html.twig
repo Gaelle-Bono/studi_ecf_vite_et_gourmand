@@ -6,6 +6,7 @@
     <h1>Enregistrez-vous</h1>
     {{ form_start(registrationForm, { attr: { 
         novalidate: 'novalidate',
+        'data-controller': 'form-validation',
         'data-turbo': 'false' 
     } })  }}
         {{ form_errors(registrationForm) }}
@@ -13,9 +14,9 @@
         {{ form_row(registrationForm.lastName) }}
         {{ form_row(registrationForm.phoneNumber) }}
         {{ form_row(registrationForm.address) }}
+        {{ form_row(registrationForm.addressComplement) }}
         {{ form_row(registrationForm.zipCode) }}
         {{ form_row(registrationForm.city) }}
-        {{ form_row(registrationForm.country) }}
         {{ form_row(registrationForm.email) }}
         {{ form_row(registrationForm.plainPassword) }}
         {{ form_row(registrationForm.save) }}

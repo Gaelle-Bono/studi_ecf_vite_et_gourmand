@@ -1,0 +1,18 @@
+{% set dishes = {
+    'Entrée': menu.starter,
+    'Plat principal': menu.mainCourse,
+    'Dessert': menu.dessert
+} %}
+
+{% for label, dish in dishes %}
+    {% if dish %}
+        <p>
+            <strong>{{ label }} :</strong> {{ dish.title }}
+
+            {% if showAllergens|default(false) and dish.allergens is not empty %}
+                (allergène{{ dish.allergens|length > 1 ? 's' : '' }} :
+                {{ dish.getAllergensAsString }})
+            {% endif %}
+        </p>
+    {% endif %}
+{% endfor %}

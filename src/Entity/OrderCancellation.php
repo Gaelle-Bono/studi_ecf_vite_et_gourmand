@@ -24,16 +24,28 @@ class OrderCancellation
     #[ORM\JoinColumn(nullable: false)]
     private User $cancelledBy;
 
-    #[ORM\Column(type: Types::TEXT, nullable:true)]
-    #[Assert\NotBlank(groups: ['admin', 'employee'])]
-    #[Assert\Length(min: 10, max: 2000, groups: ['admin', 'employee'])]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(
+        groups: ['admin', 'employee'],
+        message: "Le motif pour l'annulation est obligatoire."
+    )]
+    #[Assert\Length(
+        min: 10,
+        max: 2000,
+        minMessage: "Le motif doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le motif ne peut pas dépasser {{ limit }} caractères.",
+        groups: ['admin', 'employee']
+    )]
     private ?string $reason = null;
 
     #[ORM\Column]
     private \DateTimeImmutable $cancelledAt;
 
     #[ORM\Column(enumType: ContactMethod::class, nullable:true)]
-    #[Assert\NotNull(groups: ['employee', 'admin'])]
+    #[Assert\NotNull(
+        groups: ['employee', 'admin'],
+        message: "Le mode de contact est obligatoire."
+    )]
     private ?ContactMethod $contactMethod = null;
 
     public function __construct(Order $order, User $cancelledBy) 

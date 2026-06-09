@@ -1,0 +1,41 @@
+.order-stepper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: white;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #adb5bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+
+.step.active .circle {
+    background: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+.line {
+    flex: 1;
+    height: 2px;
+    background: #adb5bd;
+    margin: 0 10px;
+}

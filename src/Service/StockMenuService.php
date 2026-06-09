@@ -12,7 +12,7 @@ class StockMenuService
         if ($menu->getRemainingQuantity() === 0) {
             return [
                 'type' => 'danger',
-                'message' => "Ce menu n’est plus disponible (rupture de stock)",
+                'message' => "Ce menu est en rupture de stock : la commande est impossible",
                 'icon' => 'bi bi-x-circle',
             ];
         }
@@ -20,7 +20,7 @@ class StockMenuService
         if ($menu->getRemainingQuantity() < $menu->getMinimumNumberOfPeople()) {
             return [
                 'type' => 'warning',
-                'message' => "Attention : quantité insuffisante pour une réservation minimale",
+                'message' => "Le stock est insuffisant : ce menu ne peut pas être commandé actuellement",
                 'icon' => 'bi bi-exclamation-triangle',
             ];
         }

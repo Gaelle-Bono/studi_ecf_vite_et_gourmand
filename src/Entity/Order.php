@@ -17,8 +17,6 @@ class Order
     private ?int $id = null;
 
     #[ORM\Column(length: 50, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 50)]
     private string $orderNumber;
 
     #[ORM\Column]
@@ -27,47 +25,173 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    //Service details
     #[ORM\Column]
-    #[Assert\NotNull]
-    #[Assert\GreaterThanOrEqual(1)]
-    private int $numberOfPeople;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $requestedDeliveryAt = null;
-
+    private \DateTimeImmutable $requestedDeliveryAt;
+    
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deliveryAt = null;
+    
+////////////////// ADDRESS FIELDS /////////////////////
+
+    #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: "L'adresse est obligatoire")]
+    #[Assert\Length(
+        min: 5,
+        max: 180,
+        minMessage: "L'adresse doit contenir au moins {{ limit }} caractères",
+        maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private string $serviceAddress;
+    
+    #[ORM\Column(length: 180, nullable: true)]
+     #[Assert\Length(
+        max: 180,
+        maxMessage: "Le complément d'adresse ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private ?string $serviceAddressComplement = null;
+
+
+    #[ORM\Column(length: 10)]
+    #[Assert\NotBlank(message: "Le code postal est obligatoire")]
+    #[Assert\Regex(
+        pattern: "/^\d+$/",
+        message: "Le code postal doit contenir uniquement des chiffres"
+    )]
+    #[Assert\Length(
+        max: 10,
+        maxMessage: "Le code postal ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private string $serviceZipCode;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "La ville est obligatoire")]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: "La ville doit contenir au moins {{ limit }} caractères",
+        maxMessage: "La ville ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private string $serviceCity;
+
+    ////////////////// LATITUDE, LONGITUDE AND DISTANCE (Company and delivery)/////////////////////
+
+    #[ORM\Column(nullable: true)]
+    private ?float $deliveryLatAtOrder = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $deliveryLngAtOrder = null;
+
+     #[ORM\Column(nullable: true)]
+    private ?float $companyLatAtOrder = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $companyLngAtOrder = null;
+
+
+    #[ORM\Column(nullable: true)]
+    private ?float $deliveryDistanceAtOrder = null;
+
+
+
+    /////////////////MENU DETAILS //////////////////////////
+    // at the time of order (to keep a record even if menu changes later)
+    
+    #[ORM\Column(length: 100)]
+    private string $menuTitleAtOrder;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private string $menuDescriptionAtOrder;
+    
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $starterTitleAtOrder = null;
+
+    #[ORM\Column(length: 100)]
+    private string $mainCourseTitleAtOrder;
 
     #[ORM\Column(length: 100, nullable: true)]
-    private ?string $serviceAddress = null;
+    private ?string $dessertTitleAtOrder = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    #[Assert\NotNull]
-    #[Assert\Positive]
-    private string $servicePriceAtOrder;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $allergensAtOrder = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    #[Assert\NotNull]
-    #[Assert\Positive]
-    private string $deliveryPriceAtOrder;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private string $totalPriceAtOrder;
-
+    ///////////Nb people /////////////////////////
     #[ORM\Column]
-    private bool $equipmentLoan = false;
+    #[Assert\GreaterThanOrEqual(
+        value: 1,
+        message: 'Le menu doit être commandé pour au moins 1 personne'
+    )]
+    private int $numberOfPeople;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $menuTitleAtOrder = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $menuDescriptionAtOrder = null;
-
+    /////////////////////// Prices //////////////
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    #[Assert\NotNull]
-    #[Assert\Positive]
     private string $pricePerPersonAtOrder;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    private string $servicePriceBeforeDiscountAtOrder = '0';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private string $servicePriceAtOrder ='0';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private string $deliveryPriceAtOrder ='0';
+    
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private string $totalPriceAtOrder ='0';
+    
+    //////////////// equipment Loan //////////////
+    #[ORM\Column]
+    private bool $requiresEquipmentLoanAtOrder = false;
+    
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $loanEquipmentDescriptionAtOrder = null;
+
+    /////////////////////CUSTOMER DETAILS //////////////
+    // at the time of order to keep a record even if customer updates their profile later
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: "Le nom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères"
+    )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ' -]+$/",
+        message: "Le nom contient des caractères invalides"
+    )]
+    private string $customerLastNameAtOrder;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le prénom est obligatoire")]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: "Le prénom doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le prénom ne peut pas dépasser {{ limit }} caractères"
+    )]
+    #[Assert\Regex(
+        pattern: "/^[a-zA-ZÀ-ÿ' -]+$/",
+        message: "Le prénom contient des caractères invalides"
+    )]
+    private string $customerFirstNameAtOrder;
+
+    #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: "L'email est obligatoire")]
+    #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
+    #[Assert\Length(max: 180)]
+    private string $customerEmailAtOrder;
+
+    #[ORM\Column(length: 20)]
+    #[Assert\NotBlank(message: "Le numéro de téléphone est obligatoire")]
+    #[Assert\Regex(
+    pattern: "/^\+?[0-9\s]{10,20}$/",
+    message: "Le numéro de téléphone est invalide"
+    )]
+    private string $customerPhoneAtOrder;
+
+    // RELATIONSSHIPS 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private OrderStatus $orderStatus;
@@ -78,9 +202,10 @@ class Order
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: "Un menu est obligatoire.")]
     private Menu $menu;
 
+   
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -96,10 +221,10 @@ class Order
         return $this->orderNumber;
     }
 
-    public function setOrderNumber(string $orderNumber): static
+    public function generateOrderNumber(): void
     {
-        $this->orderNumber = $orderNumber;
-        return $this;
+        $this->orderNumber =
+            'ORD-' . (new \DateTimeImmutable())->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
     }
 
     public function getCreatedAt(): \DateTimeImmutable
@@ -118,12 +243,12 @@ class Order
         return $this;
     }
 
-    public function getRequestedDeliveryAt(): ?\DateTimeImmutable
+    public function getRequestedDeliveryAt(): \DateTimeImmutable
     {
         return $this->requestedDeliveryAt;
     }
 
-    public function setRequestedDeliveryAt(?\DateTimeImmutable $requestedDeliveryAt): static
+    public function setRequestedDeliveryAt(\DateTimeImmutable $requestedDeliveryAt): static
     {
         $this->requestedDeliveryAt = $requestedDeliveryAt;
         return $this;
@@ -140,6 +265,189 @@ class Order
         return $this;
     }
 
+     public function getServiceAddress(): string
+    {
+        return $this->serviceAddress;
+    }
+
+    public function setServiceAddress(string $serviceAddress): static
+    {
+        $this->serviceAddress = $serviceAddress;
+        return $this;
+    }
+
+    public function getServiceAddressComplement(): ?string
+    {
+        return $this->serviceAddressComplement;
+    }
+
+    public function setServiceAddressComplement(?string $serviceAddressComplement): static
+    {
+        $this->serviceAddressComplement = $serviceAddressComplement;
+        return $this;
+    }
+
+     public function getServiceZipCode(): string
+    {
+        return $this->serviceZipCode;
+    }
+
+    public function setServiceZipCode(string $serviceZipCode): static
+    {
+        $this->serviceZipCode = $serviceZipCode;
+        return $this;
+    }
+
+    public function getServiceCity(): string
+    {
+        return $this->serviceCity;
+    }
+
+    public function setServiceCity(string $serviceCity): static
+    {
+        $this->serviceCity = $serviceCity;
+        return $this;
+    }
+
+    public function getFullServiceAddress(): string
+    {
+        return trim(
+            $this->serviceAddress . ' ' .
+            $this->serviceZipCode . ' ' .
+            $this->serviceCity
+        );
+    }
+
+
+    public function getDeliveryLatAtOrder(): ?float
+    {
+        return $this->deliveryLatAtOrder;
+    }
+
+    public function setDeliveryLatAtOrder(?float $deliveryLatAtOrder): static
+    {
+        $this->deliveryLatAtOrder = $deliveryLatAtOrder;
+
+        return $this;
+    }
+
+    public function getDeliveryLngAtOrder(): ?float
+    {
+        return $this->deliveryLngAtOrder;
+    }
+
+    public function setDeliveryLngAtOrder(?float $deliveryLngAtOrder): static
+    {
+        $this->deliveryLngAtOrder = $deliveryLngAtOrder;
+
+        return $this;
+    }
+
+    public function getCompanyLatAtOrder(): ?float
+    {
+        return $this->companyLatAtOrder;
+    }
+
+    public function setCompanyLatAtOrder(?float $companyLatAtOrder): static
+    {
+        $this->companyLatAtOrder = $companyLatAtOrder;
+
+        return $this;
+    }
+
+    public function getCompanyLngAtOrder(): ?float
+    {
+        return $this->companyLngAtOrder;
+    }
+
+    public function setCompanyLngAtOrder(?float $companyLngAtOrder): static
+    {
+        $this->companyLngAtOrder = $companyLngAtOrder;
+
+        return $this;
+    }
+
+    public function getDeliveryDistanceAtOrder(): ?float
+    {
+        return $this->deliveryDistanceAtOrder;
+    }
+
+    public function setDeliveryDistanceAtOrder(?float $deliveryDistanceAtOrder): static
+    {
+        $this->deliveryDistanceAtOrder = $deliveryDistanceAtOrder;
+
+        return $this;
+    }
+
+
+
+    public function getMenuTitleAtOrder(): string
+    {
+        return $this->menuTitleAtOrder;
+    }
+
+    public function setMenuTitleAtOrder(string $menuTitleAtOrder): static
+    {
+        $this->menuTitleAtOrder = $menuTitleAtOrder;
+        return $this;
+    }
+
+    public function getMenuDescriptionAtOrder(): string
+    {
+        return $this->menuDescriptionAtOrder;
+    }
+
+    public function setMenuDescriptionAtOrder(string $menuDescriptionAtOrder): static
+    {
+        $this->menuDescriptionAtOrder = $menuDescriptionAtOrder;
+
+        return $this;
+    }
+
+    public function getStarterTitleAtOrder(): ?string
+    {
+        return $this->starterTitleAtOrder;
+    }
+
+    public function setStarterTitleAtOrder(?string $starterTitleAtOrder): static
+    {
+        $this->starterTitleAtOrder = $starterTitleAtOrder;
+        return $this;
+    }
+
+    public function getMainCourseTitleAtOrder(): string
+    {
+        return $this->mainCourseTitleAtOrder;
+    }
+
+    public function setMainCourseTitleAtOrder(string $mainCourseTitleAtOrder): static
+    {
+        $this->mainCourseTitleAtOrder = $mainCourseTitleAtOrder;
+        return $this;
+    }
+
+    public function getDessertTitleAtOrder(): ?string
+    {
+        return $this->dessertTitleAtOrder;
+    }
+
+    public function setDessertTitleAtOrder(?string $dessertTitleAtOrder): static
+    {
+        $this->dessertTitleAtOrder = $dessertTitleAtOrder;
+        return $this;
+    }
+
+    public function getAllergensAtOrder(): ?string
+    {
+        return $this->allergensAtOrder;
+    }
+
+    public function setAllergensAtOrder(?string $allergensAtOrder): static
+    {
+        $this->allergensAtOrder = $allergensAtOrder;
+        return $this;
+    }
+    
     public function getNumberOfPeople(): int
     {
         return $this->numberOfPeople;
@@ -151,14 +459,25 @@ class Order
         return $this;
     }
 
-    public function getServiceAddress(): ?string
+    public function getPricePerPersonAtOrder(): string
+        {
+            return $this->pricePerPersonAtOrder;
+        }
+    
+    public function setPricePerPersonAtOrder(string $pricePerPersonAtOrder): static
     {
-        return $this->serviceAddress;
+        $this->pricePerPersonAtOrder = $pricePerPersonAtOrder;
+        return $this;
     }
 
-    public function setServiceAddress(?string $serviceAddress): static
+    public function getServicePriceBeforeDiscountAtOrder(): string
     {
-        $this->serviceAddress = $serviceAddress;
+        return $this->servicePriceBeforeDiscountAtOrder;
+    }
+
+    public function setServicePriceBeforeDiscountAtOrder(string $servicePriceBeforeDiscountAtOrder): static
+    {
+        $this->servicePriceBeforeDiscountAtOrder = $servicePriceBeforeDiscountAtOrder;
         return $this;
     }
 
@@ -189,50 +508,80 @@ class Order
         return $this->totalPriceAtOrder;
     }
 
-    public function isEquipmentLoan(): bool
+    public function setTotalPriceAtOrder(string $totalPriceAtOrder): static
     {
-        return $this->equipmentLoan;
-    }
-
-    public function setEquipmentLoan(bool $equipmentLoan): static
-    {
-        $this->equipmentLoan = $equipmentLoan;
+        $this->totalPriceAtOrder = $totalPriceAtOrder;
         return $this;
     }
 
-    public function getMenuTitleAtOrder(): ?string
+    public function isRequiresEquipmentLoanAtOrder(): bool
     {
-        return $this->menuTitleAtOrder;
+        return $this->requiresEquipmentLoanAtOrder;
     }
 
-    public function setMenuTitleAtOrder(?string $menuTitleAtOrder): static
+    public function setRequiresEquipmentLoanAtOrder(bool $requiresEquipmentLoanAtOrder): static
     {
-        $this->menuTitleAtOrder = $menuTitleAtOrder;
+        $this->requiresEquipmentLoanAtOrder = $requiresEquipmentLoanAtOrder;
         return $this;
     }
 
-    public function getMenuDescriptionAtOrder(): ?string
+    public function getLoanEquipmentDescriptionAtOrder(): ?string
     {
-        return $this->menuDescriptionAtOrder;
+        return $this->loanEquipmentDescriptionAtOrder;
     }
 
-    public function setMenuDescriptionAtOrder(?string $menuDescriptionAtOrder): static
+    public function setLoanEquipmentDescriptionAtOrder(?string $loanEquipmentDescriptionAtOrder): static
     {
-        $this->menuDescriptionAtOrder = $menuDescriptionAtOrder;
-
+        $this->loanEquipmentDescriptionAtOrder = $loanEquipmentDescriptionAtOrder;
         return $this;
     }
 
-    public function getPricePerPersonAtOrder(): string
+    public function getCustomerFirstNameAtOrder(): string
     {
-        return $this->pricePerPersonAtOrder;
+        return $this->customerFirstNameAtOrder;
     }
 
-    public function setPricePerPersonAtOrder(string $pricePerPersonAtOrder): static
+    public function setCustomerFirstNameAtOrder(string $customerFirstNameAtOrder): static
     {
-        $this->pricePerPersonAtOrder = $pricePerPersonAtOrder;
+        $this->customerFirstNameAtOrder = $customerFirstNameAtOrder;
         return $this;
     }
+
+    public function getCustomerLastNameAtOrder(): string
+    {
+        return $this->customerLastNameAtOrder;
+    }
+
+    public function setCustomerLastNameAtOrder(string $customerLastNameAtOrder): static
+    {
+        $this->customerLastNameAtOrder = $customerLastNameAtOrder;
+        return $this;
+    }
+
+
+    public function getCustomerEmailAtOrder(): string
+    {
+        return $this->customerEmailAtOrder;
+    }
+
+    public function setCustomerEmailAtOrder(string $customerEmailAtOrder): static
+    {
+        $this->customerEmailAtOrder = $customerEmailAtOrder;
+        return $this;
+    }
+
+    public function getCustomerPhoneAtOrder(): string
+    {
+        return $this->customerPhoneAtOrder;
+    }
+
+    public function setCustomerPhoneAtOrder(string $customerPhoneAtOrder): static
+    {
+        $this->customerPhoneAtOrder = $customerPhoneAtOrder;
+        return $this;
+    }
+
+    // Relationships getters/setters
 
     public function getOrderStatus(): OrderStatus
     {
@@ -266,5 +615,6 @@ class Order
         $this->menu = $menu;
         return $this;
     }
+
 
 }

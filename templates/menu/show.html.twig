@@ -6,14 +6,14 @@
 
 <div class="container">
     <h1>{{ menu.title }}</h1>
+    <p>{{ menu.description }}</p>
     <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
     <p><strong>Nombre de personnes minimum :</strong> {{ menu.minimumNumberOfPeople }}</p>
     <p><strong>Prix associé au nombre minimum de personnes :</strong> {{ menu.getTotalPriceForMinimumPeople()|number_format(2, ',', ' ') }} €</p>
     <p><strong>Régime :</strong> {{ menu.diet.name }}</p>
     <p><strong>Thème :</strong> {{ menu.theme.name }}</p>
-    <p><strong>Description :</strong> {{ menu.description }}</p>
+    <p><strong>Allergènes :</strong> {{ menu.getAllergensAsString }}</p>
     
-
     {#  remaining stocks #}
     {% if stockAlert %}
         <div class="alert alert-{{ stockAlert.type }}">
@@ -26,13 +26,17 @@
 
     {#  list of conditions if exist #}
     {% if menu.conditions is not empty %}
-        <div class="alert alert-warning">
-            <strong><i class="bi bi-exclamation-triangle me-2"></i>Conditions :</strong> 
-                <ul>
-                    {% for condition in menu.conditions %}
-                        <li>{{ condition }}</li>
-                    {% endfor %}
-                </ul>
+        {% include 'menu/_conditions.html.twig' with { menu: menu } %}
+    {% endif %}
+
+
+    {# equipment loan information #}
+    {% if menu.requiresEquipmentLoan %}
+        <div class="alert alert-info">
+            <strong>Prêt de matériel inclus : </strong>
+
+            <p>{{ menu.includedEquipmentDescription }}</p>
+            <p>Le matériel devra être restitué après utilisation.</p>
         </div>
     {% endif %}
 
@@ -40,7 +44,7 @@
 
     {# displaying dishes photos #}
     <div class="gallery">
-        {% set dishes = [menu.starter, menu.main, menu.dessert] %}
+        {% set dishes = [menu.starter, menu.mainCourse, menu.dessert] %}
         {% for dish in dishes %}
             {% if dish and dish.photoPath %}
                 <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
@@ -48,12 +52,14 @@
         {% endfor %}
     </div>
 
-    {# displaying dishes by dishes category #}
+    {# displaying dishes by dishes category with allergens for each dish #}
     <p>
-        {% include 'menu/_dish_list.html.twig' with {'menu': menu} %}
+        {% include 'menu/dish/_dish_list.html.twig' with {
+            menu: menu,
+            showAllergens: true
+        } %}
     </p>
-    
-               
+       
     {#  Buttons  #} 
     <a href="{{ path('app_menu_index') }}">Retour à la liste des menus</a>
 

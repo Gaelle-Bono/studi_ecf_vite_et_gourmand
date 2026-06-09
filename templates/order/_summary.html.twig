@@ -1,0 +1,61 @@
+<div class="order-summary">
+
+    <h3>La commande</h3>
+
+    <p>
+        <strong>Menu :</strong>
+        {{ menu.title }}
+    </p>
+
+    <p>
+        <strong>Plats choisis :</strong><br>
+        {% include 'menu/dish/_dish_list.html.twig' with {
+            menu: menu,
+            showAllergens: false
+        } %}
+    </p>
+
+    <p>
+        <strong>Nombre de personnes :</strong>
+        {{ numberOfPeople }}
+    </p>
+
+    <h3>Les prix</h3>
+    {% if pricing.hasDiscount %}
+        <p>
+            <strong>Prix du service :</strong>
+            <span class="text-decoration-line-through">
+                {{ pricing.servicePriceBeforeDiscount|number_format(2, ',', ' ') }} €
+            </span>
+        </p>
+
+        <p class="text-success">
+            Réduction groupe :
+            -{{ groupDiscountPercent }} %
+            (-{{ pricing.discountAmount|number_format(2, ',', ' ') }} €)
+        </p>
+
+        <p>
+            <strong>Prix du service après réduction :</strong>
+            {{ pricing.servicePrice|number_format(2, ',', ' ') }} €
+        </p>
+
+    {% else %}
+        <p>
+            <strong>Prix du service :</strong>
+            {{ pricing.servicePrice|number_format(2, ',', ' ') }} €
+        </p>
+
+    {% endif %}
+
+    <p>
+        <strong>Prix de la livraison :</strong>
+        {{ pricing.deliveryPrice|number_format(2, ',', ' ') }} €
+    </p>
+
+    <p class="fw-bold">
+        Prix total :
+        {{ pricing.totalPrice|number_format(2, ',', ' ') }} €
+    </p>
+
+</div>

@@ -6,8 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class ResetPasswordRequestFormType extends AbstractType
 {
@@ -17,11 +16,11 @@ class ResetPasswordRequestFormType extends AbstractType
             ->add('email', EmailType::class, [
                 'attr' => ['autocomplete' => 'email'],
                 'constraints' => [
-                    new NotBlank(
-                        message: 'Entrez votre adresse mail pour recevoir un lien de réinitialisation de mot de passe',
+                    new Assert\NotBlank(
+                        message: 'Entrez votre adresse mail pour recevoir un lien de réinitialisation de mot de passe'
                     ),
-                    new Email(
-                        message: 'Adresse email invalide',
+                    new Assert\Email(
+                        message: 'Adresse email invalide'
                     ),
                 ],
             ]);

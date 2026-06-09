@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response; 
 
 use App\Service\FilterMenuService;
-use App\Service\DishesMenuService;
 use App\Service\StockMenuService;
 
 #[Route('/menu')] 
@@ -52,23 +51,39 @@ class MenuController extends AbstractController
         $filters = $result['filters'];
         $errors = $result['errors'];
 
-        $menus = [];
+        
+        //if errors
+        if (!empty($errors)) {
+            return $this->json([
+                'success' => false,
+                'menus_list' => '',
+                'errors' => $errors
+            ], 400);
+        }
 
-        if (empty($errors)) {
-            $menus = $menuRepository->findWithFilters(
-                $filters['diet'],
-                $filters['theme'],
-                $filters['minPricePerPerson'],
-                $filters['maxPricePerPerson'],
-                $filters['minimumNumberOfPeople']
-            );
+        $menus = $menuRepository->findWithFilters(
+            $filters['diet'],
+            $filters['theme'],
+            $filters['minPricePerPerson'],
+            $filters['maxPricePerPerson'],
+            $filters['minimumNumberOfPeople']
+        );
+
+        if (empty($menus)) {
+            return $this->json([
+                'success' => true,
+                'menus_list' => '<p class="text-warning">
+                Aucun menu ne correspond à vos critères de recherche</p>',
+                'errors' => []
+            ]);
         }
 
         return $this->json([
+            'success' => true,
             'menus_list' => $this->renderView('menu/_list.html.twig', [
                 'menus' => $menus
             ]),
-            'errors' => $errors
+            'errors' => []
         ]);
             
     } 

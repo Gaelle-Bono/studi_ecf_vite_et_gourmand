@@ -69,15 +69,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $phoneNumber;
 
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: "L'adresse est obligatoire")]
     #[Assert\Length(
         min: 5,
-        max: 255,
+        max: 180,
         minMessage: "L'adresse doit contenir au moins {{ limit }} caractères",
         maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères"
     )]
     private string $address;
+    
+
+    #[ORM\Column(length: 180, nullable: true)] 
+    #[Assert\Length(
+    max: 180,
+    maxMessage: 'Le complément d’adresse ne peut pas dépasser {{ limit }} caractères.'
+)]   
+    private ?string $addressComplement = null;
 
 
     #[ORM\Column(length: 10)]
@@ -102,15 +110,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private string $city;
 
 
-    #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: "Le pays est obligatoire")]
-     #[Assert\Length(
-        max: 50,
-        maxMessage: "Le pays ne peut pas dépasser {{ limit }} caractères"
-    )]    
-    private string $country;
-
-
+    //relations
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private Role $role;
@@ -210,6 +210,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getAddressComplement(): ?string
+    {
+        return $this->addressComplement;
+    }
+
+    public function setAddressComplement(?string $addressComplement): static
+    {
+        $this->addressComplement = $addressComplement;
+
+        return $this;
+    }
+
     public function getZipCode(): string
     {
         return $this->zipCode;
@@ -234,21 +246,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCountry(): string
-    {
-        return $this->country;
-    }
-
-    public function setCountry(string $country): static
-    {
-        $this->country = $country;
-
-        return $this;
-    }
-
     public function getRoles(): array
     {
-        return [$this->role->getName()];
+        if (!$this->role) {
+            throw new \LogicException('Aucun rôle attribué à cet utilisateur.');
+        }
+
+        $role = $this->role->getName();
+
+        if ($role === 'ROLE_ADMIN') {
+            return ['ROLE_ADMIN', 'ROLE_EMPLOYEE', 'ROLE_USER'];
+        }
+
+        if ($role === 'ROLE_EMPLOYEE') {
+            return ['ROLE_EMPLOYEE', 'ROLE_USER'];
+        }
+
+        if ($role === 'ROLE_USER') {
+            return ['ROLE_USER'];
+        }
+
+        throw new \LogicException('Rôle inconnu "' . $role . '"');
     }
 
     public function getRole(): Role

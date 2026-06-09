@@ -17,9 +17,12 @@ class Dish
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 50)]
+    #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: "Le nom du plat est obligatoire")]
+    #[Assert\Length(
+        max: 100,
+        maxMessage: "Le nom du plat ne peut pas dépasser {{ limit }} caractères"
+    )]
     private string $title;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -89,5 +92,17 @@ class Dish
 
         return $this;
     }
+
+    public function getAllergensAsString(): string
+    {
+        $names = [];
+
+        foreach ($this->allergens as $allergen) {
+            $names[] = $allergen->getName();
+        }
+
+        return implode(', ', $names);
+    }
+
 
 }

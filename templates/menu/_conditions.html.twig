@@ -1,0 +1,11 @@
+<div class="menu-conditions alert alert-warning mt-3">
+    <strong>
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Conditions :
+    </strong>
+    <ul>
+        {% for condition in menu.conditions %}
+            <li>{{ condition }}</li>
+        {% endfor %}
+    </ul>
+</div>
