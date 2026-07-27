@@ -51,15 +51,15 @@
             </div>
 
             <button type="submit" data-menu-filter-target="submit">Filtrer</button>
-            <button type="button" data-action="click->menu-filter#reset">Réinitialiser</button>
+            <button type="button" data-menu-filter-target="reset" data-action="click->menu-filter#reset">Réinitialiser</button>
         </form>
-        <div data-menu-filter-target="loading" class="hidden">Chargement...</div>
+        
+        <div data-menu-filter-target="filterOverlay" class="filter-overlay"></div>
 
         <div data-menu-filter-target="results">
             {% include 'menu/_list.html.twig' with { menus: menus } %}
         </div>
     </div>
-
     
 </div>
 {% endblock %}

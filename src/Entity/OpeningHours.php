@@ -17,7 +17,7 @@ class OpeningHours
     #[ORM\Column(unique: true)]
     private int $dayOfWeek;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private bool $isClosed = false;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]

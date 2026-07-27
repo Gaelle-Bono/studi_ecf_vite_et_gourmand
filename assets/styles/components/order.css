@@ -39,3 +39,7 @@
     background: #adb5bd;
     margin: 0 10px;
 }
+
+.form-check-input.is-invalid ~ .form-check-label {
+    color: #212529;
+}

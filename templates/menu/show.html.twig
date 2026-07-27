@@ -35,8 +35,8 @@
         <div class="alert alert-info">
             <strong>Prêt de matériel inclus : </strong>
 
-            <p>{{ menu.includedEquipmentDescription }}</p>
-            <p>Le matériel devra être restitué après utilisation.</p>
+            <p>{{ menu.includedEquipmentDescription }}</br>
+            Le matériel devra être restitué après utilisation</p>
         </div>
     {% endif %}
 
@@ -63,7 +63,12 @@
     {#  Buttons  #} 
     <a href="{{ path('app_menu_index') }}">Retour à la liste des menus</a>
 
-    <i class="bi bi-cart4 me-2"></i><a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}">commander</a>
+    <i class="bi bi-cart4 me-2"></i>
+    <a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}"
+    data-controller="prevent-double-click"
+    data-action="click->prevent-double-click#disable">
+        Commander
+    </a>
 </div>
 {% endblock %}
 

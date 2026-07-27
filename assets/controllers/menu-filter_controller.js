@@ -3,22 +3,25 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     
-    static targets = ['form','results','loading','submit'];
+    static targets = ['form','results','filterOverlay','submit','reset'];
 
+    connect() {
+        this.isRequestPending = false;
+    }
     
     submit(event) {
         event.preventDefault();  
-        this.updateMenus();      
+        this.updateMenus(this.submitTarget);      
     }
-
 
     reset(event) {
         event.preventDefault();
-        this.formTarget.reset(); 
-        this.clearErrors();      
-        this.updateMenus();      
-    }
 
+        this.formTarget.reset();
+        this.clearErrors();
+
+        this.updateMenus(this.resetTarget);
+    }
 
     clearErrors() {
         this.formTarget.querySelectorAll('.error')
@@ -27,13 +30,43 @@ export default class extends Controller {
             );
     }
 
+    showFilterOverlay() {
+        this.filterOverlayTarget.textContent = 'Chargement des menus...';
+        this.filterOverlayTarget.classList.add('active');
+        this.resultsTarget.classList.add('opacity-25');
+    }
 
-    async updateMenus() {
-        this.loadingTarget.classList.remove('hidden'); 
+    hideFilterOverlay() {
+        this.filterOverlayTarget.classList.remove('active');
+        this.filterOverlayTarget.textContent = '';
+        this.resultsTarget.classList.remove('opacity-25');
+    }
 
-        if (this.hasSubmitTarget) {
-            this.submitTarget.disabled = true; 
+    beforeRequest(activeButton) {
+        activeButton.disabled = true;
+
+        if (activeButton === this.submitTarget) {
+            this.showFilterOverlay();
         }
+    }
+
+    afterRequest(activeButton) {
+        activeButton.disabled = false;
+
+        if (activeButton === this.submitTarget) {
+            this.hideFilterOverlay();
+        }
+    }
+
+    
+    async updateMenus(activeButton) {
+        
+        if (this.isRequestPending) return; 
+        
+        this.isRequestPending = true;
+        
+        this.beforeRequest(activeButton); 
+
         this.clearErrors(); 
 
         try {
@@ -42,13 +75,10 @@ export default class extends Controller {
                 body: new FormData(this.formTarget)
             });
 
-            console.log('Status HTTP:', response.status);
-
             let data;
 
             try {
                 data = await response.json();
-                console.log('Réponse JSON:', data);
 
             } catch (e) {
                 console.error('JSON invalide', e);
@@ -84,11 +114,11 @@ export default class extends Controller {
                 '<p class="text-danger">Erreur lors de la récupération des menus</p>';
 
         } finally {
-            this.loadingTarget.classList.add('hidden');
+            this.isRequestPending = false;
 
-            if (this.hasSubmitTarget) {
-                this.submitTarget.disabled = false;
-            }
+            this.afterRequest(activeButton)
+
         }
+
     }
 }

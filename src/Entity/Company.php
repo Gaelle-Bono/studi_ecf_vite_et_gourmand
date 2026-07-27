@@ -22,11 +22,11 @@ class Company
     #[ORM\Column(length: 50)]
     private string $city;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $latitude = null;
+    #[ORM\Column]
+    private float $latitude;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $longitude = null;
+    #[ORM\Column]
+    private float $longitude;
 
 
     public function getId(): ?int
@@ -79,24 +79,24 @@ class Company
         );
     }
 
-    public function getLatitude(): ?float
+    public function getLatitude(): float
     {
         return $this->latitude;
     }
 
-    public function setLatitude(?float $latitude): static
+    public function setLatitude(float $latitude): static
     {
         $this->latitude = $latitude;
 
         return $this;
     }
 
-    public function getLongitude(): ?float
+    public function getLongitude(): float
     {
         return $this->longitude;
     }
 
-    public function setLongitude(?float $longitude): static
+    public function setLongitude(float $longitude): static
     {
         $this->longitude = $longitude;
 

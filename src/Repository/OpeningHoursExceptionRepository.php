@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\OpeningHoursException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\DBAL\Types\Types;
 
 /**
  * @extends ServiceEntityRepository<OpeningHoursException>
@@ -16,28 +17,12 @@ class OpeningHoursExceptionRepository extends ServiceEntityRepository
         parent::__construct($registry, OpeningHoursException::class);
     }
 
-    //    /**
-    //     * @return OpeningHoursException[] Returns an array of OpeningHoursException objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?OpeningHoursException
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByDate(\DateTimeInterface $date)
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.date = :date')
+            ->setParameter('date', $date, Types::DATE_IMMUTABLE)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

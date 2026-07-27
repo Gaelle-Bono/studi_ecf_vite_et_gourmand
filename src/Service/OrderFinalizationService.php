@@ -12,65 +12,46 @@ class OrderFinalizationService
 {
 
     public function __construct(
-        private OrderBuilderService $orderBuilderService,
         private OrderStatusRepository $orderStatusRepository,
-        private OrderCoordinatesService $orderCoordinatesService,
-        private OrderDistanceService $orderDistanceService,
-        private OrderPricingService $orderPricingService
-    ) {}
+        private OrderBuilderService $orderBuilderService
+    )
+    {}
 
-    public function finalizeOrder(Order $order, Menu $menu, \DateTimeInterface $serviceDate, \DateTimeInterface $requestedTime): void
+    public function finalizeOrder(Order $order, Menu $menu, \DateTimeInterface $serviceDate, string $requestedTime, array $summary): void
     {
-        // status
+
+        if (!$summary) {
+            throw new \RuntimeException('Les données de commande sont introuvables');
+        }
+
         $order->setOrderStatus(
             $this->orderStatusRepository->findOneBy(['code' => 'PENDING'])
         );
 
-        // date
-        $order->setRequestedDeliveryAt(
-            $this->orderBuilderService->buildRequestedDate($serviceDate, $requestedTime)
-        );
+        $requestedServiceDate = $this->orderBuilderService->buildRequestedDate($serviceDate, $requestedTime);
+        $order->setRequestedDeliveryAt($requestedServiceDate);
 
-        // coordinates and distance
-        $distance = 0;
 
-        try {
-            $coords = $this->orderCoordinatesService->getCoordinatesForOrder($order);
-            $this->setCoordinatesToOrder($order, $coords);
+        $this->setCoordinatesToOrder($order, $summary['coordinates']);
+        $order->setDeliveryDistanceAtOrder($summary['distance']);
 
-            $distance = $this->orderDistanceService->calculateDistanceFromCoordinates(
-                $coords['company']['lat'],
-                $coords['company']['lng'],
-                $coords['client']['lat'],
-                $coords['client']['lng']
-            );
-            $order->setDeliveryDistanceAtOrder($distance);
+        $this->setPricesToOrder($order, $summary['pricing']);
 
-        } catch (\RuntimeException $e) {
+        $this->setMenuDataToOrder($order, $menu);
+
+        $order->setRequiresEquipmentLoanAtOrder($menu->requiresEquipmentLoan());
+        $order->setIncludedEquipmentDescriptionAtOrder($menu->getIncludedEquipmentDescription());
+
+        $currentStock = $menu->getRemainingQuantity();
+
+        if ($currentStock < $order->getNumberOfPeople()) {
             throw new \RuntimeException(
-                'Impossible de calculer les frais de livraison. Veuillez réessayer plus tard.',
-                0,
-                $e
+                'La quantité disponible pour ce menu est insuffisante'
             );
         }
 
-        // pricing ONLY if distance is valid
-        $pricing = $this->orderPricingService->calculatePricesForOrder(
-            $menu,
-            $order->getNumberOfPeople(),
-            $distance
-        );
+        $menu->setRemainingQuantity(bcsub($currentStock, $order->getNumberOfPeople()));
 
-        $this->setPricesToOrder($order, $pricing);
-
-
-        // equipment loan 
-        $order->setRequiresEquipmentLoanAtOrder(
-            $menu->requiresEquipmentLoan()
-        );
-        
-
-        // order number
         $order->generateOrderNumber();
     }
 
@@ -80,12 +61,12 @@ class OrderFinalizationService
         $companyCoords = $coords['company'];
         $clientCoords = $coords['client'];
 
-        $order->setCompanyLatAtOrder($companyCoords['lat']);
-        $order->setCompanyLngAtOrder($companyCoords['lng']);
-        $order->setDeliveryLatAtOrder($clientCoords['lat']);
-        $order->setDeliveryLngAtOrder($clientCoords['lng']);
+        $order
+            ->setCompanyLatAtOrder($companyCoords['lat'])
+            ->setCompanyLngAtOrder($companyCoords['lng'])
+            ->setDeliveryLatAtOrder($clientCoords['lat'])
+            ->setDeliveryLngAtOrder($clientCoords['lng']);
     }
-
 
     private function setPricesToOrder(Order $order, array $pricing): void
     {
@@ -96,5 +77,16 @@ class OrderFinalizationService
             ->setTotalPriceAtOrder($pricing['totalPrice']);
     }
 
+    private function setMenuDataToOrder(Order $order, Menu $menu): void
+    {
+        $order
+            ->setMenuTitleAtOrder($menu->getTitle())
+            ->setMenuDescriptionAtOrder($menu->getDescription())
+            ->setStarterTitleAtOrder($menu->getStarter()?->getTitle())
+            ->setMainCourseTitleAtOrder($menu->getMainCourse()->getTitle())
+            ->setDessertTitleAtOrder($menu->getDessert()?->getTitle())
+            ->setAllergensAtOrder($menu->getAllergensAsString())
+            ->setPricePerPersonAtOrder($menu->getPricePerPerson());
+    }
 
 }

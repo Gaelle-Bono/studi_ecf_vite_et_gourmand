@@ -14,10 +14,10 @@ class OpeningHoursException
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private bool $isClosed = true;
 
     #[ORM\Column(type: Types::TIME_MUTABLE, nullable: true)]
@@ -52,7 +52,7 @@ class OpeningHoursException
         return $this;
     }
 
-    public function isClosed(): ?bool
+    public function isClosed(): bool
     {
         return $this->isClosed;
     }

@@ -40,35 +40,37 @@ class OrderFormType extends AbstractType
             ->add('customerPhoneAtOrder', TextType::class, [
                 'label' => 'Télephone',
                 'attr' => ['maxlength' => 20],
-                'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +."
+                'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +"
             ])
 
             
             // --- Service section ---
             ->add('serviceDate', DateType::class, [
-                'label' => 'Date de la prestation',
+                'label' => 'Date souhaitée de la prestation',
                 'mapped' => false,
                 'widget' => 'single_text',
+                'input' => 'datetime_immutable',
                 'attr' => [
                     'min' => (new \DateTime('+1 day'))->format('Y-m-d'),
                 ],
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'Veuillez choisir une date de prestation.'
+                        'message' => 'Veuillez choisir une date de prestation'
                 ]),
 
                     new Assert\GreaterThanOrEqual([
                         'value' => 'tomorrow',
-                        'message' => 'La prestation doit être réservée au minimum pour demain.'
+                        'message' => 'La prestation doit être réservée au minimum pour demain'
                     ])
                 ]
             ])
 
             ->add('requestedTime', TimeType::class, [
                 'label' => 'Heure souhaitée',
+                'widget' => 'single_text',
+                'input' => 'string',
                 'mapped' => false,
-                'required' => false,
-                'widget' => 'single_text'
+                'required' => true
             ])
 
             ->add('serviceAddress', TextType::class, [
@@ -80,7 +82,7 @@ class OrderFormType extends AbstractType
                 'label' => 'Complément d’adresse',
                 'required' => false,
                 'attr' => ['maxlength' => 180],
-                'help' => 'Informations complémentaires pour faciliter la livraison (étage, digicode, bâtiment…).'
+                'help' => 'Informations complémentaires pour faciliter la livraison (étage, digicode, bâtiment…)'
             ])
 
             ->add('serviceZipCode', TextType::class, [
@@ -93,6 +95,13 @@ class OrderFormType extends AbstractType
                 'attr' => ['maxlength' => 50]
             ])
 
+            ->add('deliveryInstructionsAtOrder', TextType::class, [
+                'label' => 'Instructions de livraison',
+                'required' => false,
+                'attr' => ['maxlength' => 255],
+                'help' => 'Précisions sur l’arrivée dans les lieux'
+            ])
+
 
             // --- Order section ---
             ->add('menu', EntityType::class, [
@@ -100,6 +109,7 @@ class OrderFormType extends AbstractType
                 'choice_label' => 'title',
                 'label' => 'Choix du menu',
                 'placeholder' => 'Choisir un menu',
+                'required' => true
             ])
 
             ->add('numberOfPeople', IntegerType::class, [

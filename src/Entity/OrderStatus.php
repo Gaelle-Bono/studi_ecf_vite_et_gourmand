@@ -29,9 +29,24 @@ class OrderStatus
         return $this->code;
     }
 
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
+
+        return $this;
+    }
+
     public function getLabel(): string
     {
         return $this->label;
     }
+
+    public function setLabel(string $label): static
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
 
 }

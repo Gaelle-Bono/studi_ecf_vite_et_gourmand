@@ -13,3 +13,11 @@
     height: 120px;
     object-fit: cover;
 }
+
+.filter-overlay {
+    min-height: 1.5rem;
+    visibility: hidden;
+}
+.filter-overlay.active {
+    visibility: visible;
+}

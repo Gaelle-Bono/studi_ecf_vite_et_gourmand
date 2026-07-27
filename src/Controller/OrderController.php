@@ -11,11 +11,12 @@ use App\Form\OrderFormType;
 use App\Repository\MenuRepository;
 
 use App\Service\StockMenuService;
+use App\Service\OpeningHoursService;
 use App\Service\OrderBuilderService;
 use App\Service\OrderValidationService;
-use App\Service\OrderFinalizationService;
+use App\Service\DeliveryRouteService;
 use App\Service\OrderPricingService;
-use App\Service\OrderDistanceService;
+use App\Service\OrderFinalizationService;
 
 use App\Constant\AppConstant;
 
@@ -27,6 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Form\FormError;
 
 
 
@@ -36,18 +39,18 @@ class OrderController extends AbstractController
 
     public function __construct(
         private StockMenuService $stockMenuService, 
-        private OrderBuilderService $orderBuilderService, 
+        private OrderBuilderService $orderBuilderService,
+        private OpeningHoursService $openingHoursService, 
         private OrderValidationService $orderValidationService, 
         private OrderFinalizationService $orderFinalizationService,
         private OrderPricingService $orderPricingService,
-        private OrderDistanceService $orderDistanceService,
-        ) {
-    }
+        private DeliveryRouteService $deliveryRouteService
+        ) {}
 
 
     #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
     #[Route('/new/{id}', name: 'app_order_new_with_menu', methods: ['GET', 'POST'])]
-    public function new(?Menu $menu, Request $request, EntityManagerInterface $em): Response 
+    public function new(?Menu $menu, Request $request, EntityManagerInterface $em, SessionInterface $session): Response 
     {
         if (!$this->isGranted('ROLE_USER')) {
             $this->addFlash('warning', 'Connectez-vous ou créez un compte pour passer votre commande');
@@ -71,10 +74,8 @@ class OrderController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-
-        if ($user) {
-            $this->orderBuilderService->fillFromUser($order, $user);
-        }
+        $this->orderBuilderService->fillFromUser($order, $user);
+    
 
         if ($menu) {
             $this->orderBuilderService->fillFromMenu($order,$menu);
@@ -84,41 +85,55 @@ class OrderController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
 
+            $order = $form->getData();
             $menu = $order->getMenu();
             
-            if (!$menu) {
-                $this->addFlash('danger', 'Veuillez sélectionner un menu pour passer votre commande');
+            //nb people
+            $numberOfPeople = $order->getNumberOfPeople();
 
-                return $this->redirectToRoute('app_order_new');
-            }
-
-
+            //Requested Service Date
             $serviceDate = $form->get('serviceDate')->getData();
             $requestedTime = $form->get('requestedTime')->getData();
 
             //Validation
-            $error = $this->orderValidationService->validate($order, $menu, $serviceDate);
+            $errors = $this->orderValidationService->validate(
+                $menu, 
+                $numberOfPeople, 
+                $serviceDate,
+                $requestedTime);
 
-            if ($error) {
-                $this->addFlash('danger', $error);
-
-                return $this->redirectToRoute('app_order_new_with_menu', [
-                    'id' => $menu->getId()
-                ]);
+            foreach ($errors as $error) {
+                $form
+                    ->get($error['field'])
+                    ->addError(new FormError($error['message']));
             }
 
-            $this->orderFinalizationService->finalizeOrder($order, $menu, $serviceDate, $requestedTime);
 
-            $em->persist($order);
-            $em->flush();
+            if ($form->isValid()) {
 
-            // TODO : envoi mail
-            
-            $this->addFlash('success', 'Commande confirmée !');
+                $summary = $session->get('order_summary');
 
-            return $this->redirectToRoute('app_menu_index');
+                $this->orderFinalizationService->finalizeOrder(
+                    $order, 
+                    $menu, 
+                    $serviceDate,
+                    $requestedTime,
+                    $summary
+                );
+
+                $em->persist($order);
+                $em->flush();
+
+
+
+                // TODO : envoi mail
+                
+                $this->addFlash('success', 'Commande confirmée !');
+
+                return $this->redirectToRoute('app_menu_index');
+            }
         }
 
         return $this->render('order/new.html.twig', [
@@ -131,30 +146,20 @@ class OrderController extends AbstractController
 
 
     #[Route('/menu-preview', name: 'app_order_menu_preview', methods: ['POST'])]
-    public function menuPreview(Request $request,MenuRepository $menuRepository): JsonResponse
+    public function menuPreview(Request $request, MenuRepository $menuRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        $menuId = $data['menuId'] ?? null;
-
-        if (!$menuId) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Veuillez sélectionner un menu',
-                'menu_html' => '<p class="text-warning">Veuillez sélectionner un menu</p>'
-            ],400);
-        }
+        $menuId = $data['menuId'];
 
         $menu = $menuRepository->find($menuId);
 
         if (!$menu) {
             return $this->json([
                 'success' => false,
-                'message' => 'Menu introuvable',
-                'menu_html' => '<p class="text-danger">Menu introuvable</p>'
-            ], 404);
+                'message' => 'Le menu sélectionné n\'existe plus.'
+            ], 400);
         }
-
 
         return $this->json([
             'success' => true,
@@ -167,48 +172,54 @@ class OrderController extends AbstractController
 
 
     #[Route('/summary', name: 'app_order_summary', methods: ['POST'])]
-    public function summary(Request $request, MenuRepository $menuRepository): JsonResponse 
+    public function summary(Request $request, MenuRepository $menuRepository,  SessionInterface $session): JsonResponse 
     {
 
         $data = json_decode($request->getContent(), true);
-
-        $menuId = $data['menuId'] ?? null;
-        $numberOfPeople = (int) ($data['people'] ?? 0);
-        $serviceAddress = $data['address'] ?? null;
-
-        if (!$menuId 
-            || !$numberOfPeople 
-            || empty($serviceAddress['street'])
-            || empty($serviceAddress['zip'])
-            || empty($serviceAddress['city'])) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Informations incomplètes.',
-                'summary_html' => '<p class="text-danger">Informations incomplètes.</p>',
-            ], 400);
-        }
-
+        
+        $menuId = $data['menuId'];
         $menu = $menuRepository->find($menuId);
-
+        
         if (!$menu) {
             return $this->json([
                 'success' => false,
-                'message' => 'Menu introuvable.',
-                'summary_html' => '<p class="text-danger">Menu introuvable</p>'
-            ], 404);
+                'message' => 'Le menu sélectionné n\'existe plus'
+            ], 400);
         }
+                
+        $serviceAddress = $data['address'];
 
         //calculate distance between company and service address
         try {
-            $distance = $this->orderDistanceService->calculateDistanceFromAddresses($serviceAddress);
+            $route = $this->deliveryRouteService->getRouteData($serviceAddress);
         } catch (\RuntimeException $e) {
             return $this->json([
                 'success' => false,
-                'message' => $e->getMessage(),
-                'summary_html' => '<p class="text-danger">' . $e->getMessage() . '</p>'
+                'message' => $e->getMessage()
             ], 400);
         }
-            
+        
+        $distance = $route['distance'];   
+        
+        if ($distance > AppConstant::MAX_DELIVERY_DISTANCE_KM) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Nous livrons uniquement dans un rayon de '
+                . AppConstant::MAX_DELIVERY_DISTANCE_KM . ' km autour de notre établissement'
+            ],400);
+        }
+                
+        $customer = $data['customer'];
+        
+        $serviceDate = new \DateTimeImmutable($data['serviceDate']);
+        $requestedTime = $data['requestedTime'];
+        
+        $coordinates = $route['coordinates'];   
+        $deliveryInstructions = $data['deliveryInstructions'] ?? null;
+        
+        $numberOfPeople = (int) $data['people'];
+    
+
         //calculate prices
         $pricing = $this->orderPricingService->calculatePricesForOrder(
             $menu,
@@ -216,9 +227,28 @@ class OrderController extends AbstractController
             $distance
         );
 
+        //stock datas in session for next step (order confirmation)
+        $session->set('order_summary', [
+            'customer' => $customer,
+            'serviceAddress' => $serviceAddress,
+            'deliveryInstructions' => $deliveryInstructions,
+            'serviceDate' => $serviceDate->format('Y-m-d'),
+            'requestedTime' => $requestedTime,
+            'menuId' => $menuId,
+            'numberOfPeople' => $numberOfPeople,
+            'coordinates' => $coordinates,
+            'distance' => $distance,
+            'pricing' => $pricing
+        ]);
+
         return $this->json([
             'success' => true,
             'summary_html' => $this->renderView('order/_summary.html.twig', [
+                'customer' => $customer,
+                'serviceAddress' => $serviceAddress,
+                'deliveryInstructions' => $deliveryInstructions,
+                'serviceDate' => $serviceDate,
+                'requestedTime' => $requestedTime,
                 'menu' => $menu,
                 'pricing' => $pricing,
                 'groupDiscountPercent' => AppConstant::GROUP_DISCOUNT_PERCENT,
@@ -226,5 +256,39 @@ class OrderController extends AbstractController
             ])
         ]);
 
+    }
+
+
+
+    #[Route('/available_times', name: 'app_order_available_times', methods: ['POST'])]
+    public function availableTimes(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $serviceDate = $data['serviceDate'];
+
+        try {
+            $date = new \DateTimeImmutable($serviceDate);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Date invalide'
+            ], 400);
+        }
+
+        $openingHoursData = $this->openingHoursService->getOpeningHoursForDate($date);
+
+        if ($openingHoursData['isClosed']) {
+            return $this->json([
+                'success' => false,
+                'isClosed' => true,
+                'message' => $openingHoursData['message']
+            ], 400);
+        }
+
+        return $this->json([
+            'success' => true,
+            'openingHoursText' => $openingHoursData['openingHoursText']
+        ]);
     }
 }

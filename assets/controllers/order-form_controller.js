@@ -2,73 +2,245 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
 
+    menuLoading = false;
+    summaryLoading = false;
+    dateLoading = false;
+    isCompanyClosed = false;
+
+
     static targets = [
+        'stepIndicator1',
+        'stepIndicator2',
+        'stepIndicator3',
+        'stepIndicator4',
         'step1',
-        'step2',
-        'step3',
-        'step4',
-        "stepIndicator1",
-        "stepIndicator2",
-        "stepIndicator3",
-        "stepIndicator4",
+        'firstName',
+        'lastName',
+        'email',
+        'phone',
+        'serviceDate',
+        'timeBlock',
+        'requestedTime',
+        'availabilityInfo',
         'address',
+        'addressComplement',
         'zipCode',
         'city',
+        'deliveryInstructions',
+        'continueButtonStep1',
+        'step2',
         'menuSelect',
         'menuPreview',
         'conditionsWrapper',
         'conditionsCheckbox',
         'menuInfo',
+        'previousButtonStep2',
+        'continueButtonStep2',
+        'step3',
         'people',
-        'summary'
+        'summaryLoadingInfo',
+        'previousButtonStep3',
+        'continueButtonStep3',
+        'step4',
+        'summary',
+        'previousButtonStep4',
+        'submitButton'
     ];
 
-    getFields(stepElement) {
-        return stepElement.querySelectorAll('input, select, textarea');
-    }
 
-    resetField(field) {
-        const container = field.type === 'checkbox'
-            ? field.closest('.form-check')
-            : field.parentElement;
+    connect() {
+        this.showStepContainingError();
 
-        // remove invalid class
-        if (field.type === 'checkbox') {
-            container?.classList.remove('is-invalid');
-        } else {
-            field.classList.remove('is-invalid');
+        this.scrollToFirstError();
+
+        const dateIsInvalid = this.serviceDateTarget.classList.contains('is-invalid');
+        const noDate = !this.serviceDateTarget.value;
+
+        if (noDate || dateIsInvalid) {
+            this.requestedTimeTarget.disabled = true;
+            this.timeBlockTarget.classList.add('opacity-50');
+            return;
         }
 
-        // remove error message
-        container
-            ?.querySelectorAll('.invalid-feedback')
-            .forEach(el => el.remove());
+        if (this.requestedTimeTarget.classList.contains("is-invalid")) {
+                this.loadAvailableTimes();
+        }
+    }
+
+
+    onConditionsChange() {
+        if (this.conditionsCheckboxTarget.checked) {
+            this.clearStimulusErrors(this.conditionsCheckboxTarget);
+        }
     }
 
 
     getMenuMinPeople() {
-        return parseInt(
-            this.menuPreviewTarget
-                ?.querySelector('.menu-preview')
-                ?.dataset
-                ?.menuMinPeople
-        );
-    }
+        const menuPreview = this.menuPreviewTarget.querySelector('.menu-preview');
+        const minPeople = menuPreview.dataset.menuMinPeople;
 
+        return Number(minPeople);
+    }
 
     getMenuTitle() {
-        return (
-            this.menuPreviewTarget
-                ?.querySelector('.menu-preview')
-                ?.dataset
-                ?.menuTitle
-        );
+        const menuPreview = this.menuPreviewTarget.querySelector('.menu-preview');
+
+        return menuPreview.dataset.menuTitle;
+    }
+
+///////////////////////////////////ERROR HANDLING /////////////////////////////
+
+     setError(field, message) {
+
+        field.classList.add('is-invalid');
+
+        const feedback = document.createElement('div');
+        feedback.classList.add('invalid-feedback', 'd-block', 'stimulus-error');
+        feedback.textContent = message;
+
+        if (field.type === 'checkbox') {
+            field.closest('.form-check').after(feedback);
+        } else {
+            field.insertAdjacentElement('afterend', feedback);
+        }
+    }
+
+    showErrors(errors) {
+        this.clearAllStimulusErrors();
+
+        errors.forEach(error => {
+            this.setError(error.element, error.message);
+        });
+
+        this.scrollToFirstError();
     }
 
 
-    // JS Validations for each step 
-    validateDate(field) {
-        if (field.type !== 'date' || !field.value) {
+    clearStimulusErrors(field) {
+
+        field.classList.remove('is-invalid');
+
+        let errorContainer;
+
+        if (field.type === 'checkbox') {
+            errorContainer = field.closest('.form-check').nextElementSibling;
+        } else {
+            errorContainer = field.nextElementSibling;
+        }
+
+        if (errorContainer && errorContainer.classList.contains('stimulus-error')) {
+            errorContainer.remove();
+        }
+    }
+
+    clearAllStimulusErrors() {
+        this.element.querySelectorAll('.stimulus-error').forEach(error => error.remove());
+    }
+
+    clearInvalidState(field){
+        if (field.type === 'checkbox') {
+            field.closest('.form-check').classList.remove('is-invalid');
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    }
+
+    clearBackendErrors(field) {
+        let container = field.parentElement;
+
+        if (field.type === 'checkbox') {
+            container = field.closest('.form-check');
+        }
+
+        container.querySelectorAll('.invalid-feedback')
+            .forEach(error => error.remove());
+    }
+
+    clearAllErrors() {
+        this.element.querySelectorAll('.is-invalid')
+            .forEach(el => el.classList.remove('is-invalid'));
+
+        this.element.querySelectorAll('.invalid-feedback')
+            .forEach(el => el.remove());
+    }
+
+
+    renderError(container, message) {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                ${message}
+            </div>
+        `;
+    }
+
+
+    showStepContainingError(){
+        const firstError = this.element.querySelector('.is-invalid');
+
+        if (!firstError) {
+            return;
+        }
+
+        if (this.step1Target.contains(firstError)) {
+            this.showStep(1);
+            return;
+        }
+
+        if (this.step2Target.contains(firstError)) {
+            this.showStep(2);
+            return;
+        }
+
+        if (this.step3Target.contains(firstError)) {
+            this.showStep(3);
+            return;
+        }
+
+        if (this.step4Target.contains(firstError)) {
+            this.showStep(4);
+        }
+    }
+
+
+    scrollToFirstError() {
+        const firstError = this.element.querySelector('.is-invalid');
+
+        if (!firstError) {
+            return;
+        }
+
+        firstError.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        let field = firstError;
+
+        if (!firstError.matches('input, select, textarea')) {
+            field = firstError.querySelector('input, select, textarea');
+        }
+
+        if (field) {
+            field.focus();
+        }
+    }
+
+
+    ////////////////////VALIDATIONS //////////////////////////////////////////////////
+
+    validateRequired(field) {
+        if (
+            field.hasAttribute('required') 
+            && !field.disabled 
+            && !field.value.trim()) {
+                return field.dataset.errorMessage || 'Ce champ est obligatoire';
+        }
+        return null;
+    }
+
+
+    validateMinimumServiceDate(field) {
+        if (!field.value) {
             return null;
         }
 
@@ -86,113 +258,189 @@ export default class extends Controller {
     }
 
 
-    validateStep(stepElement) {
+    validateConditions() {
+        if (this.hasConditionsCheckboxTarget && !this.conditionsCheckboxTarget.checked) {
+            return "Veuillez confirmer que vous avez lu les conditions";
+        }
+        return null;
+    }   
+
+    
+    validateMinimumPeople() {
+        const people = Number(this.peopleTarget.value);
+        const menuMinPeople = this.getMenuMinPeople();
+
+        if (people < menuMinPeople) {
+            return `${menuMinPeople} personnes minimum pour ce menu`;
+        }
+        return null;
+    }
+
+
+    getStep1ClientErrors() {
 
         const errors = [];
 
-        this.getFields(stepElement).forEach(field => {
+        const fields = [
+            this.firstNameTarget,
+            this.lastNameTarget,
+            this.emailTarget,
+            this.phoneTarget,
+            this.serviceDateTarget,
+            this.requestedTimeTarget,
+            this.addressTarget,
+            this.zipCodeTarget,
+            this.cityTarget
+        ];
 
-            this.resetField(field);
+        fields.forEach(field => {
 
-            // required field
             const requiredError = this.validateRequired(field);
+
             if (requiredError) {
                 errors.push({
                     element: field,
                     message: requiredError
                 });
+
+                return;
             }
 
-            // date rule
-            const dateError = this.validateDate(field);
-            if (dateError) {
-                errors.push({
-                    element: field,
-                    message: dateError
-                });
+            if (field === this.serviceDateTarget) {
+
+                const dateError = this.validateMinimumServiceDate(field);
+
+                if (dateError) {
+                    errors.push({
+                        element: field,
+                        message: dateError
+                    });
+                }
             }
         });
 
         return errors;
     }
 
-    validateRequired(field) {
-        if (
-            field.hasAttribute('required')
-            && !field.value.trim()
-        ) {
-            return field.dataset.errorMessage
-                || 'Ce champ est obligatoire';
-        }
-
-        return null;
-    }
 
 
-    validateMinimumPeople() {
-        const people = parseInt(this.peopleTarget.value);
-        const menuMinPeople = this.getMenuMinPeople();
+    getStep2ClientError() {
 
-        if (menuMinPeople && people < menuMinPeople) {
+        const requiredError = this.validateRequired(this.menuSelectTarget);
+
+        if (requiredError) {
             return {
-                element: this.peopleTarget,
-                message: `${menuMinPeople} personnes minimum pour ce menu`
+                element: this.menuSelectTarget,
+                message: requiredError
             };
         }
+
+        const conditionsError = this.validateConditions();
+
+        if (conditionsError) {
+            return {
+                element: this.conditionsCheckboxTarget,
+                message: conditionsError
+            };
+        }
+
         return null;
     }
 
-    //Progress bar update
-    updateStepper(currentStep) {
-        const indicators = [
-            this.stepIndicator1Target,
-            this.stepIndicator2Target,
-            this.stepIndicator3Target,
-            this.stepIndicator4Target
-        ];
 
-        indicators.forEach((indicator, index) => {
-            indicator.classList.toggle(
-                "active",
-                index + 1 <= currentStep
-            );
-        });
+
+    getStep3ClientError() {
+
+        const requiredError = this.validateRequired(this.peopleTarget);
+
+        if (requiredError) {
+            return {
+                element: this.peopleTarget,
+                message: requiredError
+            };
+        }
+
+        const minimumPeopleError = this.validateMinimumPeople();
+
+        if (minimumPeopleError) {
+            return {
+                element: this.peopleTarget,
+                message: minimumPeopleError
+            };
+        }
+
+        return null;
     }
 
-    // Navigation between steps
-    goToStep2() {
 
-        const errors = this.validateStep(this.step1Target);
-        if (errors.length > 0) {
-            this.showErrors(errors);
+/////////////////////////////////NAVIGATION ///////////////////////////
+
+   //Progress bar update
+    updateStepper(currentStep) {
+        const step1 = this.stepIndicator1Target;
+        const step2 = this.stepIndicator2Target;
+        const step3 = this.stepIndicator3Target;
+        const step4 = this.stepIndicator4Target;
+
+        step1.classList.toggle("active", currentStep >= 1);
+        step2.classList.toggle("active", currentStep >= 2);
+        step3.classList.toggle("active", currentStep >= 3);
+        step4.classList.toggle("active", currentStep >= 4);
+    }
+
+
+    showStep(step) {
+        this.step1Target.classList.add('hidden');
+        this.step2Target.classList.add('hidden');
+        this.step3Target.classList.add('hidden');
+        this.step4Target.classList.add('hidden');
+
+        switch (step) {
+            case 1:
+                this.step1Target.classList.remove('hidden');
+                break;
+
+            case 2:
+                this.step2Target.classList.remove('hidden');
+                break;
+
+            case 3:
+                this.step3Target.classList.remove('hidden');
+                break;
+
+            case 4:
+                this.step4Target.classList.remove('hidden');
+                break;
+        }
+
+        this.updateStepper(step);
+    }
+
+
+    goToStep2() {
+        
+        const clientErrors = this.getStep1ClientErrors();
+
+        if (clientErrors.length > 0) {
+            this.showErrors(clientErrors);
             return;
         }
 
-        this.updateStepper(2);
-        this.step1Target.classList.add('hidden');
-        this.step2Target.classList.remove('hidden');
+        if (this.isCompanyClosed) {
+            return;
+        }
 
+        this.showStep(2);
+        
     }
 
 
     goToStep3() {
 
-        const errors = this.validateStep(this.step2Target);
+        const clientError = this.getStep2ClientError();
 
-        if (this.hasConditionsCheckboxTarget) {
-
-            if (!this.conditionsCheckboxTarget.checked) {
-                this.setError(
-                    this.conditionsCheckboxTarget,
-                    "Veuillez confirmer que vous avez lu les conditions"
-                );
-                return;
-            }
-
-        }
-
-        if (errors.length > 0) {
-            this.showErrors(errors);
+         if (clientError) {
+            this.showErrors([clientError]);
             return;
         }
 
@@ -200,186 +448,349 @@ export default class extends Controller {
         const menuTitle = this.getMenuTitle();
 
         this.menuInfoTarget.textContent =
-    `Pour le menu choisi ${menuTitle}, le nombre minimum de personnes est ${menuMinPeople}`;
+            `Pour le menu choisi ${menuTitle}, le nombre minimum de personnes est ${menuMinPeople}`;
 
-        this.updateStepper(3);
-        this.step2Target.classList.add('hidden');
-        this.step3Target.classList.remove('hidden');
+        this.showStep(3);
+
     }
 
-    goToStep4() {
 
-        const errors = this.validateStep(this.step3Target);
-        const minimumPeopleError = this.validateMinimumPeople();
+    async goToStep4() {
+    
+        const clientError = this.getStep3ClientError();
 
-        if (minimumPeopleError) {
-            this.showErrors([minimumPeopleError]);
+        if (clientError) {
+            this.showErrors([clientError]);
             return;
         }
 
-        if (errors.length > 0) {
-            this.showErrors(errors);
-            return;
-        }
+        this.setLoadingState(true, [this.previousButtonStep3Target, this.continueButtonStep3Target]);
 
-        this.updateSummary();
+        await this.updateSummary();
 
-        this.updateStepper(4);
-        this.step3Target.classList.add('hidden');
-        this.step4Target.classList.remove('hidden');
+        this.setLoadingState(false, [
+            this.previousButtonStep3Target,
+            this.continueButtonStep3Target
+        ]);
+
+        this.showStep(4);
+
     }
-
-
-    returnToStep(stepToHide, stepToShow) {
-        stepToHide.classList.add('hidden');
-        stepToShow.classList.remove('hidden');
-    }
-
 
     returnToStep1() {
-        this.returnToStep(this.step2Target, this.step1Target);
-        this.updateStepper(1);
+        this.showStep(1);
     }
-
 
     returnToStep2() {
-        this.returnToStep(this.step3Target, this.step2Target);
-        this.updateStepper(2);
+        this.showStep(2);
     }
     
-
     returnToStep3() {
-        this.returnToStep(this.step4Target, this.step3Target);
-        this.updateStepper(3);
+        this.showStep(3);
     }
 
 
-    //error handling
-    setError(field, message) {
+    ///////////////////////////////////LOCK NAVIGATION ////////////////////////////
+    setLoadingState(isLoading, buttons = []) {
 
-        const container = field.type === 'checkbox'
-        ? field.closest('.form-check')
-        : field;
-
-        container.classList.add('is-invalid');
-
-        const feedback = document.createElement('div');
-        feedback.classList.add('invalid-feedback', 'd-block');
-        feedback.textContent = message;
-
-        if (field.type === 'checkbox') {
-            container.appendChild(feedback);
-        } else {
-            field.insertAdjacentElement('afterend', feedback);
-        }
-    }
-
-    showErrors(errors) {
-
-        errors.forEach(error => {
-            this.setError(error.element, error.message);
+        buttons.forEach(button => {
+            button.disabled = isLoading;
         });
+    }
 
-        const firstError = this.element.querySelector('.is-invalid');
 
-        if (firstError) {
-            firstError.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
+
+    ////////////////////////////////AJAX DATE AND TIME HANDLER //////////////////////////////////
+
+
+    async loadAvailableTimes() {
+
+        const serviceDate = this.serviceDateTarget.value;
+
+        try {
+            const response = await fetch(this.element.dataset.timesUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ serviceDate })
             });
 
-            firstError.focus?.();
-        }
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('Erreur backend', data);
+                this.renderError(
+                    this.availabilityInfoTarget,
+                    "Impossible de charger les horaires. Veuillez réessayer plus tard"
+                );
+                return;
+            }
+            
+            // company is open this day : show ranges of delivery hours
+            this.availabilityInfoTarget.textContent = "Créneaux disponibles : " + data.openingHoursText;
+            this.requestedTimeTarget.disabled = false;
+            this.timeBlockTarget.classList.remove("opacity-50");
+            this.requestedTimeTarget.setAttribute('required', 'required');
+        
+        } catch (error) {
+            console.error('Erreur réseau', error);
+            this.renderError(
+                this.availabilityInfoTarget,
+                "Impossible de charger les horaires. Veuillez réessayer plus tard"
+            );
+        } 
     }
 
-    //update order
-    async updateMenuPreview() {
 
-        const menuId = this.menuSelectTarget?.value;
+    onTimeChange() {
+        this.clearInvalidState(this.requestedTimeTarget);
+        this.clearStimulusErrors(this.requestedTimeTarget);
+        this.clearBackendErrors(this.requestedTimeTarget);
+    }
 
-        if (!menuId) {
-            this.menuPreviewTarget.innerHTML = ''
+
+    resetTimeSelection() {
+
+        this.clearInvalidState(this.requestedTimeTarget);
+        this.clearStimulusErrors(this.requestedTimeTarget);
+        this.clearBackendErrors(this.requestedTimeTarget);
+
+        this.availabilityInfoTarget.textContent = '';
+        this.requestedTimeTarget.value = '';
+        this.requestedTimeTarget.disabled = true;
+        this.timeBlockTarget.classList.add("opacity-50");
+        this.requestedTimeTarget.removeAttribute('required');
+    }
+
+
+    async onDateChange() {
+
+        this.isCompanyClosed = false;
+
+        this.clearInvalidState(this.serviceDateTarget);
+        this.clearStimulusErrors(this.serviceDateTarget);
+        this.clearBackendErrors(this.serviceDateTarget);
+
+        this.resetTimeSelection();
+
+        const serviceDate = this.serviceDateTarget.value;
+
+        if (!serviceDate) {
             return;
         }
+
+        if (this.dateLoading) {
+            return;
+        }
+
+        this.dateLoading = true;
+        
+        this.setLoadingState(true, [this.continueButtonStep1Target]);
+
+        this.availabilityInfoTarget.textContent = 'Recherche des créneaux disponibles...';
+        
+        try {
+
+            const response = await fetch(this.element.dataset.timesUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ serviceDate })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+
+                if (data.isClosed) {
+                    this.isCompanyClosed = true;
+                    this.availabilityInfoTarget.textContent = "";
+
+                    this.showErrors([{
+                        element: this.serviceDateTarget,
+                        message: data.message
+                    }]);
+
+                    return;
+                }
+
+                this.renderError(
+                    this.availabilityInfoTarget,
+                    data.message ?? "Impossible de charger les horaires. Veuillez réessayer plus tard"
+                );
+
+                return;
+            }
+
+            // company is open this day : show ranges of delivery hours
+            this.availabilityInfoTarget.textContent = "Créneaux disponibles : " + data.openingHoursText;
+            this.requestedTimeTarget.disabled = false;
+            this.timeBlockTarget.classList.remove("opacity-50");
+            this.requestedTimeTarget.setAttribute('required', 'required');
+        
+        } catch (error) {
+            console.error('Erreur réseau', error);
+            this.renderError(
+                this.availabilityInfoTarget,
+                "Impossible de charger les horaires. Veuillez réessayer plus tard"
+            );
+        
+        } finally {
+            this.dateLoading = false;
+            this.setLoadingState(false, [this.continueButtonStep1Target]);
+        }  
+    }
+
+
+
+
+    /////////////////////////////AJAX MENU ////////////////////////////////
+
+    async onMenuChange() {
+
+        this.clearStimulusErrors(this.menuSelectTarget);
+
+        const menuId = this.menuSelectTarget.value;
+
+        if (!menuId) {
+            this.menuPreviewTarget.innerHTML = '';
+            return;
+        }
+
+        if (this.menuLoading) return;
+
+        this.menuLoading = true;
+        this.setLoadingState(true, [this.previousButtonStep2Target, this.continueButtonStep2Target]);
+
+        this.menuPreviewTarget.innerHTML = `
+            <div class="text-muted">
+                Chargement du menu...
+            </div>
+        `;
 
         try {
             const response = await fetch(
-                this.element.dataset.menuUrl,
-                {
+                this.element.dataset.menuUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        menuId
-                    })
-                }
-            );
+                    body: JSON.stringify({menuId})
+                });
 
             const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                this.renderError(this.menuPreviewTarget, data.message ?? "Erreur lors du chargement du menu");
+                return;
+            }
+
             this.menuPreviewTarget.innerHTML = data.menu_html;
 
         } catch (error) {
             console.error(error);
-            this.menuPreviewTarget.innerHTML =
-                '<p class="text-danger">Erreur lors du chargement du menu</p>';
+            this.renderError(this.menuPreviewTarget, "Impossible de charger le menu");
+        
+        } finally {
+            this.menuLoading = false;
+            this.setLoadingState(false, [this.previousButtonStep2Target, this.continueButtonStep2Target]);
         }
+
     }
 
+    /////////////////////////////AJAX SUMMARY ////////////////////////////////
 
     async updateSummary() {
 
-        const menuId = this.menuSelectTarget?.value;
-        const people = parseInt(this.peopleTarget?.value);
-
-        const address = {
-            street: this.addressTarget?.value || '',
-            zip: this.zipCodeTarget?.value || '',
-            city: this.cityTarget?.value || ''
-        };
-
-        if (!menuId || !people || !address.street || !address.zip || !address.city) {
-            this.summaryTarget.innerHTML =
-                '<p class="text-warning">Complétez les informations pour voir le prix</p>';
+        if (this.summaryLoading) {
             return;
         }
+
+        this.summaryLoading = true;
+        this.submitButtonTarget.disabled = true;
+
+        this.peopleTarget.disabled = true;
+        this.peopleTarget.classList.add('opacity-50');
+        this.summaryLoadingInfoTarget.classList.remove('hidden');
+
+        const customer = {
+            firstName: this.firstNameTarget.value,
+            lastName: this.lastNameTarget.value,
+            email: this.emailTarget.value,
+            phone: this.phoneTarget.value
+        };
+
+        const address = {
+            street: this.addressTarget.value,
+            complement: this.addressComplementTarget.value,
+            zip: this.zipCodeTarget.value,
+            city: this.cityTarget.value
+        };
+
+        const deliveryInstructions = this.deliveryInstructionsTarget.value;
+
+        const serviceDate = this.serviceDateTarget.value;
+        const requestedTime = this.requestedTimeTarget.value;
+        const menuId = this.menuSelectTarget.value;
+        const people = Number(this.peopleTarget.value);
 
 
         try {
             const response = await fetch(this.element.dataset.summaryUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ menuId, people, address })
+                body: JSON.stringify({
+                    menuId,
+                    people,
+                    address,
+                    deliveryInstructions,
+                    customer,
+                    serviceDate,
+                    requestedTime
+                })
             });
 
+            const data = await response.json();
 
-            let data;
-
-            try {
-                data = await response.json();
-            } catch (e) {
-                console.error('JSON invalide', e);
-                data = null;
-            }
-
-            if (!data) {
-                this.summaryTarget.innerHTML =
-                    '<p class="text-danger">Erreur lors du calcul du prix</p>';
+            if (!response.ok || !data.success) {
+                this.renderError(this.summaryTarget, data.message ?? "Erreur lors du calcul du prix");
                 return;
             }
 
-            this.summaryTarget.innerHTML =
-                data.summary_html || '<p class="text-danger">Erreur lors du calcul du prix</p>';
-
-            if (!response.ok) {
-                console.error('Erreur HTTP:', data);
-            }
+            this.summaryTarget.innerHTML = data.summary_html;
+            this.submitButtonTarget.disabled = false;
 
         } catch (e) {
-            console.error('Erreur réseau:', e);
-            this.summaryTarget.innerHTML =
-                '<p class="text-danger">Erreur réseau lors du calcul du prix</p>';
+            console.error(e);
+            this.renderError(this.summaryTarget, "Impossible de calculer le prix");
+
+        } finally {
+            this.peopleTarget.disabled = false;
+            this.peopleTarget.classList.remove('opacity-50');
+            this.summaryLoadingInfoTarget.classList.add('hidden');
+            this.summaryLoading = false;
         }
+
+    }
+
+
+    //////////////////////////////////////ORDERING//////////////////////////////////////
+
+ 
+    onSubmit(event) {
+        if (this.submitted || this.summaryLoading) {
+            event.preventDefault();
+            return;
+        }
+
+        this.submitted = true;
+
+        this.setLoadingState(true, [
+            this.previousButtonStep4Target,
+            this.submitButtonTarget
+        ]);
     }
 
 }

@@ -13,7 +13,9 @@ class AppConstant
     public const MIN_PASSWORD_LENGTH = 10;
 
     //Order
-    public const DEFAULT_REQUESTED_TIME = '12:00';
+
+    public const CLOSED = "L'entreprise est fermée ce jour";
+    public const MAX_DELIVERY_DISTANCE_KM = 15;
     public const DELIVERY_BASE_PRICE = '5.00';
     public const DELIVERY_PRICE_PER_KM = '0.59';
 

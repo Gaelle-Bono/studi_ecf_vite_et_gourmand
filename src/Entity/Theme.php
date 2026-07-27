@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\ThemeRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ThemeRepository::class)]
 class Theme
@@ -26,6 +25,7 @@ class Theme
     {
         return $this->name;
     }
+
 
     public function setName(string $name): static
     {

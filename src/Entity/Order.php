@@ -74,6 +74,12 @@ class Order
     )]
     private string $serviceCity;
 
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $deliveryInstructionsAtOrder = null;
+
+
+
     ////////////////// LATITUDE, LONGITUDE AND DISTANCE (Company and delivery)/////////////////////
 
     #[ORM\Column(nullable: true)]
@@ -119,7 +125,7 @@ class Order
     #[ORM\Column]
     #[Assert\GreaterThanOrEqual(
         value: 1,
-        message: 'Le menu doit être commandé pour au moins 1 personne'
+        message: 'La commande doit être effectuée pour au moins 1 personne'
     )]
     private int $numberOfPeople;
 
@@ -141,11 +147,11 @@ class Order
     private string $totalPriceAtOrder ='0';
     
     //////////////// equipment Loan //////////////
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private bool $requiresEquipmentLoanAtOrder = false;
     
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $loanEquipmentDescriptionAtOrder = null;
+    private ?string $includedEquipmentDescriptionAtOrder = null;
 
     /////////////////////CUSTOMER DETAILS //////////////
     // at the time of order to keep a record even if customer updates their profile later
@@ -276,14 +282,14 @@ class Order
         return $this;
     }
 
-    public function getServiceAddressComplement(): ?string
+    public function getDeliveryInstructionsAtOrder(): ?string
     {
-        return $this->serviceAddressComplement;
+        return $this->deliveryInstructionsAtOrder;
     }
 
-    public function setServiceAddressComplement(?string $serviceAddressComplement): static
+    public function setDeliveryInstructionsAtOrder(?string $deliveryInstructionsAtOrder): static
     {
-        $this->serviceAddressComplement = $serviceAddressComplement;
+        $this->deliveryInstructionsAtOrder = $deliveryInstructionsAtOrder;
         return $this;
     }
 
@@ -317,6 +323,18 @@ class Order
             $this->serviceCity
         );
     }
+
+     public function getServiceAddressComplement(): ?string
+    {
+        return $this->serviceAddressComplement;
+    }
+
+    public function setServiceAddressComplement(?string $serviceAddressComplement): static
+    {
+        $this->serviceAddressComplement = $serviceAddressComplement;
+        return $this;
+    }
+
 
 
     public function getDeliveryLatAtOrder(): ?float
@@ -525,14 +543,14 @@ class Order
         return $this;
     }
 
-    public function getLoanEquipmentDescriptionAtOrder(): ?string
+    public function getIncludedEquipmentDescriptionAtOrder(): ?string
     {
-        return $this->loanEquipmentDescriptionAtOrder;
+        return $this->includedEquipmentDescriptionAtOrder;
     }
 
-    public function setLoanEquipmentDescriptionAtOrder(?string $loanEquipmentDescriptionAtOrder): static
+    public function setIncludedEquipmentDescriptionAtOrder(?string $includedEquipmentDescriptionAtOrder): static
     {
-        $this->loanEquipmentDescriptionAtOrder = $loanEquipmentDescriptionAtOrder;
+        $this->includedEquipmentDescriptionAtOrder = $includedEquipmentDescriptionAtOrder;
         return $this;
     }
 

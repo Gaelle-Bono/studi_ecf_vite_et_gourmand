@@ -5,17 +5,19 @@ namespace App\Service;
 use App\Entity\Order;
 use App\Entity\User;
 use App\Entity\Menu;
-use App\Constant\AppConstant;
 
 class OrderBuilderService
 {
     public function fillFromUser(Order $order, User $user): void
     {
         $order
+            ->setUser($user)
+
             ->setCustomerFirstNameAtOrder($user->getFirstName())
             ->setCustomerLastNameAtOrder($user->getLastName())
             ->setCustomerEmailAtOrder($user->getEmail())
             ->setCustomerPhoneAtOrder($user->getPhoneNumber())
+            
             ->setServiceAddress($user->getAddress())
             ->setServiceAddressComplement($user->getAddressComplement())
             ->setServiceZipCode($user->getZipCode())
@@ -26,6 +28,7 @@ class OrderBuilderService
     {
         $order
             ->setMenu($menu)
+
             ->setMenuTitleAtOrder($menu->getTitle())
             ->setMenuDescriptionAtOrder($menu->getDescription())
             ->setPricePerPersonAtOrder($menu->getPricePerPerson())
@@ -35,12 +38,10 @@ class OrderBuilderService
             ->setAllergensAtOrder($menu->getAllergensAsString());
     }
 
-    public function buildRequestedDate(\DateTimeInterface $serviceDate, ?\DateTimeInterface $requestedTime): \DateTimeImmutable
+    public function buildRequestedDate(\DateTimeInterface $serviceDate, string $requestedTime): \DateTimeImmutable
     {
-        $time = $requestedTime
-            ? $requestedTime->format('H:i')
-            : AppConstant::DEFAULT_REQUESTED_TIME;
-
-        return new \DateTimeImmutable($serviceDate->format('Y-m-d') . ' ' . $time);
+        return new \DateTimeImmutable(
+            $serviceDate->format('Y-m-d') . ' ' . $requestedTime
+        );
     }
 }

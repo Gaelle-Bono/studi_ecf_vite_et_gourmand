@@ -61,7 +61,7 @@ class Menu
     )]
     private ?int $minimumDaysBeforeOrder = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private bool $requiresEquipmentLoan = false;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -261,6 +261,8 @@ class Menu
 
         return implode(', ', array_unique($allergensIntheMenu));
     }
+
+    
 
     public function getDiet(): Diet
     {

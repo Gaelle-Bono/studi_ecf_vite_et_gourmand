@@ -25,6 +25,6 @@ services:
     App\Service\MailService:
         arguments:
             $mailFrom: '%mail_from%'
-    App\Service\DistanceService:
+    App\Service\DeliveryRouteService:
         arguments:
             $openRouteApiKey: '%openroute_api_key%'
