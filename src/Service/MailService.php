@@ -13,12 +13,11 @@ class MailService
     {
     }
 
-    public function sendMail(User $user, string $subject, string $template, array $context = []):bool
+    public function sendMail(string $emailAddress, string $subject, string $template, array $context = []):bool
     {
-
         $email = (new TemplatedEmail())
             ->from($this->mailFrom)
-            ->to($user->getEmail())
+            ->to($emailAddress)
             ->subject($subject)
             ->htmlTemplate($template)
             ->context($context);
@@ -28,7 +27,7 @@ class MailService
             return true;
         } catch (\Throwable $e) {
             $this->logger->error('Erreur envoi mail',[
-                'email' => $user->getEmail(), 
+                'email' => $emailAddress, 
                 'error' => $e->getMessage()
                 
             ]);

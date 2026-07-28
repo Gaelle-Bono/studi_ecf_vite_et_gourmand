@@ -17,6 +17,7 @@ use App\Service\OrderValidationService;
 use App\Service\DeliveryRouteService;
 use App\Service\OrderPricingService;
 use App\Service\OrderFinalizationService;
+use App\Service\MailService;
 
 use App\Constant\AppConstant;
 
@@ -44,7 +45,8 @@ class OrderController extends AbstractController
         private OrderValidationService $orderValidationService, 
         private OrderFinalizationService $orderFinalizationService,
         private OrderPricingService $orderPricingService,
-        private DeliveryRouteService $deliveryRouteService
+        private DeliveryRouteService $deliveryRouteService, 
+        private MailService $mailService
         ) {}
 
 
@@ -127,12 +129,27 @@ class OrderController extends AbstractController
                 $em->flush();
 
 
+                // sending a mail
+                $success = $this->mailService->sendMail($order->getCustomerEmailAtOrder(), 'Confirmation de votre commande', 'emails/order_confirmation.html.twig',
+                    ['order' => $order]
+                );
 
-                // TODO : envoi mail
-                
-                $this->addFlash('success', 'Commande confirmée !');
+                if (!$success) {
+                    $this->addFlash(
+                        'warning', 
+                        'Votre commande a bien été enregistrée, mais l’email de confirmation n’a pas pu être envoyé.'
+                    );
+                } else {
+                    $this->addFlash(
+                        'success', 
+                        'Votre commande a bien été enregistrée. Un email de confirmation vous a été envoyé.'
+                    );
+                }
 
-                return $this->redirectToRoute('app_menu_index');
+                return $this->redirectToRoute('app_order_show', [
+                    'id' => $order->getId()
+                ]);
+
             }
         }
 
@@ -290,5 +307,19 @@ class OrderController extends AbstractController
             'success' => true,
             'openingHoursText' => $openingHoursData['openingHoursText']
         ]);
+    }
+
+    #[Route('/{id}', name: 'app_order_show',  requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function show(Order $order): Response
+    {
+        return $this->render('order/show.html.twig', [
+            'order' => $order,
+        ]);
+    }
+
+    #[Route(name: 'app_order_index', methods: ['GET'])]
+    public function index(): Response
+    {
+        return $this->render('order/index.html.twig');
     }
 }

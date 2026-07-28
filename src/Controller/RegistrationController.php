@@ -43,7 +43,7 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $success = $mailService->sendMail($user, 'Bienvenue sur Vite et Gourmand!','emails/welcome.html.twig',
+            $success = $mailService->sendMail($user->getEmail(), 'Bienvenue sur Vite et Gourmand!','emails/welcome.html.twig',
                 ['user' => $user]
             );
 

@@ -150,7 +150,7 @@ class ResetPasswordController extends AbstractController
         }
 
         // send a mail for reinitialisation of password
-        $mailService->sendMail($user, 'Votre demande de réinitialisation de mot de passe', 'reset_password/email.html.twig',
+        $mailService->sendMail($user->getEmail(), 'Votre demande de réinitialisation de mot de passe', 'reset_password/email.html.twig',
             [
                 'resetToken' => $resetToken,
                 'user' => $user

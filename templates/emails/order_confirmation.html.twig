@@ -1,0 +1,44 @@
+<h1>Bonjour {{ order.customerFirstNameAtOrder }} {{ order.customerLastNameAtOrder }} !</h1>
+
+<p>
+    Nous vous confirmons la prise en compte de votre commande sur notre site 
+    <strong>Vite et Gourmand</strong>.
+</p>
+
+<p>
+    Voici le récapitulatif de votre commande :
+</p>
+
+<ul>
+    <li><strong>Numéro de commande :</strong> {{ order.orderNumber }}</li>
+    <li><strong>Menu :</strong> {{ order.menu.title }}</li>
+    <li><strong>Nombre de personnes :</strong> {{ order.numberOfPeople }}</li>
+    <li><strong>Date de prestation :</strong> {{ order.requestedDeliveryAt|date('d/m/Y à H:i') }}</li>
+    <li><strong>Montant total :</strong> {{ order.totalPriceAtOrder|number_format(2, ',', ' ') }} €</li>
+</ul>
+
+<p>
+    Nous vous informerons dès que votre commande aura été acceptée par notre équipe.
+</p>
+
+<p>
+    Vous pouvez modifier ou annuler votre commande depuis votre espace personnel
+    tant qu'elle est encore en attente de validation.
+</p>
+
+<p>
+    Nous vous remercions pour votre confiance et espérons avoir le plaisir de
+    préparer votre commande très prochainement.
+</p>
+
+<p>
+    <a href="{{ url('app_order_show', {'id': order.id}) }}">
+        Consulter ma commande
+    </a>
+</p>
+
+
+<p>
+    À bientôt,<br>
+    L'équipe de Vite et Gourmand
+</p>
