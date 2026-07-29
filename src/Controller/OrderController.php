@@ -136,15 +136,20 @@ class OrderController extends AbstractController
 
                 if (!$success) {
                     $this->addFlash(
-                        'warning', 
-                        'Votre commande a bien été enregistrée, mais l’email de confirmation n’a pas pu être envoyé.'
+                        'warning',
+                        "Merci pour votre commande !\n
+                        Votre commande n°" . $order->getOrderNumber() . " a bien été enregistrée, mais l’email de confirmation n’a pas pu être envoyé."
                     );
                 } else {
                     $this->addFlash(
-                        'success', 
-                        'Votre commande a bien été enregistrée. Un email de confirmation vous a été envoyé.'
+                        'success',
+                        "Merci pour votre commande !\n
+                        Votre commande n°" . $order->getOrderNumber() . " a bien été enregistrée.\n
+                        Un email de confirmation vous a été envoyé."
                     );
                 }
+
+               
 
                 return $this->redirectToRoute('app_order_show', [
                     'id' => $order->getId()

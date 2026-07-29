@@ -1,7 +1,12 @@
 {% for label, messages in app.flashes %}
     {% for message in messages %}
-        <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">
-            {{ message }}
+        {% if label == 'error' %}
+            {% set alertType = 'danger' %}
+        {% else %}
+            {% set alertType = label %}
+        {% endif %}
+        <div class="alert alert-{{ alertType }}">
+            {{ message|nl2br }}
         </div>
     {% endfor %}
 {% endfor %}
