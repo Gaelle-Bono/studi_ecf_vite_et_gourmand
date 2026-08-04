@@ -1,89 +1,53 @@
 <div class="order-summary">
 
-    <h3>Client</h3>
-    <p>
-        {{ customer.firstName }} {{ customer.lastName }}<br>
-        {{ customer.email }}<br>
-        {{ customer.phone }}
-    </p>
+    {# Customer #}
+    {% include 'order/_customer.html.twig' with {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+    } %}
 
-    <h3>Prestation</h3>
-    <p>
-        <strong>Adresse :</strong><br>
-        {{ serviceAddress.street }}<br>
-        {% if serviceAddress.complement %}
-            {{ serviceAddress.complement }}<br>
-        {% endif %}
-        {{ serviceAddress.zip }} {{ serviceAddress.city }}
-    </p>
-    <p>
-        <strong>Instructions de livraison :</strong><br>
-        {{ deliveryInstructions ?: 'Aucune précision' }}
-    </p>
-    <p>
-        <strong>Date souhaitée de la prestation :</strong><br>
-        {{ serviceDate|date('d/m/Y') }}
-        {% if requestedTime %}
-             à {{ requestedTime }}
-        {% endif %}
-        <br>
-    </p>
 
-    <h3>La commande</h3>
-    <p>
-        <strong>Menu :</strong>
-        {{ menu.title }}
-    </p>
+    {# Service details #}
+    {% include 'order/_service_details.html.twig' with {
+        street: serviceAddress.street,
+        complement: serviceAddress.complement,
+        zip: serviceAddress.zip,
+        city: serviceAddress.city,
+        deliveryInstructions: deliveryInstructions,
+        serviceDate: serviceDate,
+        requestedTime: requestedTime
+    } %}
 
-    <p>
-        <strong>Plats choisis :</strong><br>
-        {% include 'menu/dish/_dish_list.html.twig' with {
-            menu: menu,
-            showAllergens: false
-        } %}
-    </p>
 
-    <p>
-        <strong>Nombre de personnes :</strong>
-        {{ numberOfPeople }}
-    </p>
+    {# Order details #}
+    {% embed 'order/_order_menu_details.html.twig' with {
+        menuTitle: menu.title,
+        menuDescription: menu.description,
+        includedEquipmentDescription: menu.includedEquipmentDescription,
+        numberOfPeople: numberOfPeople
+    } %}
+        {% block dishes %}
+            {% include 'menu/dish/_dish_list.html.twig' with {
+                starter: menu.starter,
+                mainCourse: menu.mainCourse,
+                dessert: menu.dessert
+            } %}
+        {% endblock %}
+    {% endembed %}
 
-    <h3>Les prix</h3>
-    {% if pricing.hasDiscount %}
-        <p>
-            <strong>Prix du service :</strong>
-            <span class="text-decoration-line-through">
-                {{ pricing.servicePriceBeforeDiscount|number_format(2, ',', ' ') }} €
-            </span>
-        </p>
 
-        <p class="text-success">
-            Réduction groupe :
-            -{{ groupDiscountPercent }} %
-            (-{{ pricing.discountAmount|number_format(2, ',', ' ') }} €)
-        </p>
+    {# Prices #}
+    {% include 'order/_prices_details.html.twig' with {
+        servicePriceBeforeDiscount: pricing.servicePriceBeforeDiscount,
+        servicePrice: pricing.servicePrice,
+        deliveryPrice: pricing.deliveryPrice,
+        totalPrice: pricing.totalPrice,
+        hasDiscount: pricing.hasDiscount,
+        discountAmount: pricing.discountAmount,
+        groupDiscountPercent: groupDiscountPercent
+    } %}
 
-        <p>
-            <strong>Prix du service après réduction :</strong>
-            {{ pricing.servicePrice|number_format(2, ',', ' ') }} €
-        </p>
-
-    {% else %}
-        <p>
-            <strong>Prix du service :</strong>
-            {{ pricing.servicePrice|number_format(2, ',', ' ') }} €
-        </p>
-
-    {% endif %}
-
-    <p>
-        <strong>Prix de la livraison :</strong>
-        {{ pricing.deliveryPrice|number_format(2, ',', ' ') }} €
-    </p>
-
-    <p class="fw-bold">
-        Prix total :
-        {{ pricing.totalPrice|number_format(2, ',', ' ') }} €
-    </p>
 
 </div>

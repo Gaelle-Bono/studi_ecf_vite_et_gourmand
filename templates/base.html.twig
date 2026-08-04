@@ -34,12 +34,6 @@
                             </a>
                             <a class="nav-link" href="#">Contact</a>
 
-                            {# {% if app.user %}
-                                <span class="nav-link text-warning">
-                                    <i class="bi bi-person-circle"></i> {{ app.user.userIdentifier }}
-                                </span>
-                                <a class="nav-link" href="{{ logout_path() }}">Déconnexion</a> #}
-
 
                             {% if app.user %}
                                 <div class="nav-item dropdown">
@@ -48,7 +42,7 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" href="{{ path('app_order_index') }}">
+                                            <a class="dropdown-item" href="{{ path('app_order_my_orders') }}">
                                                 <i class="bi bi-bag"></i> Mes commandes
                                             </a>
                                         </li>

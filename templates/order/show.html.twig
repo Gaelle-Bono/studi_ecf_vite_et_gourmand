@@ -1,11 +1,98 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ order.orderNumber }}{% endblock %}
+{% block title %}Commande {{ order.orderNumber }}{% endblock %}
 
 {% block body %}
 
 <div class="container">
-    <h1>{{ order.orderNumber }}</h1>
-</div>
-{% endblock %}
 
+    <h1>Détails de ma commande</h1>
+
+    <h3>Commande</h3>
+
+    <p>
+        <strong>Numéro :</strong>
+        {{ order.orderNumber }}<br>
+
+        <strong>Date de commande :</strong>
+        {{ order.createdAt|date('d/m/Y H:i') }}<br>
+
+        <strong>Statut :</strong>
+        {{ order.orderStatus.label }}
+    </p>
+
+    {% if canEdit %}
+        {# <a href="{{ path('app_order_edit', {'id': order.id}) }}">
+            Modifier la commande
+        </a>
+
+        <a href="{{ path('app_order_cancel', {'id': order.id}) }}">
+            Annuler la commande
+        </a> #}
+
+        <a href="#">
+            Modifier la commande
+        </a>
+
+        <a href="#">
+            Annuler la commande
+        </a>
+
+    {% endif %}
+
+    {# Customer #}
+    {% include 'order/_customer.html.twig' with {
+        firstName: order.customerFirstNameAtOrder,
+        lastName: order.customerLastNameAtOrder,
+        email: order.customerEmailAtOrder,
+        phone: order.customerPhoneAtOrder
+    } %}
+
+    {# Service Details #}
+    {% include 'order/_service_details.html.twig' with {
+        street: order.serviceAddress,
+        complement: order.serviceAddressComplement,
+        zip: order.serviceZipCode,
+        city: order.serviceCity,
+        deliveryInstructions: order.deliveryInstructionsAtOrder,
+        serviceDate: order.requestedDeliveryAt,
+        requestedTime: order.requestedDeliveryAt|date('H:i')
+    } %}
+
+
+    {# Order details #}
+    {% embed 'order/_order_menu_details.html.twig' with {
+        menuTitle: order.menuTitleAtOrder,
+        menuDescription: order.menuDescriptionAtOrder,
+        includedEquipmentDescription: order.includedEquipmentDescriptionAtOrder,
+        numberOfPeople: order.numberOfPeople
+    } %}
+        {% block dishes %}
+            {% include 'order/_dish_list_at_order.html.twig' with {
+                starter: order.starterTitleAtOrder,
+                mainCourse: order.mainCourseTitleAtOrder,
+                dessert: order.dessertTitleAtOrder,
+                starterAllergens: order.starterAllergensAtOrder,
+                mainCourseAllergens: order.mainCourseAllergensAtOrder,
+                dessertAllergens: order.dessertAllergensAtOrder
+            } %}
+        {% endblock %}
+    {% endembed %}
+
+
+    {# Prices #}
+    {% set discountAmount = order.servicePriceBeforeDiscountAtOrder - order.servicePriceAtOrder %}
+
+    {% include 'order/_prices_details.html.twig' with {
+        servicePriceBeforeDiscount: order.servicePriceBeforeDiscountAtOrder,
+        servicePrice: order.servicePriceAtOrder,
+        deliveryPrice: order.deliveryPriceAtOrder,
+        totalPrice: order.totalPriceAtOrder,
+        hasDiscount: discountAmount > 0,
+        discountAmount: discountAmount,
+        groupDiscountPercent: ((discountAmount / order.servicePriceBeforeDiscountAtOrder) * 100)|round
+    } %}
+
+</div>
+
+{% endblock %}

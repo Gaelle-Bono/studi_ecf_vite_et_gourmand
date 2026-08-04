@@ -1,0 +1,27 @@
+{% set menuDishes = {
+    'Entrée': {
+        title: order.starterTitleAtOrder,
+        allergens: order.starterAllergensAtOrder
+    },
+    'Plat principal': {
+        title: order.mainCourseTitleAtOrder,
+        allergens: order.mainCourseAllergensAtOrder
+    },
+    'Dessert': {
+        title: order.dessertTitleAtOrder,
+        allergens: order.dessertAllergensAtOrder
+    }
+} %}
+
+{% for label, dish in menuDishes %}
+    {% if dish.title %}
+        <p>
+            <strong>{{ label }} :</strong> 
+            {{ dish.title }}
+            {% if dish.allergens %}
+                (allergène{{ dish.allergens|length > 1 ? 's' : '' }} :
+                {{ dish.allergens }})
+            {% endif %}
+        </p>
+    {% endif %}
+{% endfor %}

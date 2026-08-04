@@ -1,0 +1,22 @@
+<h3>Prestation</h3>
+
+<p>
+    <strong>Adresse :</strong><br>
+    {{ street }}<br>
+
+    {% if complement %}
+        {{ complement }}<br>
+    {% endif %}
+
+    {{ zip }} {{ city }}
+</p>
+
+<p>
+    {% if deliveryInstructions %}
+        <strong>Instructions de livraison :</strong> {{ deliveryInstructions }}
+    {% endif %}
+</p>
+
+<p>
+    <strong>Date souhaitée de la prestation :</strong> {{ serviceDate|date('d/m/Y') }} à {{ requestedTime }}
+</p>

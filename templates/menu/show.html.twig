@@ -7,13 +7,36 @@
 <div class="container">
     <h1>{{ menu.title }}</h1>
     <p>{{ menu.description }}</p>
+
+
+    <h2>Plats du menu</h2>
+    {# displaying dishes photos #}
+    <div class="gallery">
+        {% set menuDishes = [menu.starter, menu.mainCourse, menu.dessert] %}
+        {% for dish in menuDishes %}
+            {% if dish and dish.photoPath %}
+                <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {# displaying dishes by dishes category with allergens for each dish #}
+    {% include 'menu/dish/_dish_list.html.twig' with {
+        starter: menu.starter,
+        mainCourse: menu.mainCourse,
+        dessert: menu.dessert
+    } %}
+
+
+    <h2>Informations pratiques</h2>
+
+    <p><strong>Nombre minimum de personnes :</strong> {{ menu.minimumNumberOfPeople }}</p>
     <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
-    <p><strong>Nombre de personnes minimum :</strong> {{ menu.minimumNumberOfPeople }}</p>
     <p><strong>Prix associé au nombre minimum de personnes :</strong> {{ menu.getTotalPriceForMinimumPeople()|number_format(2, ',', ' ') }} €</p>
     <p><strong>Régime :</strong> {{ menu.diet.name }}</p>
     <p><strong>Thème :</strong> {{ menu.theme.name }}</p>
-    <p><strong>Allergènes :</strong> {{ menu.getAllergensAsString }}</p>
     
+    <h2>Disponibilité</h2>
     {#  remaining stocks #}
     {% if stockAlert %}
         <div class="alert alert-{{ stockAlert.type }}">
@@ -24,50 +47,38 @@
         <p><strong>Quantité restante :</strong> {{ menu.remainingQuantity }}</p>
     {% endif %}
 
-    {#  list of conditions if exist #}
-    {% if menu.conditions is not empty %}
-        {% include 'menu/_conditions.html.twig' with { menu: menu } %}
-    {% endif %}
-
 
     {# equipment loan information #}
     {% if menu.requiresEquipmentLoan %}
+        <h2>Informations complémentaires</h2>
         <div class="alert alert-info">
             <strong>Prêt de matériel inclus : </strong>
 
-            <p>{{ menu.includedEquipmentDescription }}</br>
+            <p>{{ menu.includedEquipmentDescription }}<br>
             Le matériel devra être restitué après utilisation</p>
         </div>
     {% endif %}
 
-    <h2>Plats du menu :</h2>
 
-    {# displaying dishes photos #}
-    <div class="gallery">
-        {% set dishes = [menu.starter, menu.mainCourse, menu.dessert] %}
-        {% for dish in dishes %}
-            {% if dish and dish.photoPath %}
-                <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
-            {% endif %}
-        {% endfor %}
-    </div>
+    {#  list of conditions if exist #}
+    {% if menu.conditions is not empty %}
+        <h2>Conditions de commande</h2>
+        {% include 'menu/_conditions.html.twig' with { menu: menu } %}
+    {% endif %}
 
-    {# displaying dishes by dishes category with allergens for each dish #}
-    <p>
-        {% include 'menu/dish/_dish_list.html.twig' with {
-            menu: menu,
-            showAllergens: true
-        } %}
-    </p>
-       
     {#  Buttons  #} 
-    <a href="{{ path('app_menu_index') }}">Retour à la liste des menus</a>
-
-    <i class="bi bi-cart4 me-2"></i>
     <a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}"
-    data-controller="prevent-double-click"
-    data-action="click->prevent-double-click#disable">
+        class="btn btn-primary"
+        data-controller="prevent-double-click"
+        data-action="click->prevent-double-click#disable">
+        <i class="bi bi-cart4 me-2"></i>
         Commander
+    </a>
+
+    <a href="{{ path('app_menu_index') }}"
+        class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>
+        Retour à la liste
     </a>
 </div>
 {% endblock %}

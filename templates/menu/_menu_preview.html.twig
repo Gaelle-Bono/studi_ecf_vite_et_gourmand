@@ -3,19 +3,22 @@
     data-menu-title="{{ menu.title }}">
     <h3>{{ menu.title }}</h3>
     <p>{{ menu.description }}</p>
-    <p><strong>Allergènes :</strong> {{ menu.getAllergensAsString }}</p>
+    
+    <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
+    <p><strong>Nombre minimum de personnes :</strong> {{ menu.minimumNumberOfPeople }}</p>
+    
+    <h4>Plats du menu</h4>
+    {% include 'menu/dish/_dish_list.html.twig' with {
+        starter: menu.starter,
+        mainCourse: menu.mainCourse,
+        dessert: menu.dessert
+    } %}
 
     {% if menu.conditions is not empty %}
+        <h4>Conditions de commande</h4>
         {% include 'menu/_conditions.html.twig' with { menu: menu } %}
         {% include 'order/_conditions_checkbox.html.twig' %}
     {% endif %}
 
-    <h4>Plats du menu</h4>
-    {% include 'menu/dish/_dish_list.html.twig' with {
-        menu: menu,
-        showAllergens: false
-    } %}
-
-    <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
-    <p><strong>Nombre de personnes minimum :</strong> {{ menu.minimumNumberOfPeople }}</p>
 </div>
+   

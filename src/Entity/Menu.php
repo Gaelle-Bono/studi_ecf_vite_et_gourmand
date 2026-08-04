@@ -241,29 +241,6 @@ class Menu
         return $this;
     }
 
-    public function getAllergensAsString(): string
-    {
-        $allergensIntheMenu = [];
-
-        $dishes = [
-            $this->getStarter(),
-            $this->getMainCourse(),
-            $this->getDessert(),
-        ];
-
-        foreach ($dishes as $dish) {
-            if ($dish) {
-                foreach ($dish->getAllergens() as $allergen) {
-                    $allergensIntheMenu[] = $allergen->getName();
-                }
-            }
-        }
-
-        return implode(', ', array_unique($allergensIntheMenu));
-    }
-
-    
-
     public function getDiet(): Diet
     {
         return $this->diet;

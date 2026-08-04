@@ -435,7 +435,7 @@ export default class extends Controller {
     }
 
 
-    goToStep3() {
+    async goToStep3() {
 
         const clientError = this.getStep2ClientError();
 
@@ -444,11 +444,17 @@ export default class extends Controller {
             return;
         }
 
+        const menuAvailable = await this.validateMenuAvailability();
+
+        if (!menuAvailable) {
+            return;
+        }
+
         const menuMinPeople = this.getMenuMinPeople();
         const menuTitle = this.getMenuTitle();
 
         this.menuInfoTarget.textContent =
-            `Pour le menu choisi ${menuTitle}, le nombre minimum de personnes est ${menuMinPeople}`;
+            `Pour le menu choisi "${menuTitle}", le nombre minimum de personnes est de ${menuMinPeople}.`;
 
         this.showStep(3);
 
@@ -698,6 +704,47 @@ export default class extends Controller {
             this.setLoadingState(false, [this.previousButtonStep2Target, this.continueButtonStep2Target]);
         }
 
+    }
+
+    /////////////////////////////AJAX VALIDATE MENU AVAILABILITY ////////////////////////////////
+
+    async validateMenuAvailability() {
+
+        try {
+            const response = await fetch(this.element.dataset.validateMenuAvailabilityUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    menuId: this.menuSelectTarget.value
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                this.showErrors([{
+                    element: this.menuSelectTarget,
+                    message: data.message
+                }]);
+
+                return false;
+            }
+
+            return true;
+
+        } catch (error) {
+            console.error(error);
+
+           this.renderError(
+                this.menuPreviewTarget,
+                "Impossible de vérifier la disponibilité du menu. Veuillez réessayer."
+            );
+
+            return false;
+        }
     }
 
     /////////////////////////////AJAX SUMMARY ////////////////////////////////

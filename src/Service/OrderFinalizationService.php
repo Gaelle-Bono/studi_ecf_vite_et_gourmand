@@ -82,10 +82,17 @@ class OrderFinalizationService
         $order
             ->setMenuTitleAtOrder($menu->getTitle())
             ->setMenuDescriptionAtOrder($menu->getDescription())
+            
             ->setStarterTitleAtOrder($menu->getStarter()?->getTitle())
+            ->setStarterAllergensAtOrder($menu->getStarter()?->getAllergensAsString()?: null)
+
+
             ->setMainCourseTitleAtOrder($menu->getMainCourse()->getTitle())
+            ->setMainCourseAllergensAtOrder($menu->getMainCourse()->getAllergensAsString()?: null)
+            
             ->setDessertTitleAtOrder($menu->getDessert()?->getTitle())
-            ->setAllergensAtOrder($menu->getAllergensAsString())
+            ->setDessertAllergensAtOrder($menu->getDessert()?->getAllergensAsString()?: null)
+
             ->setPricePerPersonAtOrder($menu->getPricePerPerson());
     }
 

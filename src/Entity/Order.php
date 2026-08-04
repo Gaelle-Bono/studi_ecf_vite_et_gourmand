@@ -118,8 +118,17 @@ class Order
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $dessertTitleAtOrder = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $allergensAtOrder = null;
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $starterAllergensAtOrder = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $mainCourseAllergensAtOrder = null;
+
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $dessertAllergensAtOrder = null;
+
+
 
     ///////////Nb people /////////////////////////
     #[ORM\Column]
@@ -455,17 +464,40 @@ class Order
         return $this;
     }
 
-    public function getAllergensAtOrder(): ?string
+
+    public function getStarterAllergensAtOrder(): ?string
     {
-        return $this->allergensAtOrder;
+        return $this->starterAllergensAtOrder;
     }
 
-    public function setAllergensAtOrder(?string $allergensAtOrder): static
+    public function setStarterAllergensAtOrder(?string $starterAllergensAtOrder): static
     {
-        $this->allergensAtOrder = $allergensAtOrder;
+        $this->starterAllergensAtOrder = $starterAllergensAtOrder;
         return $this;
     }
-    
+
+    public function getMainCourseAllergensAtOrder(): ?string
+    {
+        return $this->mainCourseAllergensAtOrder;
+    }
+
+    public function setMainCourseAllergensAtOrder(?string $mainCourseAllergensAtOrder): static
+    {
+        $this->mainCourseAllergensAtOrder = $mainCourseAllergensAtOrder;
+        return $this;
+    }
+
+    public function getDessertAllergensAtOrder(): ?string
+    {
+        return $this->dessertAllergensAtOrder;
+    }
+
+    public function setDessertAllergensAtOrder(?string $dessertAllergensAtOrder): static
+    {
+        $this->dessertAllergensAtOrder = $dessertAllergensAtOrder;
+        return $this;
+    }
+
     public function getNumberOfPeople(): int
     {
         return $this->numberOfPeople;

@@ -107,7 +107,7 @@ class OrderFormType extends AbstractType
             ->add('menu', EntityType::class, [
                 'class' => Menu::class,
                 'choice_label' => 'title',
-                'label' => 'Choix du menu',
+                'label' => 'Menu',
                 'placeholder' => 'Choisir un menu',
                 'required' => true
             ])

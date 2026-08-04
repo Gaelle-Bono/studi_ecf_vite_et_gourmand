@@ -1,0 +1,25 @@
+<h3>Commande</h3>
+
+<p>
+    <strong>Menu :</strong> {{ menuTitle }}
+</p>
+
+<p>
+    <strong>Nombre de personnes :</strong> {{ numberOfPeople }}
+</p>
+
+{% if includedEquipmentDescription %}
+    <p>
+        <strong>Prêt de matériel inclus :</strong> {{ includedEquipmentDescription }}
+    </p>
+{% endif %}
+
+<h4>Plats du menu</h4>
+
+{% block dishes %}
+    <p>Aucun plat disponible.</p>
+{% endblock %}
+
+
+
+

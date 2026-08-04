@@ -34,8 +34,7 @@ class OrderBuilderService
             ->setPricePerPersonAtOrder($menu->getPricePerPerson())
             ->setStarterTitleAtOrder($menu->getStarter()->getTitle())
             ->setMainCourseTitleAtOrder($menu->getMainCourse()->getTitle())
-            ->setDessertTitleAtOrder($menu->getDessert()->getTitle())
-            ->setAllergensAtOrder($menu->getAllergensAsString());
+            ->setDessertTitleAtOrder($menu->getDessert()->getTitle());
     }
 
     public function buildRequestedDate(\DateTimeInterface $serviceDate, string $requestedTime): \DateTimeImmutable

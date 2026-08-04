@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Form\OrderFormType;
 
 use App\Repository\MenuRepository;
+use App\Repository\OrderRepository;
 
 use App\Service\StockMenuService;
 use App\Service\OpeningHoursService;
@@ -183,14 +184,45 @@ class OrderController extends AbstractController
             ], 400);
         }
 
+
         return $this->json([
             'success' => true,
             'menu_html' => $this->renderView('menu/_menu_preview.html.twig', [
                 'menu' => $menu
-            ])
+            ]),
         ]);
-
     }
+
+    #[Route('/validate-menu-availability', name: 'app_order_validate_menu_availability', methods: ['POST'])]
+    public function validate_menu_availability(Request $request, MenuRepository $menuRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $menu = $menuRepository->find($data['menuId']);
+
+        if (!$menu) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Le menu sélectionné n\'existe plus.'
+            ], 400);
+        }
+
+        $stockAlert = $this->stockMenuService->getStockAlert($menu);
+
+        
+        if ($stockAlert) {
+            return $this->json([
+                'success' => false,
+                'message' => $stockAlert['message']
+            ]);
+        }
+
+
+        return $this->json([
+            'success' => true
+        ]);
+    }
+
 
 
     #[Route('/summary', name: 'app_order_summary', methods: ['POST'])]
@@ -317,14 +349,42 @@ class OrderController extends AbstractController
     #[Route('/{id}', name: 'app_order_show',  requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Order $order): Response
     {
+
+        if (!$this->isGranted('ROLE_USER')) {
+            $this->addFlash(
+                'warning',
+                'Connectez-vous ou créez un compte pour consulter votre commande.'
+            );
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $canEdit = $order->getOrderStatus()->getCode() === 'PENDING';
+
         return $this->render('order/show.html.twig', [
             'order' => $order,
+            'canEdit' => $canEdit
         ]);
     }
 
-    #[Route(name: 'app_order_index', methods: ['GET'])]
-    public function index(): Response
+    #[Route('/my-orders', name: 'app_order_my_orders', methods: ['GET'])]
+    public function myOrders(OrderRepository $orderRepository): Response
     {
-        return $this->render('order/index.html.twig');
+        $orders = $orderRepository->findBy(
+            ['user' => $this->getUser()],
+            ['createdAt' => 'DESC']
+        );
+
+        return $this->render('order/my_orders.html.twig', [
+            'orders' => $orders
+        ]);
     }
+
 }

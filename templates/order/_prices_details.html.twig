@@ -1,0 +1,36 @@
+<h3>Récapitulatif des prix</h3>
+
+{% if hasDiscount %}
+
+    <p>
+        Sous-total :
+        <span class="text-decoration-line-through">
+            {{ servicePriceBeforeDiscount|number_format(2, ',', ' ') }} €
+        </span>
+    </p>
+
+    <p class="text-success">
+        Réduction groupe :
+        -{{ groupDiscountPercent }} %
+        (-{{ discountAmount|number_format(2, ',', ' ') }} €)
+    </p>
+
+    <p>
+        <strong>Prix du service après réduction :</strong> {{ servicePrice|number_format(2, ',', ' ') }} €
+    </p>
+
+{% else %}
+
+    <p>
+        <strong>Sous-total :</strong> {{ servicePrice|number_format(2, ',', ' ') }} €
+    </p>
+
+{% endif %}
+
+<p>
+    <strong>Livraison :</strong> {{ deliveryPrice|number_format(2, ',', ' ') }} €
+</p>
+
+<p class="fw-bold">
+    Total : {{ totalPrice|number_format(2, ',', ' ') }} €
+</p>
