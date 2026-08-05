@@ -3,7 +3,48 @@
 {% block title %}Mes commandes{% endblock %}
 
 {% block body %}
+
 <div class="container">
+
     <h1>Mes commandes</h1>
+
+    {% for order in orders %}
+
+        <h2>{{ order.orderNumber }}</h2>
+
+        <p>
+            <strong>Date souhaitée de la prestation :</strong> {{ order.requestedDeliveryAt|date('d/m/Y à H:i') }}
+        </p>
+
+        <p>
+            <strong>Statut :</strong> {{ order.orderStatus.label }}
+        </p>
+
+        <p>
+            <strong>Menu :</strong> {{ order.menuTitleAtOrder }}
+        </p>
+
+        <p>
+            <strong>Nombre de personnes :</strong> {{ order.numberOfPeople }}
+        </p>
+
+        <p>
+            <strong>Montant :</strong> {{ order.totalPriceAtOrder|number_format(2, ',', ' ') }} €
+        </p>
+
+
+        <p>
+            <a href="{{ path('app_order_show', { id: order.id }) }}">
+                Voir le détail
+            </a>
+        </p>
+
+        <hr>
+
+    {% else %}
+        <p>Vous n'avez passé aucune commande.</p>
+    {% endfor %}
+
 </div>
+
 {% endblock %}

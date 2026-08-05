@@ -11,14 +11,28 @@
     <h3>Commande</h3>
 
     <p>
-        <strong>Numéro :</strong>
-        {{ order.orderNumber }}<br>
+        <strong>Numéro :</strong> {{ order.orderNumber }}<br>
 
-        <strong>Date de commande :</strong>
-        {{ order.createdAt|date('d/m/Y H:i') }}<br>
+        <strong>Date de commande :</strong> {{ order.createdAt|date('d/m/Y H:i') }}<br>
 
-        <strong>Statut :</strong>
-        {{ order.orderStatus.label }}
+
+        {% set statusClass = 'alert-secondary' %}
+
+        {% if order.orderStatus.code == 'PENDING' %}
+            {% set statusClass = 'alert-warning' %}
+        {% elseif order.orderStatus.code in ['CONFIRMED', 'COMPLETED'] %}
+            {% set statusClass = 'alert-success' %}
+        {% elseif order.orderStatus.code in ['PREPARING', 'READY'] %}
+            {% set statusClass = 'alert-info' %}
+        {% elseif order.orderStatus.code == 'DELIVERING' %}
+            {% set statusClass = 'alert-primary' %}
+        {% elseif order.orderStatus.code == 'CANCELLED' %}
+            {% set statusClass = 'alert-danger' %}
+        {% endif %}
+
+        <div class="alert {{ statusClass }} mt-3">
+            <strong>Statut :</strong>  {{ order.orderStatus.label }}
+        </div>
     </p>
 
     {% if canEdit %}
@@ -92,6 +106,10 @@
         discountAmount: discountAmount,
         groupDiscountPercent: ((discountAmount / order.servicePriceBeforeDiscountAtOrder) * 100)|round
     } %}
+
+    <a href="{{ path('app_order_my_orders') }}">
+        Accéder à mes commandes
+    </a>
 
 </div>
 
