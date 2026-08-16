@@ -1,0 +1,37 @@
+{# step 3: number of people #}
+<div data-order-form-target="step3" class="hidden">
+    <h2>Nombre de personnes</h2>
+
+    <p data-order-form-target="menuInfo"></p>
+
+    {{ form_row(form.numberOfPeople, {
+        attr: {
+            'data-order-form-target': 'people',
+            'data-error-message': "Le nombre de personnes est obligatoire"
+        }
+    }) }}
+
+    <div
+        data-order-form-target="summaryLoadingInfo"
+        class="text-muted hidden"
+    >
+        Chargement du récapitulatif en cours...
+    </div>
+
+    <button
+        type="button"
+        data-order-form-target="previousButtonStep3"
+        data-action="click->order-form#returnToStep2"
+    >
+        Retour
+    </button>
+
+    <button
+        type="button"
+        data-order-form-target="continueButtonStep3"
+        data-action="click->order-form#goToStep4"
+    >
+        Continuer
+    </button>
+</div>
+

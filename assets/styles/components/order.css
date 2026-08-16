@@ -43,3 +43,11 @@
 .form-check-input.is-invalid ~ .form-check-label {
     color: #212529;
 }
+
+.menu-disabled {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none !important;
+    cursor: not-allowed;
+    background-color: #e9ecef;
+}

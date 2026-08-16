@@ -13,7 +13,7 @@ class OrderValidationService
         private OpeningHoursService $openingHoursService
     ) {}
 
-    public function validate(Menu $menu, int $numberOfPeople, \DateTimeInterface $serviceDate, string $requestedTime): array
+    public function validate(Menu $menu, int $numberOfPeople, \DateTimeInterface $serviceDate, string $requestedTime, int $currentNumberOfPeople = 0): array
     {
         $errors = [];
 
@@ -37,13 +37,15 @@ class OrderValidationService
                 'message' => $menu->getMinimumNumberOfPeople() . ' personnes minimum pour ce menu'
             ];
         }
-        
+              
         // stock validation 
-        if ($numberOfPeople > $menu->getRemainingQuantity()) {
+        $availableQuantity = $menu->getRemainingQuantity() + $currentNumberOfPeople;
+
+        if ($numberOfPeople > $availableQuantity) {
             $errors[]= [
                 'field' => 'numberOfPeople',
                 'message' => 'Ce menu est encore disponible pour ' 
-                    . $menu->getRemainingQuantity() . ' personne(s) maximum'
+                    . $availableQuantity . ' personne(s) maximum'
             ];
         }
 
@@ -65,6 +67,21 @@ class OrderValidationService
             ];
         }
         return $errors;
+    }
+
+    public function validateNumberOfPeople(Menu $menu, int $numberOfPeople, int $currentNumberOfPeople = 0): ?string 
+    {
+        if ($numberOfPeople < $menu->getMinimumNumberOfPeople()) {
+            return $menu->getMinimumNumberOfPeople() . ' personnes minimum pour ce menu';
+        }
+
+        $availableQuantity = $menu->getRemainingQuantity() + $currentNumberOfPeople;
+
+        if ($numberOfPeople > $availableQuantity) {
+            return 'Ce menu est encore disponible pour ' . $availableQuantity . ' personne(s) maximum';
+        }
+
+        return null;
     }
 
 }

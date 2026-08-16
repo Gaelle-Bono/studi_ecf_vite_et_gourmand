@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}Modifier une commande{% endblock %}
+
+{% block body %}
+    <h1>Modifier une commande</h1>
+    {{ form_start(form, { attr: { 
+        novalidate: 'novalidate',
+        'data-controller': 'order-form',
+        'data-times-url' : path('app_order_available_times'),
+        'data-menu-url': path('app_order_menu_preview'),
+        'data-validate-menu-availability-url': path('app_order_validate_menu_availability'),
+        'data-summary-url': path('app_order_summary'),
+        'data-action': 'submit->order-form#onSubmit',
+        'data-turbo': 'false' 
+    } })  }}    
+
+    {% if form.vars.errors|length > 0 %}
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <div>
+                <strong>Impossible de traiter votre demande</strong><br>
+                {{ form_errors(form) }}
+            </div>
+        </div>
+    {% endif %}
+
+
+    <div class="order-stepper mb-4">
+        <div data-order-form-target="stepIndicator1" class="step active">
+            <span class="circle">1</span>
+            <span class="label">Informations</span>
+        </div>
+
+        <div class="line"></div>
+
+        <div data-order-form-target="stepIndicator2" class="step">
+            <span class="circle">2</span>
+            <span class="label">Menu</span>
+        </div>
+
+        <div class="line"></div>
+
+        <div data-order-form-target="stepIndicator3" class="step">
+            <span class="circle">3</span>
+            <span class="label">Participants</span>
+        </div>
+
+        <div class="line"></div>
+
+        <div data-order-form-target="stepIndicator4" class="step">
+            <span class="circle">4</span>
+            <span class="label">Récapitulatif</span>
+        </div>
+    </div>
+
+    {# step 1: customer info and service details #}
+    <div data-order-form-target="step1">
+        <h2>Coordonnées du client</h2>
+
+        {{ form_row(form.customerFirstNameAtOrder, {
+            attr: {
+                'data-order-form-target': 'firstName',
+                'data-error-message': "Le prénom est obligatoire"
+            }
+        }) }}
+
+        {{ form_row(form.customerLastNameAtOrder, {
+            attr: {
+                'data-order-form-target': 'lastName',
+                'data-error-message': "Le nom est obligatoire"
+            }
+        }) }}
+
+        {{ form_row(form.customerEmailAtOrder, {
+            attr: {
+                'data-order-form-target': 'email',
+                'data-error-message': "L'email est obligatoire"
+            }
+        }) }}
+
+        {{ form_row(form.customerPhoneAtOrder, {
+            attr: {
+                'data-order-form-target': 'phone',
+                'data-error-message': "Le téléphone est obligatoire"
+            }
+        }) }}
+
+        <h2>Détails de la prestation</h2>
+
+        {{ form_row(form.serviceDate, {
+            attr: {
+                'data-order-form-target': 'serviceDate',
+                'data-error-message': "La date de prestation souhaitée est obligatoire",
+                'data-action': 'change->order-form#onDateChange'
+            }
+        }) }}
+        <div data-order-form-target="timeBlock">
+            {{ form_row(form.requestedTime, {
+                attr: {
+                    'data-order-form-target': 'requestedTime',
+                    'data-error-message': "L'heure souhaitée est obligatoire",
+                    'data-action': 'change->order-form#onTimeChange'
+                }
+            }) }}
+            <div data-order-form-target="availabilityInfo"></div>
+        </div> 
+
+        {{ form_row(form.serviceAddress, {
+            attr: {
+                'data-order-form-target': 'address',
+                'data-error-message': "L'adresse est obligatoire"
+            }
+        }) }}
+
+        {{ form_row(form.serviceAddressComplement, {
+            attr: {
+                'data-order-form-target': 'addressComplement'
+            }
+        }) }}
+
+        {{ form_row(form.serviceZipCode, {
+            attr: {
+                'data-order-form-target': 'zipCode',
+                'data-error-message': "Le code postal est obligatoire"
+            }
+        }) }}
+
+        {{ form_row(form.serviceCity, {
+            attr: {
+                'data-order-form-target': 'city',
+                'data-error-message': "La ville est obligatoire"
+            }
+        }) }}
+
+        {{ form_row(form.deliveryInstructionsAtOrder, {
+            attr: {
+                'data-order-form-target': 'deliveryInstructions'
+            }
+        }) }}
+
+        <button type="button" data-order-form-target= "continueButtonStep1" data-action="click->order-form#goToStep2">
+            Continuer
+        </button>
+    </div>
+
+    {# step 2: menu page #}
+    <div data-order-form-target="step2" class="hidden">
+        <h2>Choix du menu</h2>
+
+        {{ form_row(form.menu, {
+            attr: {
+                'data-order-form-target': 'menuSelect',
+                'data-error-message': "Veuillez sélectionner un menu"
+            }
+        }) }}
+
+        <div data-order-form-target="menuPreview">
+
+            {% if order.menu %}
+            {#from Menu details #} 
+                {% include 'menu/_menu_preview.html.twig' with { menu: order.menu } %}
+            {% endif %}
+        </div>
+
+        <button type="button" data-order-form-target="previousButtonStep2" data-action="click->order-form#returnToStep1">
+            Retour
+        </button>
+
+        <button type="button" data-order-form-target="continueButtonStep2" data-action="click->order-form#goToStep3">
+            Continuer
+        </button>
+    </div>
+
+
+
+    {# step 3: number of people #}
+    <div data-order-form-target="step3" class="hidden">
+        <h2>Nombre de personnes</h2>
+        <p data-order-form-target="menuInfo"></p>
+        
+        {{ form_row(form.numberOfPeople, {
+            attr: {
+                'data-order-form-target': 'people',
+                'data-error-message': "Le nombre de personnes est obligatoire"
+            }
+        }) }}
+
+        <div data-order-form-target="summaryLoadingInfo" class="text-muted hidden">
+            Chargement du récapitulatif en cours...
+        </div>
+        
+        <button type="button" data-order-form-target="previousButtonStep3" data-action="click->order-form#returnToStep2">
+            Retour
+        </button>
+
+        <button type="button" data-order-form-target="continueButtonStep3" data-action="click->order-form#goToStep4">
+            Continuer
+        </button>
+    </div>
+
+    {# step 4: order summary and confirmation #}
+    <div data-order-form-target="step4" class="hidden">
+        <h2>Récapitulatif de la commande</h2>
+
+        <div data-order-form-target="summary"></div>
+
+        <button type="button" data-order-form-target="previousButtonStep4" data-action="click->order-form#returnToStep3">
+            Retour
+        </button>
+
+        <button type="submit" data-order-form-target="submitButton" class="btn btn-primary">
+        
+            Modifier la commande
+        </button>
+    </div>
+    
+    {{ form_row(form._token) }}
+        
+    {{ form_end(form, {'render_rest': false}) }}
+
+{% endblock %}
+
+    

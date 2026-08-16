@@ -1,0 +1,94 @@
+<div data-order-form-target="step1">
+    <h2>Coordonnées du client</h2>
+
+    {{ form_row(form.customerFirstNameAtOrder, {
+        attr: {
+            'data-order-form-target': 'firstName',
+            'data-error-message': "Le prénom est obligatoire"
+        }
+    }) }}
+
+    {{ form_row(form.customerLastNameAtOrder, {
+        attr: {
+            'data-order-form-target': 'lastName',
+            'data-error-message': "Le nom est obligatoire"
+        }
+    }) }}
+
+    {{ form_row(form.customerEmailAtOrder, {
+        attr: {
+            'data-order-form-target': 'email',
+            'data-error-message': "L'email est obligatoire"
+        }
+    }) }}
+
+    {{ form_row(form.customerPhoneAtOrder, {
+        attr: {
+            'data-order-form-target': 'phone',
+            'data-error-message': "Le téléphone est obligatoire"
+        }
+    }) }}
+
+    <h2>Détails de la prestation</h2>
+
+    {{ form_row(form.serviceDate, {
+        attr: {
+            'data-order-form-target': 'serviceDate',
+            'data-error-message': "La date de prestation souhaitée est obligatoire",
+            'data-action': 'change->order-form#onDateChange'
+        }
+    }) }}
+
+    <div data-order-form-target="timeBlock">
+        {{ form_row(form.requestedTime, {
+            attr: {
+                'data-order-form-target': 'requestedTime',
+                'data-error-message': "L'heure souhaitée est obligatoire",
+                'data-action': 'change->order-form#onTimeChange'
+            }
+        }) }}
+
+        <div data-order-form-target="availabilityInfo"></div>
+    </div>
+
+    {{ form_row(form.serviceAddress, {
+        attr: {
+            'data-order-form-target': 'address',
+            'data-error-message': "L'adresse est obligatoire"
+        }
+    }) }}
+
+    {{ form_row(form.serviceAddressComplement, {
+        attr: {
+            'data-order-form-target': 'addressComplement'
+        }
+    }) }}
+
+    {{ form_row(form.serviceZipCode, {
+        attr: {
+            'data-order-form-target': 'zipCode',
+            'data-error-message': "Le code postal est obligatoire"
+        }
+    }) }}
+
+    {{ form_row(form.serviceCity, {
+        attr: {
+            'data-order-form-target': 'city',
+            'data-error-message': "La ville est obligatoire"
+        }
+    }) }}
+
+    {{ form_row(form.deliveryInstructionsAtOrder, {
+        attr: {
+            'data-order-form-target': 'deliveryInstructions'
+        }
+    }) }}
+
+    <button
+        type="button"
+        data-order-form-target="continueButtonStep1"
+        data-action="click->order-form#goToStep2"
+    >
+        Continuer
+    </button>
+</div>

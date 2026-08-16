@@ -48,5 +48,66 @@ class OrderStatus
         return $this;
     }
 
+    public function getStatusDisplay(): array
+    {
+        switch ($this->code) {
+            case 'PENDING':
+                return [
+                    'class' => 'alert-warning',
+                    'icon' => 'bi-hourglass-split',
+                    'text' => 'Commande en attente'
+                ];
+
+            case 'CONFIRMED':
+                return [
+                    'class' => 'alert-success',
+                    'icon' => 'bi-check-circle',
+                    'text' => 'Commande acceptée'
+                ];
+
+            case 'PREPARING':
+                return [
+                    'class' => 'alert-info',
+                    'icon' => 'bi-gear',
+                    'text' => 'Commande en préparation'
+                ];
+
+            case 'READY':
+                return [
+                    'class' => 'alert-info',
+                    'icon' => 'bi-check2-square',
+                    'text' => 'Commande prête'
+                ];
+
+            case 'DELIVERING':
+                return [
+                    'class' => 'alert-primary',
+                    'icon' => 'bi-truck',
+                    'text' => 'Commande en livraison'
+                ];
+
+            case 'COMPLETED':
+                return [
+                    'class' => 'alert-success',
+                    'icon' => 'bi-check-circle-fill',
+                    'text' => 'Commande terminée'
+                ];
+
+            case 'CANCELLED':
+                return [
+                    'class' => 'alert-danger',
+                    'icon' => 'bi-x-circle',
+                    'text' => 'Commande annulée'
+                ];
+
+            default:
+                return [
+                    'class' => 'alert-secondary',
+                    'icon' => 'bi-info-circle',
+                    'text' => 'Statut de la commande inconnu'
+                ];
+        }
+    }
+
 
 }

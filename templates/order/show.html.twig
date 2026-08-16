@@ -15,42 +15,24 @@
 
         <strong>Date de commande :</strong> {{ order.createdAt|date('d/m/Y H:i') }}<br>
 
+        {% include 'order/_status.html.twig' %}
 
-        {% set statusClass = 'alert-secondary' %}
-
-        {% if order.orderStatus.code == 'PENDING' %}
-            {% set statusClass = 'alert-warning' %}
-        {% elseif order.orderStatus.code in ['CONFIRMED', 'COMPLETED'] %}
-            {% set statusClass = 'alert-success' %}
-        {% elseif order.orderStatus.code in ['PREPARING', 'READY'] %}
-            {% set statusClass = 'alert-info' %}
-        {% elseif order.orderStatus.code == 'DELIVERING' %}
-            {% set statusClass = 'alert-primary' %}
-        {% elseif order.orderStatus.code == 'CANCELLED' %}
-            {% set statusClass = 'alert-danger' %}
-        {% endif %}
-
-        <div class="alert {{ statusClass }} mt-3">
-            <strong>Statut :</strong>  {{ order.orderStatus.label }}
-        </div>
     </p>
 
     {% if canEdit %}
-        {# <a href="{{ path('app_order_edit', {'id': order.id}) }}">
+        <form method="post" 
+            action="{{ path('app_order_cancel', {id: order.id}) }}"
+            onsubmit="return confirm('Confirmez-vous l’annulation de cette commande ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ order.id) }}">
+            <button type="submit" class="btn btn-danger">
+                Annuler la commande
+            </button>
+        </form>
+
+        <a href="{{ path('app_order_edit', {id: order.id}) }}" class="btn btn-primary">
             Modifier la commande
         </a>
 
-        <a href="{{ path('app_order_cancel', {'id': order.id}) }}">
-            Annuler la commande
-        </a> #}
-
-        <a href="#">
-            Modifier la commande
-        </a>
-
-        <a href="#">
-            Annuler la commande
-        </a>
 
     {% endif %}
 

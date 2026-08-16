@@ -19,6 +19,8 @@ use App\Service\DeliveryRouteService;
 use App\Service\OrderPricingService;
 use App\Service\OrderFinalizationService;
 use App\Service\MailService;
+use App\Service\OrderUpdateService;
+use App\Service\OrderCancellationService;
 
 use App\Constant\AppConstant;
 
@@ -47,7 +49,9 @@ class OrderController extends AbstractController
         private OrderFinalizationService $orderFinalizationService,
         private OrderPricingService $orderPricingService,
         private DeliveryRouteService $deliveryRouteService, 
-        private MailService $mailService
+        private MailService $mailService,
+        private OrderUpdateService $orderUpdateService,
+        private OrderCancellationService $orderCancellationService
         ) {}
 
 
@@ -194,6 +198,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/validate-menu-availability', name: 'app_order_validate_menu_availability', methods: ['POST'])]
+    
     public function validate_menu_availability(Request $request, MenuRepository $menuRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -223,6 +228,54 @@ class OrderController extends AbstractController
         ]);
     }
 
+
+    #[Route('/validate-number-of-people', name: 'app_order_validate_number_of_people', methods: ['POST'])]
+    public function validateNumberOfPeople( Request $request, OrderRepository $orderRepository): JsonResponse 
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $orderId = $data['orderId'];
+
+        $order = $orderRepository->find($orderId);
+
+        if (!$order) {
+            return $this->json([
+                'success' => false,
+                'message' => 'La commande sélectionnée n\'existe plus.'
+            ], 400);
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Vous ne pouvez pas modifier cette commande.'
+            ], 403);
+        }
+
+        $numberOfPeople = (int) $data['numberOfPeople'];
+        $menu = $order->getMenu();
+
+        $error = $this->orderValidationService->validateNumberOfPeople(
+            $menu,
+            $numberOfPeople,
+            $order->getNumberOfPeople()
+        );
+
+        if ($error) {
+            return $this->json([
+                'success' => false,
+                'message' => $error
+            ]);
+        }
+
+        return $this->json([
+            'success' => true
+        ]);
+
+    }
 
 
     #[Route('/summary', name: 'app_order_summary', methods: ['POST'])]
@@ -353,7 +406,7 @@ class OrderController extends AbstractController
         if (!$this->isGranted('ROLE_USER')) {
             $this->addFlash(
                 'warning',
-                'Connectez-vous ou créez un compte pour consulter votre commande.'
+                'Connectez-vous pour consulter votre commande.'
             );
 
             return $this->redirectToRoute('app_login');
@@ -363,7 +416,8 @@ class OrderController extends AbstractController
         $user = $this->getUser();
 
         if ($order->getUser() !== $user) {
-            throw $this->createAccessDeniedException();
+            $this->addFlash('danger', 'Vous ne pouvez pas accéder à cette commande');
+            return $this->redirectToRoute('app_order_my_orders');
         }
 
         $canEdit = $order->getOrderStatus()->getCode() === 'PENDING';
@@ -386,5 +440,156 @@ class OrderController extends AbstractController
             'orders' => $orders
         ]);
     }
+
+    #[Route('/{id}/edit', name: 'app_order_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    public function edit(Order $order, Request $request, EntityManagerInterface $em, SessionInterface $session): Response
+    {
+        if (!$this->isGranted('ROLE_USER')) {
+            $this->addFlash(
+                'warning',
+                'Connectez-vous pour modifier votre commande'
+            );
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user) {
+            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette commande.');
+            return $this->redirectToRoute('app_order_my_orders');
+        }
+
+        if ($order->getOrderStatus()->getCode() !== 'PENDING') {
+            $this->addFlash(
+                'warning',
+                'Cette commande ne peut plus être modifiée.'
+            );
+
+            return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
+        }
+
+        $form = $this->createForm(OrderFormType::class, $order, [
+            'edit' => true,
+        ]);
+
+        $form->get('serviceDate')->setData($order->getRequestedDeliveryAt());
+        $form->get('requestedTime')->setData($order->getRequestedDeliveryAt()->format('H:i:s'));
+
+        $oldNumberOfPeople = $order->getNumberOfPeople();
+
+        $form->handleRequest($request);
+
+
+        if ($form->isSubmitted()) {
+
+            $order = $form->getData();
+            $menu = $order->getMenu();
+
+            $numberOfPeople = $order->getNumberOfPeople();
+            $currentNumberOfPeople = $oldNumberOfPeople;
+
+
+            $serviceDate = $form->get('serviceDate')->getData();
+            $requestedTime = $form->get('requestedTime')->getData();
+
+     
+            // Validation
+            $errors = $this->orderValidationService->validate(
+                $menu,
+                $numberOfPeople,
+                $serviceDate,
+                $requestedTime,
+                $currentNumberOfPeople
+            );
+
+            foreach ($errors as $error) {
+                $form
+                    ->get($error['field'])
+                    ->addError(new FormError($error['message']));
+            }
+
+            if ($form->isValid()) {
+
+                $summary = $session->get('order_summary');
+
+                $this->orderUpdateService->updateOrder(
+                    $order,
+                    $summary,
+                    $serviceDate,
+                    $requestedTime,
+                    $currentNumberOfPeople
+                );
+
+                // Stock management
+                $difference = $numberOfPeople - $currentNumberOfPeople;
+
+                $menu->setRemainingQuantity(
+                    $menu->getRemainingQuantity() - $difference
+                );
+
+                $em->persist($order);
+                $em->flush();
+
+                $session->remove('order_summary');
+
+                $this->addFlash(
+                    'success',
+                    "Votre commande n°" . $order->getOrderNumber() . " a bien été modifiée."
+                );
+
+                return $this->redirectToRoute('app_order_show', [
+                    'id' => $order->getId()
+                ]);
+            }
+        }
+
+        return $this->render('order/edit.html.twig', [
+            'order' => $order,
+            'form' => $form,
+        ]);
+      
+    }
+
+
+    #[Route('/{id}/cancel', name: 'app_order_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function cancel(Order $order, Request $request, EntityManagerInterface $em): Response
+    {
+        if (!$this->isCsrfTokenValid('cancel'.$order->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        } 
+
+        if ($order->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($order->getOrderStatus()->getCode() !== 'PENDING') {
+            $this->addFlash(
+                'warning',
+                'Cette commande ne peut plus être annulée.'
+            );
+
+            return $this->redirectToRoute('app_order_show', [
+                'id' => $order->getId()
+            ]);
+        }
+
+        $result = $this->orderCancellationService->cancel($order);
+
+        $em->persist($result['statusHistory']);
+        $em->persist($result['cancellation']);
+        $em->flush();
+
+    
+        $this->addFlash(
+            'success',
+            'La commande ' . $order->getOrderNumber() . ' a été annulée avec succès.'
+        );
+
+        return $this->redirectToRoute('app_order_my_orders');
+
+    }
+
 
 }

@@ -109,7 +109,8 @@ class OrderFormType extends AbstractType
                 'choice_label' => 'title',
                 'label' => 'Menu',
                 'placeholder' => 'Choisir un menu',
-                'required' => true
+                'required' => true,
+                'disabled' => $options['edit']
             ])
 
             ->add('numberOfPeople', IntegerType::class, [
@@ -122,6 +123,9 @@ class OrderFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Order::class,
+             'edit' => false
         ]);
+
+        $resolver->setAllowedTypes('edit', 'bool');
     }
 }

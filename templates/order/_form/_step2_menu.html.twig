@@ -1,0 +1,51 @@
+<div data-order-form-target="step2" class="hidden">
+    <h2>Choix du menu</h2>
+
+    {% if edit %}
+        {{ form_row(form.menu, {
+            attr: {
+                'data-order-form-target': 'menuSelect',
+                'class': 'menu-disabled'
+            }
+        }) }}
+
+        <div class="form-text">
+            Le menu ne peut pas être modifié après la création de la commande.
+        </div>
+
+    {% else %}
+        {{ form_row(form.menu, {
+            attr: {
+                'data-order-form-target': 'menuSelect',
+                'data-error-message': "Veuillez sélectionner un menu",
+                'data-action': 'change->order-form#onMenuChange'
+            }
+        }) }}
+    {% endif %}
+
+    <div data-order-form-target="menuPreview">
+
+        {% if menu %}
+            {% include 'menu/_menu_preview.html.twig' with { menu: menu } %}
+        {% endif %}
+
+    </div>
+
+    <button
+        type="button"
+        data-order-form-target="previousButtonStep2"
+        data-action="click->order-form#returnToStep1"
+    >
+        Retour
+    </button>
+
+    <button
+        type="button"
+        data-order-form-target="continueButtonStep2"
+        data-action="click->order-form#goToStep3"
+    >
+        Continuer
+    </button>
+</div>
+
+

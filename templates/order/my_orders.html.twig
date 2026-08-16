@@ -16,9 +16,12 @@
             <strong>Date souhaitée de la prestation :</strong> {{ order.requestedDeliveryAt|date('d/m/Y à H:i') }}
         </p>
 
+        {% include 'order/_status.html.twig' %}
+
         <p>
             <strong>Statut :</strong> {{ order.orderStatus.label }}
         </p>
+
 
         <p>
             <strong>Menu :</strong> {{ order.menuTitleAtOrder }}

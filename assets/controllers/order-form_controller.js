@@ -444,10 +444,12 @@ export default class extends Controller {
             return;
         }
 
-        const menuAvailable = await this.validateMenuAvailability();
+        if (this.element.dataset.edit === 'false') {
+            const menuAvailable = await this.validateMenuAvailability();
 
-        if (!menuAvailable) {
-            return;
+            if (!menuAvailable) {
+                return;
+            }
         }
 
         const menuMinPeople = this.getMenuMinPeople();
@@ -468,6 +470,14 @@ export default class extends Controller {
         if (clientError) {
             this.showErrors([clientError]);
             return;
+        }
+
+        if (this.element.dataset.edit === 'true') {
+            const peopleAvailable = await this.validateNumberOfPeople();
+
+            if (!peopleAvailable) {
+                return;
+            }
         }
 
         this.setLoadingState(true, [this.previousButtonStep3Target, this.continueButtonStep3Target]);
@@ -746,6 +756,43 @@ export default class extends Controller {
             return false;
         }
     }
+
+    /////////////////////////////AJAX FOR UPDATE ORDER : VALIDATE NB Of PEOPLE ////////////////////////////////
+    async validateNumberOfPeople() {
+
+        try {
+            const response = await fetch(this.element.dataset.validateNumberOfPeopleUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    orderId: this.element.dataset.orderId,
+                    numberOfPeople: Number(this.peopleTarget.value)
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                this.showErrors([{
+                    element: this.peopleTarget,
+                    message: data.message
+                }]);
+
+                return false;
+            }
+
+            return true;
+
+        } catch (error) {
+            console.error(error);
+            return true; // In case of network error, we don't block the user here, but we log the error
+        }
+
+    }
+
 
     /////////////////////////////AJAX SUMMARY ////////////////////////////////
 
