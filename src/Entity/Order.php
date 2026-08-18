@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use App\Enum\OrderStatus;
+
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -206,11 +209,12 @@ class Order
     )]
     private string $customerPhoneAtOrder;
 
+    
     // RELATIONSSHIPS 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private OrderStatus $orderStatus;
 
+    #[ORM\Column(enumType: OrderStatus::class)]
+    private OrderStatus $orderStatus;
+    
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
@@ -221,10 +225,6 @@ class Order
     private Menu $menu;
 
    
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
 
     public function getId(): ?int
     {
@@ -236,15 +236,21 @@ class Order
         return $this->orderNumber;
     }
 
-    public function generateOrderNumber(): void
+    public function generateOrderNumber(\DateTimeImmutable $createdAt): void
     {
         $this->orderNumber =
-            'ORD-' . (new \DateTimeImmutable())->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
+            'ORD-' . $createdAt->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
     }
 
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable

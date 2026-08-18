@@ -38,9 +38,6 @@ class OrderCancellation
     )]
     private ?string $reason = null;
 
-    #[ORM\Column]
-    private \DateTimeImmutable $cancelledAt;
-
     #[ORM\Column(enumType: ContactMethod::class, nullable:true)]
     #[Assert\NotNull(
         groups: ['employee', 'admin'],
@@ -52,7 +49,6 @@ class OrderCancellation
     {
         $this->order = $order;
         $this->cancelledBy = $cancelledBy;
-        $this->cancelledAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -75,11 +71,6 @@ class OrderCancellation
         $this->reason = $reason;
 
         return $this;
-    }
-
-    public function getCancelledAt(): \DateTimeImmutable
-    {
-        return $this->cancelledAt;
     }
 
     public function getContactMethod(): ?ContactMethod

@@ -1,0 +1,17 @@
+.order-status-item {
+    display: grid;
+    grid-template-columns: 25px 220px auto;
+    align-items: center;
+    min-height: 35px;
+}
+
+.order-status-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--bs-dark);
+    border-radius: 50%;
+}
+
+.order-status-item small {
+    padding-left: 15px;
+}

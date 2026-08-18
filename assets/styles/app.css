@@ -1,5 +1,6 @@
 @import './components/menu.css';
 @import './components/order.css';
+@import './components/order_details.css';
 
 html {
     overflow-y: scroll;

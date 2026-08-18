@@ -13,7 +13,7 @@ class OrderUpdateService
     )
     {}
 
-    public function updateOrder(Order $order, array $summary, \DateTimeInterface $serviceDate, string $requestedTime, int $currentNumberOfPeople): void
+    public function updateOrder(Order $order, array $summary, \DateTimeInterface $serviceDate, string $requestedTime): void
     {
 
         //Service Date

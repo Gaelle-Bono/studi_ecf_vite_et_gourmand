@@ -10,6 +10,9 @@ use App\Form\OrderFormType;
 
 use App\Repository\MenuRepository;
 use App\Repository\OrderRepository;
+use App\Repository\OrderStatusHistoryRepository;
+
+use App\Enum\OrderStatus;
 
 use App\Service\StockMenuService;
 use App\Service\OpeningHoursService;
@@ -122,15 +125,21 @@ class OrderController extends AbstractController
 
                 $summary = $session->get('order_summary');
 
+                $now = new \DateTimeImmutable();
+
                 $this->orderFinalizationService->finalizeOrder(
                     $order, 
                     $menu, 
                     $serviceDate,
                     $requestedTime,
-                    $summary
+                    $summary, 
+                    $now
                 );
 
+                $statusHistory = $this->orderFinalizationService->createInitialStatusHistory($order, $now);
+
                 $em->persist($order);
+                $em->persist($statusHistory);
                 $em->flush();
 
 
@@ -400,7 +409,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_order_show',  requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Order $order): Response
+    public function show(Order $order, OrderStatusHistoryRepository $orderStatusHistoryRepository): Response
     {
 
         if (!$this->isGranted('ROLE_USER')) {
@@ -420,11 +429,15 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('app_order_my_orders');
         }
 
-        $canEdit = $order->getOrderStatus()->getCode() === 'PENDING';
+        $canEdit = $order->getOrderStatus() === OrderStatus::PENDING;
+        
+        $statusHistory = $orderStatusHistoryRepository->findByOrder($order);
+        
 
         return $this->render('order/show.html.twig', [
             'order' => $order,
-            'canEdit' => $canEdit
+            'canEdit' => $canEdit,
+            'statusHistory' => $statusHistory
         ]);
     }
 
@@ -461,7 +474,7 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('app_order_my_orders');
         }
 
-        if ($order->getOrderStatus()->getCode() !== 'PENDING') {
+        if ($order->getOrderStatus() !== OrderStatus::PENDING) {
             $this->addFlash(
                 'warning',
                 'Cette commande ne peut plus être modifiée.'
@@ -518,8 +531,7 @@ class OrderController extends AbstractController
                     $order,
                     $summary,
                     $serviceDate,
-                    $requestedTime,
-                    $currentNumberOfPeople
+                    $requestedTime
                 );
 
                 // Stock management
@@ -564,7 +576,7 @@ class OrderController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($order->getOrderStatus()->getCode() !== 'PENDING') {
+        if ($order->getOrderStatus() !== OrderStatus::PENDING) {
             $this->addFlash(
                 'warning',
                 'Cette commande ne peut plus être annulée.'
@@ -575,10 +587,15 @@ class OrderController extends AbstractController
             ]);
         }
 
-        $result = $this->orderCancellationService->cancel($order);
+        $now = new \DateTimeImmutable();
+        $this->orderCancellationService->cancel($order, $now);
+        $statusHistory = $this->orderCancellationService->createStatusHistory($order, $now);
+        $cancellation = $this->orderCancellationService->createCancellation($order);
+        
+        $em->persist($order);
+        $em->persist($statusHistory);
+        $em->persist($cancellation);
 
-        $em->persist($result['statusHistory']);
-        $em->persist($result['cancellation']);
         $em->flush();
 
     

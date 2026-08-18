@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\OrderStatusHistoryRepository;
+
+use App\Enum\OrderStatus;
+
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderStatusHistoryRepository::class)]
@@ -24,14 +27,13 @@ final class OrderStatusHistory
     #[ORM\JoinColumn(nullable: false)]
     private Order $order;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\Column(enumType: OrderStatus::class)]
     private OrderStatus $orderStatus;
 
 
-    public function __construct(User $changedBy, Order $order, OrderStatus $orderStatus) 
+    public function __construct(User $changedBy, Order $order, OrderStatus $orderStatus, \DateTimeImmutable $changedAt) 
     {
-        $this->changedAt = new \DateTimeImmutable();
+        $this->changedAt = $changedAt;
         $this->changedBy = $changedBy;
         $this->order = $order;
         $this->orderStatus = $orderStatus;

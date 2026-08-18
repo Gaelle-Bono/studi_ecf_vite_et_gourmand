@@ -13,7 +13,7 @@
         'data-order-id': order.id,
         'data-validate-number-of-people-url': path('app_order_validate_number_of_people'),
         'data-summary-url': path('app_order_summary'),
-        'data-action': 'submit->order-form#onSubmit',
+        'data-action': 'submit->order-form#onSubmit keydown->order-form#handleKeydown',
         'data-turbo': 'false' 
     } })  }}    
 

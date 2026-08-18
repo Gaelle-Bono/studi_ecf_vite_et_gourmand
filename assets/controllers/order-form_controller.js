@@ -6,6 +6,7 @@ export default class extends Controller {
     summaryLoading = false;
     dateLoading = false;
     isCompanyClosed = false;
+    submitted = false;
 
 
     static targets = [
@@ -49,6 +50,7 @@ export default class extends Controller {
 
 
     connect() {
+
         this.showStepContainingError();
 
         this.scrollToFirstError();
@@ -65,15 +67,21 @@ export default class extends Controller {
         if (this.requestedTimeTarget.classList.contains("is-invalid")) {
                 this.loadAvailableTimes();
         }
+
     }
 
+    handleKeydown(event) 
+    {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+        }
+    }
 
     onConditionsChange() {
         if (this.conditionsCheckboxTarget.checked) {
             this.clearStimulusErrors(this.conditionsCheckboxTarget);
         }
     }
-
 
     getMenuMinPeople() {
         const menuPreview = this.menuPreviewTarget.querySelector('.menu-preview');
@@ -869,10 +877,8 @@ export default class extends Controller {
 
     }
 
-
     //////////////////////////////////////ORDERING//////////////////////////////////////
 
- 
     onSubmit(event) {
         if (this.submitted || this.summaryLoading) {
             event.preventDefault();

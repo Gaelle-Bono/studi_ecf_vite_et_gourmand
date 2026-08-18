@@ -10,14 +10,14 @@
 
     <h3>Commande</h3>
 
-    <p>
-        <strong>Numéro :</strong> {{ order.orderNumber }}<br>
+    <strong>Numéro :</strong> {{ order.orderNumber }}<br>
+    <strong>Date de commande :</strong> {{ order.createdAt|date('d/m/Y à H:i') }}<br>
 
-        <strong>Date de commande :</strong> {{ order.createdAt|date('d/m/Y H:i') }}<br>
+    {% if order.updatedAt %}
+        <strong>Dernière modification :</strong> {{ order.updatedAt|date('d/m/Y à H:i') }}
+    {% endif %}
 
-        {% include 'order/_status.html.twig' %}
-
-    </p>
+    {% include 'order/_status.html.twig' %}
 
     {% if canEdit %}
         <form method="post" 
@@ -29,13 +29,18 @@
             </button>
         </form>
 
-        <a href="{{ path('app_order_edit', {id: order.id}) }}" class="btn btn-primary">
+        <a href="{{ path('app_order_edit', {id: order.id}) }}" class="btn btn-primary mt-2">
             Modifier la commande
         </a>
-
-
     {% endif %}
 
+    {# Status history #}
+    {% if statusHistory|length > 1 %}
+        {% include 'order/_status_history.html.twig' with {
+            statusHistory: statusHistory
+        } %}
+    {% endif %}
+    
     {# Customer #}
     {% include 'order/_customer.html.twig' with {
         firstName: order.customerFirstNameAtOrder,
@@ -55,7 +60,6 @@
         requestedTime: order.requestedDeliveryAt|date('H:i')
     } %}
 
-
     {# Order details #}
     {% embed 'order/_order_menu_details.html.twig' with {
         menuTitle: order.menuTitleAtOrder,
@@ -74,7 +78,6 @@
             } %}
         {% endblock %}
     {% endembed %}
-
 
     {# Prices #}
     {% set discountAmount = order.servicePriceBeforeDiscountAtOrder - order.servicePriceAtOrder %}

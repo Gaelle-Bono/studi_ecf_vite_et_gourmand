@@ -4,33 +4,33 @@ namespace App\Service;
 
 use App\Entity\Order;
 use App\Entity\Menu;
+use App\Entity\OrderStatusHistory;
 
-use App\Repository\OrderStatusRepository;
+use App\Enum\OrderStatus;
+
 
 
 class OrderFinalizationService
 {
 
     public function __construct(
-        private OrderStatusRepository $orderStatusRepository,
         private OrderBuilderService $orderBuilderService
     )
     {}
 
-    public function finalizeOrder(Order $order, Menu $menu, \DateTimeInterface $serviceDate, string $requestedTime, array $summary): void
+    public function finalizeOrder(Order $order, Menu $menu, \DateTimeInterface $serviceDate, string $requestedTime, array $summary, \DateTimeImmutable $createdAt): void
     {
 
         if (!$summary) {
             throw new \RuntimeException('Les données de commande sont introuvables');
         }
 
-        $order->setOrderStatus(
-            $this->orderStatusRepository->findOneBy(['code' => 'PENDING'])
-        );
+        $order->setOrderStatus(OrderStatus::PENDING);
+
+
 
         $requestedServiceDate = $this->orderBuilderService->buildRequestedDate($serviceDate, $requestedTime);
         $order->setRequestedDeliveryAt($requestedServiceDate);
-
 
         $this->setCoordinatesToOrder($order, $summary['coordinates']);
         $order->setDeliveryDistanceAtOrder($summary['distance']);
@@ -52,7 +52,10 @@ class OrderFinalizationService
 
         $menu->setRemainingQuantity(bcsub($currentStock, $order->getNumberOfPeople()));
 
-        $order->generateOrderNumber();
+        $order->setCreatedAt($createdAt);
+
+        $order->generateOrderNumber($createdAt);
+
     }
 
 
@@ -94,6 +97,11 @@ class OrderFinalizationService
             ->setDessertAllergensAtOrder($menu->getDessert()?->getAllergensAsString()?: null)
 
             ->setPricePerPersonAtOrder($menu->getPricePerPerson());
+    }
+
+    public function createInitialStatusHistory(Order $order, \DateTimeImmutable $createdAt): OrderStatusHistory
+    {
+        return new OrderStatusHistory($order->getUser(), $order, OrderStatus::PENDING, $createdAt);
     }
 
 }

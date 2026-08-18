@@ -1,0 +1,15 @@
+<h3>Suivi de la commande</h3>
+
+<div class="order-status-history">
+    {% for history in statusHistory %}
+        <div class="order-status-item">
+            <span class="order-status-dot"></span>
+
+            <strong>{{ history.orderStatus.label }}</strong>
+
+            <small class="text-muted">
+                {{ history.changedAt|date('d/m/Y à H:i') }}
+            </small>
+        </div>
+    {% endfor %}
+</div>

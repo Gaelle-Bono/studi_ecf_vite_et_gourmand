@@ -5,38 +5,33 @@ namespace App\Service;
 use App\Entity\Order;
 use App\Entity\OrderStatusHistory;
 use App\Entity\OrderCancellation;
-use App\Repository\OrderStatusRepository;
+
+use App\Enum\OrderStatus;
 
 class OrderCancellationService
 {
-    public function __construct(
-        private OrderStatusRepository $orderStatusRepository
-    ) {}
-
-    public function cancel(Order $order): array
+    public function cancel(Order $order, \DateTimeImmutable $cancelledAt): void
     {
-        // Update Order Status to Cancelled
-        $cancelledStatus = $this->orderStatusRepository->findOneBy(['code' => 'CANCELLED']);
-        $order->setOrderStatus($cancelledStatus);
-        
-        //Update Menu Remaining Quantity
+        $order->setOrderStatus(OrderStatus::CANCELLED);
+
         $menu = $order->getMenu();
+
         $menu->setRemainingQuantity(
             $menu->getRemainingQuantity() + $order->getNumberOfPeople()
         );
-            
-        //Update Order UpdatedAt
-        $order->setUpdatedAt(new \DateTimeImmutable());
 
-        //create a line in OrderStatusHistory
-        $statusHistory = new OrderStatusHistory($order->getUser(), $order, $cancelledStatus);
-        
-        //create a line in OrderCancellation
-        $cancellation = new OrderCancellation($order, $order->getUser());
-
-        return [
-            'statusHistory' => $statusHistory, 
-            'cancellation' => $cancellation
-        ];
+        $order->setUpdatedAt($cancelledAt);
     }
+
+    public function createStatusHistory(Order $order, \DateTimeImmutable $cancelledAt): OrderStatusHistory
+    {
+        return new OrderStatusHistory($order->getUser(), $order, OrderStatus::CANCELLED, $cancelledAt);
+    }
+
+
+    public function createCancellation(Order $order): OrderCancellation
+    {
+        return new OrderCancellation($order, $order->getUser());
+    }
+
 }
