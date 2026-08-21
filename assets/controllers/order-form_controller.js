@@ -45,6 +45,7 @@ export default class extends Controller {
         'step4',
         'summary',
         'previousButtonStep4',
+        'previousButtonStep4Label',
         'submitButton'
     ];
 
@@ -207,6 +208,16 @@ export default class extends Controller {
         if (this.step4Target.contains(firstError)) {
             this.showStep(4);
         }
+    }
+
+    setStep4BlockingError() {
+        this.previousButtonStep4LabelTarget.textContent = 'Annuler';
+        this.previousButtonStep4Target.querySelector('i').className = 'bi bi-x-circle me-2';
+        this.previousButtonStep4Target.dataset.action = 'click->order-form#cancelOrder';
+    }
+
+    cancelOrder() {
+        window.location.href = this.element.dataset.cancelUrl;
     }
 
 
@@ -758,7 +769,7 @@ export default class extends Controller {
 
            this.renderError(
                 this.menuPreviewTarget,
-                "Impossible de vérifier la disponibilité du menu. Veuillez réessayer."
+                "Impossible de vérifier la disponibilité du menu. Veuillez réessayer"
             );
 
             return false;
@@ -844,11 +855,11 @@ export default class extends Controller {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    customer,
                     menuId,
                     people,
                     address,
                     deliveryInstructions,
-                    customer,
                     serviceDate,
                     requestedTime
                 })
@@ -857,8 +868,14 @@ export default class extends Controller {
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                this.renderError(this.summaryTarget, data.message ?? "Erreur lors du calcul du prix");
+                this.renderError(this.summaryTarget, data.message ?? "Erreur lors de l'élaboration du récapitulatif");
+                
+                if (data.blocking) {
+                    this.setStep4BlockingError();
+                }
+                
                 return;
+
             }
 
             this.summaryTarget.innerHTML = data.summary_html;
@@ -866,7 +883,7 @@ export default class extends Controller {
 
         } catch (e) {
             console.error(e);
-            this.renderError(this.summaryTarget, "Impossible de calculer le prix");
+            this.renderError(this.summaryTarget, "Impossible d'élaborer le récapitulatif");
 
         } finally {
             this.peopleTarget.disabled = false;

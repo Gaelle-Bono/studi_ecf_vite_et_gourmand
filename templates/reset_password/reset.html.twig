@@ -7,6 +7,10 @@
 
     {{ form_start(resetForm) }}
         {{ form_row(resetForm.plainPassword) }}
+       
+        <a href="{{ path('app_login') }}" class="btn btn-secondary">Annuler</a>
+        
         <button class="btn btn-primary">Réinitialiser le mot de passe</button>
+    
     {{ form_end(resetForm) }}
 {% endblock %}

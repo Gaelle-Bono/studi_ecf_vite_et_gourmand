@@ -6,7 +6,7 @@
 
 <div class="container">
 
-    <h1>Détails de ma commande</h1>
+    <h1 class="h3 mb-3">Détails de ma commande</h1>
 
     <h3>Commande</h3>
 
@@ -20,18 +20,24 @@
     {% include 'order/_status.html.twig' %}
 
     {% if canEdit %}
-        <form method="post" 
-            action="{{ path('app_order_cancel', {id: order.id}) }}"
-            onsubmit="return confirm('Confirmez-vous l’annulation de cette commande ?');">
-            <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ order.id) }}">
-            <button type="submit" class="btn btn-danger">
-                Annuler la commande
-            </button>
-        </form>
+        <div class="d-flex gap-2 mt-3 mb-3">
+            <form method="post"
+                action="{{ path('app_order_cancel', {id: order.id}) }}"
+                onsubmit="return confirm('Confirmez-vous l’annulation de cette commande ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ order.id) }}">
 
-        <a href="{{ path('app_order_edit', {id: order.id}) }}" class="btn btn-primary mt-2">
-            Modifier la commande
-        </a>
+                <button type="submit" class="btn btn-danger"><i class="bi bi-x-circle me-2"></i>
+                    Annuler la commande
+                </button>
+            </form>
+            
+            <a href="{{ path('app_order_edit', {id: order.id}) }}"
+            class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i>
+                Modifier la commande
+            </a>
+
+        </div>
     {% endif %}
 
     {# Status history #}
@@ -92,8 +98,10 @@
         groupDiscountPercent: ((discountAmount / order.servicePriceBeforeDiscountAtOrder) * 100)|round
     } %}
 
-    <a href="{{ path('app_order_my_orders') }}">
-        Accéder à mes commandes
+    <a href="{{ path('app_order_my_orders') }}"
+        class="btn btn-secondary mt-3"
+    ><i class="bi bi-receipt me-2"></i>
+        Mes commandes
     </a>
 
 </div>

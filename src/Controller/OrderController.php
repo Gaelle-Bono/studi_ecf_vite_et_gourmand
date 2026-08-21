@@ -12,6 +12,7 @@ use App\Repository\MenuRepository;
 use App\Repository\OrderRepository;
 use App\Repository\OrderStatusHistoryRepository;
 
+
 use App\Enum\OrderStatus;
 
 use App\Service\StockMenuService;
@@ -193,7 +194,7 @@ class OrderController extends AbstractController
         if (!$menu) {
             return $this->json([
                 'success' => false,
-                'message' => 'Le menu sélectionné n\'existe plus.'
+                'message' => 'Le menu sélectionné n\'existe plus'
             ], 400);
         }
 
@@ -217,7 +218,7 @@ class OrderController extends AbstractController
         if (!$menu) {
             return $this->json([
                 'success' => false,
-                'message' => 'Le menu sélectionné n\'existe plus.'
+                'message' => 'Le menu sélectionné n\'existe plus'
             ], 400);
         }
 
@@ -250,7 +251,7 @@ class OrderController extends AbstractController
         if (!$order) {
             return $this->json([
                 'success' => false,
-                'message' => 'La commande sélectionnée n\'existe plus.'
+                'message' => 'La commande sélectionnée n\'existe plus'
             ], 400);
         }
 
@@ -260,7 +261,7 @@ class OrderController extends AbstractController
         if ($order->getUser() !== $user) {
             return $this->json([
                 'success' => false,
-                'message' => 'Vous ne pouvez pas modifier cette commande.'
+                'message' => 'Vous ne pouvez pas modifier cette commande'
             ], 403);
         }
 
@@ -311,7 +312,8 @@ class OrderController extends AbstractController
         } catch (\RuntimeException $e) {
             return $this->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'blocking' => true
             ], 400);
         }
         
@@ -321,12 +323,13 @@ class OrderController extends AbstractController
             return $this->json([
                 'success' => false,
                 'message' => 'Nous livrons uniquement dans un rayon de '
-                . AppConstant::MAX_DELIVERY_DISTANCE_KM . ' km autour de notre établissement'
+                . AppConstant::MAX_DELIVERY_DISTANCE_KM . ' km autour de notre établissement',
+                'blocking' => true
             ],400);
         }
                 
         $customer = $data['customer'];
-        
+    
         $serviceDate = new \DateTimeImmutable($data['serviceDate']);
         $requestedTime = $data['requestedTime'];
         
@@ -360,7 +363,7 @@ class OrderController extends AbstractController
         return $this->json([
             'success' => true,
             'summary_html' => $this->renderView('order/_summary.html.twig', [
-                'customer' => $customer,
+                'customer' => $customer,    
                 'serviceAddress' => $serviceAddress,
                 'deliveryInstructions' => $deliveryInstructions,
                 'serviceDate' => $serviceDate,
@@ -373,7 +376,6 @@ class OrderController extends AbstractController
         ]);
 
     }
-
 
 
     #[Route('/available_times', name: 'app_order_available_times', methods: ['POST'])]
@@ -415,7 +417,7 @@ class OrderController extends AbstractController
         if (!$this->isGranted('ROLE_USER')) {
             $this->addFlash(
                 'warning',
-                'Connectez-vous pour consulter votre commande.'
+                'Connectez-vous pour consulter votre commande'
             );
 
             return $this->redirectToRoute('app_login');
@@ -470,14 +472,14 @@ class OrderController extends AbstractController
         $user = $this->getUser();
 
         if ($order->getUser() !== $user) {
-            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette commande.');
+            $this->addFlash('danger', 'Vous ne pouvez pas modifier cette commande');
             return $this->redirectToRoute('app_order_my_orders');
         }
 
         if ($order->getOrderStatus() !== OrderStatus::PENDING) {
             $this->addFlash(
                 'warning',
-                'Cette commande ne peut plus être modifiée.'
+                'Cette commande ne peut plus être modifiée'
             );
 
             return $this->redirectToRoute('app_order_show', ['id' => $order->getId()]);
@@ -579,7 +581,7 @@ class OrderController extends AbstractController
         if ($order->getOrderStatus() !== OrderStatus::PENDING) {
             $this->addFlash(
                 'warning',
-                'Cette commande ne peut plus être annulée.'
+                'Cette commande ne peut plus être annulée'
             );
 
             return $this->redirectToRoute('app_order_show', [
@@ -601,7 +603,7 @@ class OrderController extends AbstractController
     
         $this->addFlash(
             'success',
-            'La commande ' . $order->getOrderNumber() . ' a été annulée avec succès.'
+            'La commande ' . $order->getOrderNumber() . ' a été annulée avec succès'
         );
 
         return $this->redirectToRoute('app_order_my_orders');

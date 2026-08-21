@@ -197,7 +197,7 @@ class Order
 
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: "L'email est obligatoire")]
-    #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
+    #[Assert\Email(message: "L'email {{ value }} n'est pas valide")]
     #[Assert\Length(max: 180)]
     private string $customerEmailAtOrder;
 
@@ -221,7 +221,7 @@ class Order
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: "Un menu est obligatoire.")]
+    #[Assert\NotNull(message: "Un menu est obligatoire")]
     private Menu $menu;
 
    

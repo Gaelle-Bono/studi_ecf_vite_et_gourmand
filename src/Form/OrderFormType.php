@@ -21,7 +21,6 @@ class OrderFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-
             // --- Customer section ---
             ->add('customerFirstNameAtOrder', TextType::class, [
                 'label' => 'Prénom',
@@ -43,7 +42,7 @@ class OrderFormType extends AbstractType
                 'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +"
             ])
 
-            
+ 
             // --- Service section ---
             ->add('serviceDate', DateType::class, [
                 'label' => 'Date souhaitée de la prestation',

@@ -57,7 +57,7 @@ class Menu
     #[ORM\Column(nullable: true)]
     #[Assert\GreaterThanOrEqual(
         value: 1,
-        message: "Ce menu doit être commandé au moins 1 jour à l’avance."
+        message: "Ce menu doit être commandé au moins 1 jour à l’avance"
     )]
     private ?int $minimumDaysBeforeOrder = null;
 

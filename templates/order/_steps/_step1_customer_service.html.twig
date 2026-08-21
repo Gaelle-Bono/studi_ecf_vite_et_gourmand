@@ -1,5 +1,5 @@
 <div data-order-form-target="step1">
-    <h2>Coordonnées du client</h2>
+     <h2>Coordonnées pour la prestation</h2>
 
     {{ form_row(form.customerFirstNameAtOrder, {
         attr: {
@@ -29,6 +29,7 @@
         }
     }) }}
 
+    
     <h2>Détails de la prestation</h2>
 
     {{ form_row(form.serviceDate, {
@@ -84,11 +85,27 @@
         }
     }) }}
 
+    {% if menu and not edit %}
+        <a href="{{ path('app_menu_show', {id: menu.id}) }}"
+        class="btn btn-secondary mt-3">
+            Retour
+        </a>
+    {% endif %}
+
+    {% if edit %}
+        <a href="{{ path('app_order_show', {id: order.id}) }}"
+        class="btn btn-secondary mt-3">
+            Retour
+        </a>
+    {% endif %}
+
     <button
         type="button"
         data-order-form-target="continueButtonStep1"
         data-action="click->order-form#goToStep2"
+        class="btn btn-primary mt-3"
     >
         Continuer
     </button>
+
 </div>

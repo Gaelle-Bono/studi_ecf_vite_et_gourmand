@@ -67,18 +67,19 @@
     {% endif %}
 
     {#  Buttons  #} 
+
+    <a href="{{ path('app_menu_index') }}"
+        class="btn btn-secondary">
+        <i class="bi bi-card-list me-2"></i>
+        Liste des menus
+    </a>
+    
     <a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}"
         class="btn btn-primary"
         data-controller="prevent-double-click"
         data-action="click->prevent-double-click#disable">
         <i class="bi bi-cart4 me-2"></i>
         Commander
-    </a>
-
-    <a href="{{ path('app_menu_index') }}"
-        class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-2"></i>
-        Retour à la liste
     </a>
 </div>
 {% endblock %}

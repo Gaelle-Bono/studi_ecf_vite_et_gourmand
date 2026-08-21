@@ -87,7 +87,7 @@ class ResetPasswordController extends AbstractController
         $token = $this->getTokenFromSession();
 
         if (null === $token) {
-            throw $this->createNotFoundException('Pas de jeton de réinitialisation de mot de passe trouvé dans l\'URL ou dans la session.');
+            throw $this->createNotFoundException('Pas de jeton de réinitialisation de mot de passe trouvé dans l\'URL ou dans la session');
         }
 
         try {
@@ -121,7 +121,7 @@ class ResetPasswordController extends AbstractController
             // The session is cleaned up after the password has been changed.
             $this->cleanSessionAfterReset();
 
-            $this->addFlash('success', 'Mot de passe modifié avec succès.');
+            $this->addFlash('success', 'Mot de passe modifié avec succès');
             return $this->redirectToRoute('app_login');
         
         }

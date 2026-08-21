@@ -1,3 +1,4 @@
+<hr>
 {% for menu in menus %}
     <div>
         <h2>{{ menu.title }}</h2>
@@ -6,8 +7,13 @@
             - {{ menu.minimumNumberOfPeople }} personne{{ menu.minimumNumberOfPeople > 1 ? 's' : '' }} minimum
             - prix associé : {{ menu.getTotalPriceForMinimumPeople()|number_format(2, ',', ' ') }} €
         </p>
-        <a href="{{ path('app_menu_show', { id: menu.id }) }}">Détails du menu</a>
+        <a href="{{ path('app_menu_show', {'id': menu.id}) }}" 
+            class="btn btn-secondary"
+        ><i class="bi bi-eye me-2"></i>
+            Détails du menu
+        </a>
     </div>
+    <hr>
 {% else %}
     <p class="text-warning">Aucun menu trouvé</p>
 {% endfor %}

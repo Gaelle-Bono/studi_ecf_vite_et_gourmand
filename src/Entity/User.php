@@ -19,7 +19,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank(message: "L'email est obligatoire")]
-    #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
+    #[Assert\Email(message: "L'email {{ value }} n'est pas valide")]
     #[Assert\Length(max: 180)]
     private string $email;
 
@@ -83,7 +83,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, nullable: true)] 
     #[Assert\Length(
     max: 180,
-    maxMessage: 'Le complément d’adresse ne peut pas dépasser {{ limit }} caractères.'
+    maxMessage: 'Le complément d’adresse ne peut pas dépasser {{ limit }} caractères'
 )]   
     private ?string $addressComplement = null;
 
@@ -249,7 +249,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         if (!$this->role) {
-            throw new \LogicException('Aucun rôle attribué à cet utilisateur.');
+            throw new \LogicException('Aucun rôle attribué à cet utilisateur');
         }
 
         $role = $this->role->getName();

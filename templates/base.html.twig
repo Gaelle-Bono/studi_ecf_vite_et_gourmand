@@ -38,17 +38,17 @@
                             {% if app.user %}
                                 <div class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-person-circle"></i> {{ app.user.userIdentifier }}
+                                        <i class="bi bi-person-circle me-1"></i> {{ app.user.userIdentifier }}
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
                                             <a class="dropdown-item" href="{{ path('app_order_my_orders') }}">
-                                                <i class="bi bi-bag"></i> Mes commandes
+                                                <i class="bi bi-bag me-2"></i> Mes commandes
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="#">
-                                                <i class="bi bi-person"></i> Mes informations personnelles
+                                            <a class="dropdown-item" href="{{ path('app_user_profile') }}">
+                                                <i class="bi bi-person me-2"></i> Mes informations personnelles
                                             </a>
                                         </li>
                                         <li>
@@ -56,7 +56,7 @@
                                         </li>
                                         <li>
                                             <a class="dropdown-item" href="{{ logout_path() }}">
-                                                <i class="bi bi-box-arrow-right"></i> Déconnexion
+                                                <i class="bi bi-box-arrow-right me-2"></i> Déconnexion
                                             </a>
                                         </li>
                                     </ul>
@@ -74,6 +74,7 @@
             {% include 'partials/_flash.html.twig' %}
             {% block body %}
             {% endblock %}
+            <br>
         </main>
         <footer>
             <p>© 2026 Vite et Gourmand. Tous droits réservés.</p>

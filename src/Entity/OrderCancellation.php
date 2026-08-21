@@ -27,13 +27,13 @@ class OrderCancellation
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\NotBlank(
         groups: ['admin', 'employee'],
-        message: "Le motif pour l'annulation est obligatoire."
+        message: "Le motif pour l'annulation est obligatoire"
     )]
     #[Assert\Length(
         min: 10,
         max: 2000,
-        minMessage: "Le motif doit contenir au moins {{ limit }} caractères.",
-        maxMessage: "Le motif ne peut pas dépasser {{ limit }} caractères.",
+        minMessage: "Le motif doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le motif ne peut pas dépasser {{ limit }} caractères",
         groups: ['admin', 'employee']
     )]
     private ?string $reason = null;
@@ -41,7 +41,7 @@ class OrderCancellation
     #[ORM\Column(enumType: ContactMethod::class, nullable:true)]
     #[Assert\NotNull(
         groups: ['employee', 'admin'],
-        message: "Le mode de contact est obligatoire."
+        message: "Le mode de contact est obligatoire"
     )]
     private ?ContactMethod $contactMethod = null;
 

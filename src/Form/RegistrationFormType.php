@@ -11,8 +11,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+
 
 
 class RegistrationFormType extends AbstractType
@@ -31,9 +32,9 @@ class RegistrationFormType extends AbstractType
             ])
 
             ->add('phoneNumber', TextType::class, [
-                'label' => 'Télephone',
+                'label' => 'Téléphone',
                 'attr' => ['maxlength' => 20],
-                'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +."
+                'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +"
             ])
 
             ->add('address', TextType::class, [
@@ -61,12 +62,26 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Adresse e-mail'
             ])
 
-            ->add('plainPassword', PasswordType::class, [
-                // instead of being set onto the object directly,
-                // this is read and encoded in the controller
+           ->add('plainPassword', RepeatedType::class, [
+                'type' => PasswordType::class,
                 'mapped' => false,
-                'label' => 'Mot de passe',
-                'attr' => ['autocomplete' => 'new-password'],
+
+                'first_options' => [
+                    'label' => 'Mot de passe',
+                    'attr' => [
+                        'autocomplete' => 'new-password',
+                    ],
+                ],
+
+                'second_options' => [
+                    'label' => 'Répétez le mot de passe',
+                    'attr' => [
+                        'autocomplete' => 'new-password',
+                    ],
+                ],
+
+                'invalid_message' => 'Les champs de mot de passe doivent correspondre.',
+
                 'constraints' => [
                     new Assert\NotBlank(
                         message: 'Entrez un mot de passe'
@@ -74,20 +89,15 @@ class RegistrationFormType extends AbstractType
                     new Assert\Length(
                         min: AppConstant::MIN_PASSWORD_LENGTH,
                         minMessage: 'Votre mot de passe doit contenir au moins {{ limit }} caractères',
-                        // max length allowed by Symfony for security reasons
                         max: 4096
                     ),
                     new Assert\Regex(
-                        pattern : '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
-                        message : 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial.'
-                    ),     
+                        pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/',
+                        message: 'Le mot de passe doit contenir au moins une minuscule, une majuscule, un chiffre et un caractère spécial'
+                    ),
                 ],
-                'help' => "Le mot de passe doit contenir au moins " . AppConstant::MIN_PASSWORD_LENGTH . " caractères, une minuscule, une majuscule, un chiffre et un caractère spécial."
-            ])
 
-            // Submit button
-            ->add('save', SubmitType::class, [
-                'label' => 'Enregistrer'
+                'help' => 'Le mot de passe doit contenir au moins ' . AppConstant::MIN_PASSWORD_LENGTH . ' caractères, une minuscule, une majuscule, un chiffre et un caractère spécial'
             ])
         ;
     }

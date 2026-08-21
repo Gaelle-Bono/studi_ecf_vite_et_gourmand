@@ -34,7 +34,7 @@ class RegistrationController extends AbstractController
             //add 'ROLE_USER' to a new subscriber
             $role = $roleRepository->findOneBy(['name' => AppConstant::USER]);
             if (!$role) {
-               throw new \LogicException('Le rôle ROLE_USER doit exister en base.');
+               throw new \LogicException('Le rôle ROLE_USER doit exister en base');
             } 
             
             $user->setRole($role);
@@ -48,9 +48,9 @@ class RegistrationController extends AbstractController
             );
 
             if (!$success) {
-                $this->addFlash('warning', 'Compte créé mais l’email de confirmation n’a pas pu être envoyé.');
+                $this->addFlash('warning', 'Compte créé mais l’email de confirmation n’a pas pu être envoyé');
             } else {
-                $this->addFlash('success', 'Compte créé avec succès. Un email de bienvenue vous a été envoyé.');
+                $this->addFlash('success', 'Compte créé avec succès. Un email de bienvenue vous a été envoyé');
             }
 
             return $this->redirectToRoute('app_login');

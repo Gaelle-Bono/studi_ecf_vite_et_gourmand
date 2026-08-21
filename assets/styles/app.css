@@ -25,3 +25,7 @@ label.required::after {
     display: none;
 }
 
+input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear {
+    display: none;
+}
+

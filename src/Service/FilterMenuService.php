@@ -29,7 +29,7 @@ class FilterMenuService
 
         // logical validation
         if ($minPrice !== null && $maxPrice !== null && $minPrice > $maxPrice) {
-            $errors['maxPricePerPerson'] = 'Le prix maximum doit être supérieur ou égal au prix minimum.';
+            $errors['maxPricePerPerson'] = 'Le prix maximum doit être supérieur ou égal au prix minimum';
         }
 
         return [
@@ -52,7 +52,7 @@ class FilterMenuService
 
         if ($type === 'int') {
             if (!filter_var($value, FILTER_VALIDATE_INT)) {
-                $errors[$fieldName] = 'La valeur doit être un nombre entier.';
+                $errors[$fieldName] = 'La valeur doit être un nombre entier';
                 return null;
             }
             return (int)$value;
@@ -60,13 +60,13 @@ class FilterMenuService
 
         if ($type === 'float') {
             if (!filter_var($value, FILTER_VALIDATE_FLOAT)) {
-                $errors[$fieldName] = 'La valeur doit être un nombre.';
+                $errors[$fieldName] = 'La valeur doit être un nombre';
                 return null;
             }
             return (float)$value;
         }
 
-        $errors[$fieldName] = 'Valeur invalide.';
+        $errors[$fieldName] = 'Valeur invalide';
         return null;
     }
 
@@ -79,7 +79,7 @@ class FilterMenuService
         }
 
         if (!$repository->find($id)) {
-            $errors[$fieldName] = 'Valeur inexistante.';
+            $errors[$fieldName] = 'Valeur inexistante';
             return null;
         }
 
@@ -91,7 +91,7 @@ class FilterMenuService
         $value = $this->parseNumber($value, $fieldName, $errors, 'float');
 
         if ($value !== null && $value < 0) {
-            $errors[$fieldName] = 'Le prix doit être positif.';
+            $errors[$fieldName] = 'Le prix doit être positif';
             return null;
         }
 
@@ -103,7 +103,7 @@ class FilterMenuService
         $value = $this->parseNumber($value, $fieldName, $errors, 'int');
 
         if ($value !== null && $value <= 0) {
-            $errors[$fieldName] = 'Le nombre minimum de personnes doit être supérieur à zéro.';
+            $errors[$fieldName] = 'Le nombre minimum de personnes doit être supérieur à zéro';
             return null;
         }
 

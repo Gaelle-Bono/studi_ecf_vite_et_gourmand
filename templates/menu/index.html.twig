@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="container">
-    <h1>Liste des menus</h1>
+    <h1 class="h3 mb-3">Liste des menus</h1>
     <div data-controller="menu-filter">
         <form data-menu-filter-target="form"
             data-action="submit->menu-filter#submit"
@@ -50,8 +50,9 @@
                 <p class="error" data-menu-filter-target="minimumNumberOfPeople"></p>
             </div>
 
-            <button type="submit" data-menu-filter-target="submit">Filtrer</button>
-            <button type="button" data-menu-filter-target="reset" data-action="click->menu-filter#reset">Réinitialiser</button>
+            <button type="button" data-menu-filter-target="reset" data-action="click->menu-filter#reset" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise me-2"></i>Réinitialiser</button>
+            
+            <button type="submit" data-menu-filter-target="submit" class="btn btn-primary "><i class="bi bi-funnel me-2"></i>Filtrer</button>
         </form>
         
         <div data-menu-filter-target="filterOverlay" class="filter-overlay"></div>
