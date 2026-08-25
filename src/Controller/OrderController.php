@@ -11,6 +11,7 @@ use App\Form\OrderFormType;
 use App\Repository\MenuRepository;
 use App\Repository\OrderRepository;
 use App\Repository\OrderStatusHistoryRepository;
+use App\Repository\ReviewRepository;
 
 
 use App\Enum\OrderStatus;
@@ -242,6 +243,14 @@ class OrderController extends AbstractController
     #[Route('/validate-number-of-people', name: 'app_order_validate_number_of_people', methods: ['POST'])]
     public function validateNumberOfPeople( Request $request, OrderRepository $orderRepository): JsonResponse 
     {
+
+        if (!$this->isGranted('ROLE_USER')) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Vous devez être connecté'
+            ], 403);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $orderId = $data['orderId'];
@@ -254,6 +263,7 @@ class OrderController extends AbstractController
                 'message' => 'La commande sélectionnée n\'existe plus'
             ], 400);
         }
+
 
         /** @var User $user */
         $user = $this->getUser();
@@ -291,6 +301,12 @@ class OrderController extends AbstractController
     #[Route('/summary', name: 'app_order_summary', methods: ['POST'])]
     public function summary(Request $request, MenuRepository $menuRepository,  SessionInterface $session): JsonResponse 
     {
+        if (!$this->isGranted('ROLE_USER')) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Vous devez être connecté'
+            ], 403);
+        }
 
         $data = json_decode($request->getContent(), true);
         
@@ -411,7 +427,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_order_show',  requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Order $order, OrderStatusHistoryRepository $orderStatusHistoryRepository): Response
+    public function show(Order $order, OrderStatusHistoryRepository $orderStatusHistoryRepository, ReviewRepository $reviewRepository): Response
     {
 
         if (!$this->isGranted('ROLE_USER')) {
@@ -435,7 +451,6 @@ class OrderController extends AbstractController
         
         $statusHistory = $orderStatusHistoryRepository->findByOrder($order);
         
-
         return $this->render('order/show.html.twig', [
             'order' => $order,
             'canEdit' => $canEdit,
@@ -443,18 +458,33 @@ class OrderController extends AbstractController
         ]);
     }
 
+    
     #[Route('/my-orders', name: 'app_order_my_orders', methods: ['GET'])]
-    public function myOrders(OrderRepository $orderRepository): Response
+    public function myOrders(OrderRepository $orderRepository, ReviewRepository $reviewRepository): Response
     {
+        if (!$this->isGranted('ROLE_USER')) {
+            $this->addFlash(
+                'warning',
+                'Connectez-vous pour accéder à vos commandes'
+            );
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
         $orders = $orderRepository->findBy(
-            ['user' => $this->getUser()],
+            ['user' => $user],
             ['createdAt' => 'DESC']
         );
 
+    
         return $this->render('order/my_orders.html.twig', [
             'orders' => $orders
         ]);
     }
+
 
     #[Route('/{id}/edit', name: 'app_order_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function edit(Order $order, Request $request, EntityManagerInterface $em, SessionInterface $session): Response
@@ -574,8 +604,22 @@ class OrderController extends AbstractController
             throw $this->createAccessDeniedException();
         } 
 
-        if ($order->getUser() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
+        if (!$this->isGranted('ROLE_USER')) {
+            $this->addFlash(
+                'warning',
+                'Connectez-vous pour annuler votre commande'
+            );
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($order->getUser() !== $user) {
+            $this->addFlash('danger', 'Vous ne pouvez pas annuler cette commande');
+
+            return $this->redirectToRoute('app_order_my_orders');
         }
 
         if ($order->getOrderStatus() !== OrderStatus::PENDING) {
@@ -600,7 +644,6 @@ class OrderController extends AbstractController
 
         $em->flush();
 
-    
         $this->addFlash(
             'success',
             'La commande ' . $order->getOrderNumber() . ' a été annulée avec succès'

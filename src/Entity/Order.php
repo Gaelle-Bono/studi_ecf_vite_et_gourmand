@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+
 use App\Repository\OrderRepository;
 use App\Enum\OrderStatus;
 
@@ -224,7 +225,9 @@ class Order
     #[Assert\NotNull(message: "Un menu est obligatoire")]
     private Menu $menu;
 
-   
+   #[ORM\OneToOne(mappedBy: 'order')]
+    private ?Review $review = null;
+
 
     public function getId(): ?int
     {
@@ -669,6 +672,18 @@ class Order
     public function setMenu(Menu $menu): static
     {
         $this->menu = $menu;
+        return $this;
+    }
+
+    public function getReview(): ?Review
+    {
+        return $this->review;
+    }
+
+    public function setReview(?Review $review): static
+    {
+        $this->review = $review;
+
         return $this;
     }
 

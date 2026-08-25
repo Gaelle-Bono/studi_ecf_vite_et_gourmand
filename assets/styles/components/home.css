@@ -1,0 +1,7 @@
+#reviewsCarousel .carousel-control-prev {
+    left: -100px;
+}
+
+#reviewsCarousel .carousel-control-next {
+    right: -100px;
+}

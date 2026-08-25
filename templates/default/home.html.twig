@@ -1,10 +1,68 @@
 {% extends 'base.html.twig' %}
 {% block body %}
     <h1 class="h3 mb-3">Bienvenue sur le site Vite et Gourmand !</h1>
+
     <h2>Présentation de l'entreprise</h2>
     <p>bla bla</p>
+
     <h2>Mise en avant du professionnalisme de l'équipe</h2>
     <p>bla bla</p>
+
     <h2>Les avis des clients</h2>
-    <p>bla bla</p>
+    
+    {% if reviews %}
+        <div id="reviewsCarousel" class="carousel slide" data-bs-ride="false">
+
+            <div class="carousel-inner">
+
+                {% for review in reviews|batch(3) %}
+                    <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                        <div class="row g-3">
+                            {% for item in review %}
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <p class="mb-2">
+                                                {% for i in 1..5 %}
+                                                    {% if i <= item.rating %}
+                                                        <i class="bi bi-star-fill"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </p>
+                                            <p class="card-text">
+                                                {{ item.comment }}
+                                            </p>
+
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    {{ item.user.firstName }}
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            {% if reviews|length > 3 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#reviewsCarousel" data-bs-slide="prev">
+                    <i class="bi bi-chevron-left text-dark fs-2" aria-hidden="true"></i>
+                    <span class="visually-hidden">Précédent</span>
+                </button>
+
+                <button class="carousel-control-next" type="button" data-bs-target="#reviewsCarousel" data-bs-slide="next">
+                    <i class="bi bi-chevron-right text-dark fs-2" aria-hidden="true"></i>
+                    <span class="visually-hidden">Suivant</span>
+                </button>
+            {% endif %}
+        </div>
+    {% endif %}
+
 {% endblock %}

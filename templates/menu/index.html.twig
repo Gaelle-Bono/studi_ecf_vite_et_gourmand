@@ -3,7 +3,6 @@
 {% block title %}Liste des menus{% endblock %}
 
 {% block body %}
-<div class="container">
     <h1 class="h3 mb-3">Liste des menus</h1>
     <div data-controller="menu-filter">
         <form data-menu-filter-target="form"
@@ -61,6 +60,4 @@
             {% include 'menu/_list.html.twig' with { menus: menus } %}
         </div>
     </div>
-    
-</div>
 {% endblock %}

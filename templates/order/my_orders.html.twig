@@ -4,8 +4,6 @@
 
 {% block body %}
 
-<div class="container">
-
     <h1 class="h3 mb-3">Mes commandes</h1>
 
     {% for order in orders %}
@@ -17,6 +15,13 @@
         </p>
 
         {% include 'order/_status.html.twig' %}
+
+        {% if order.review %}
+            <p>
+                <strong>Avis :</strong> Avis déjà envoyé pour cette commande
+            </p>
+        {% endif %}
+
 
         <p>
             <strong>Menu :</strong> {{ order.menuTitleAtOrder }}
@@ -44,7 +49,5 @@
     {% else %}
         <p>Vous n'avez passé aucune commande.</p>
     {% endfor %}
-
-</div>
 
 {% endblock %}

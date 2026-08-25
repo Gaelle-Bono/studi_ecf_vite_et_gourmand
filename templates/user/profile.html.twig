@@ -3,7 +3,6 @@
 {% block title %}Mes informations personnelles{% endblock %}
 
 {% block body %}
-
     <h1 class="h3 mb-3">Mes informations personnelles</h1>
 
     {{ form_start(profileForm, {
@@ -23,15 +22,15 @@
         {{ form_row(profileForm.zipCode) }}
         {{ form_row(profileForm.city) }}
 
-         <a href="{{ path('app_change_password') }}"
-            class="btn btn-secondary mt-3 mb-3"
+        <a href="{{ path('app_change_password') }}"
+            class="btn btn-secondary mt-3"
         ><i class="bi bi-key me-2"></i> 
             Changer mon mot de passe
         </a>
 
         <button
             type="submit"
-            class="btn btn-primary mt-3 mb-3"
+            class="btn btn-primary mt-3"
             data-controller="prevent-double-click"
             data-action="click->prevent-double-click#disable"
         >
@@ -40,7 +39,6 @@
         </button>
 
     {{ form_end(profileForm) }}
-
    
 
 {% endblock %}

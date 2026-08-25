@@ -70,17 +70,22 @@
                 </div>
             </nav>
         </header>
+    
         <main>
-            {% include 'partials/_flash.html.twig' %}
-            {% block body %}
-            {% endblock %}
-            <br>
+            <div class="container">
+                {% include 'partials/_flash.html.twig' %}
+                {% block body %}
+                {% endblock %}
+                <br>
+            </div>
         </main>
         <footer>
-            <p>© 2026 Vite et Gourmand. Tous droits réservés.</p>
-                <p>horaires : du lundi au dimanche</p>
-                <p><a href="#">Mentions légales</a></p>
-                <p><a href="#">Conditions générales de vente</a></p>
+            <div class="container mt-3">
+                <p>© 2026 Vite et Gourmand. Tous droits réservés.</p>
+                    <p>horaires : du lundi au dimanche</p>
+                    <p><a href="#">Mentions légales</a></p>
+                    <p><a href="#">Conditions générales de vente</a></p>
+            </div>
         </footer>
     </body>
 </html>
