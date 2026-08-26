@@ -15,10 +15,36 @@ use App\Constant\AppConstant;
 class OpeningHoursService
 {
     
+
     public function __construct(
         private OpeningHoursRepository $openingHoursRepository,
         private OpeningHoursExceptionRepository $exceptionRepository
     ){}
+
+
+    public function getWeeklyOpeningHours(): array
+    {
+        $openingHours = $this->openingHoursRepository->findBy(
+            [],
+            ['dayOfWeek' => 'ASC']
+        );
+
+        $result = [];
+
+        foreach ($openingHours as $openingHour) {
+            $ranges = $this->buildRanges($openingHour);
+
+            $result[] = [
+                'day' => AppConstant::DAYS_OF_WEEK[$openingHour->getDayOfWeek()],
+                'isClosed' => $openingHour->isClosed(),
+                'hours' => $openingHour->isClosed()
+                    ? null
+                    : $this->formatToText($ranges),
+            ];
+        }
+
+        return $result;
+    }
 
 
     private function formatToText(array $ranges): string
@@ -118,4 +144,5 @@ class OpeningHoursService
         ];
     }
 
+    
 }

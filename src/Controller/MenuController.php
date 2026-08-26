@@ -23,7 +23,7 @@ class MenuController extends AbstractController
                     DietRepository $dietRepository, 
                     ThemeRepository $themeRepository): Response 
     { 
-        return $this->render('menu/index.html.twig', [
+        return $this->render('pages/menu/index.html.twig', [
             // Get all menus, themes, and diets 
             'menus' => $menuRepository->findAll(),
             'diets' => $dietRepository->findAll(), 
@@ -80,7 +80,7 @@ class MenuController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'menus_list' => $this->renderView('menu/_list.html.twig', [
+            'menus_list' => $this->renderView('pages/menu/_list.html.twig', [
                 'menus' => $menus
             ]),
             'errors' => []
@@ -93,7 +93,7 @@ class MenuController extends AbstractController
         Menu $menu, StockMenuService $stockMenuService): Response 
     {
 
-        return $this->render('menu/show.html.twig', [
+        return $this->render('pages/menu/show.html.twig', [
             'menu' => $menu,
             // stock
             'stockAlert' => $stockMenuService->getStockAlert($menu),

@@ -9,3 +9,15 @@
 
 controllers:
     resource: routing.controllers
+
+legal_notice:
+    path: /mentions-legales
+    controller: Symfony\Bundle\FrameworkBundle\Controller\TemplateController
+    defaults:
+        template: pages/general/legal_notice.html.twig
+
+terms:
+    path: /conditions-generales-de-vente
+    controller: Symfony\Bundle\FrameworkBundle\Controller\TemplateController
+    defaults:
+        template: pages/general/terms.html.twig

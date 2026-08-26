@@ -1,7 +1,7 @@
 <div class="order-summary">
 
     {# Customer #}
-    {% include 'order/_customer.html.twig' with {
+    {% include 'pages/order/_customer.html.twig' with {
         firstName: customer.firstName,
         lastName: customer.lastName,
         email: customer.email,
@@ -9,7 +9,7 @@
     } %}
 
     {# Service details #}
-    {% include 'order/_service_details.html.twig' with {
+    {% include 'pages/order/_service_details.html.twig' with {
         street: serviceAddress.street,
         complement: serviceAddress.complement,
         zip: serviceAddress.zip,
@@ -21,14 +21,14 @@
 
 
     {# Order details #}
-    {% embed 'order/_order_menu_details.html.twig' with {
+    {% embed 'pages/order/_order_menu_details.html.twig' with {
         menuTitle: menu.title,
         menuDescription: menu.description,
         includedEquipmentDescription: menu.includedEquipmentDescription,
         numberOfPeople: numberOfPeople
     } %}
         {% block dishes %}
-            {% include 'menu/dish/_dish_list.html.twig' with {
+            {% include 'pages/menu/dish/_dish_list.html.twig' with {
                 starter: menu.starter,
                 mainCourse: menu.mainCourse,
                 dessert: menu.dessert
@@ -38,7 +38,7 @@
 
 
     {# Prices #}
-    {% include 'order/_prices_details.html.twig' with {
+    {% include 'pages/order/_prices_details.html.twig' with {
         servicePriceBeforeDiscount: pricing.servicePriceBeforeDiscount,
         servicePrice: pricing.servicePrice,
         deliveryPrice: pricing.deliveryPrice,

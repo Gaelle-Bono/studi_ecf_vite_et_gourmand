@@ -8,8 +8,7 @@
     {{ form_start(requestForm) }}
         {{ form_row(requestForm.email) }}
         <div>
-            Entrez votre adresse email, et nous vous enverrons un lien de réinitialisation 
-            si un compte existe.
+            Entrez votre adresse email. Si un compte existe, vous recevrez un lien de réinitialisation.
         </div>
 
         <a href="{{ path('app_login') }}" class="btn btn-secondary mt-3">Annuler</a>

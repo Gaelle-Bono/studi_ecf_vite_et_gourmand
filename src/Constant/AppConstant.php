@@ -4,6 +4,20 @@ namespace App\Constant;
 
 class AppConstant
 {
+
+    //Footer
+    public const DAYS_OF_WEEK = [
+        1 => 'Lundi',
+        2 => 'Mardi',
+        3 => 'Mercredi',
+        4 => 'Jeudi',
+        5 => 'Vendredi',
+        6 => 'Samedi',
+        7 => 'Dimanche',
+    ];
+
+
+
     //roles
     public const USER = 'ROLE_USER';
     public const ADMIN = 'ROLE_ADMIN';

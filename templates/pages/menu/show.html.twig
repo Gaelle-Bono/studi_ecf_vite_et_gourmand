@@ -19,7 +19,7 @@
     </div>
 
     {# displaying dishes by dishes category with allergens for each dish #}
-    {% include 'menu/dish/_dish_list.html.twig' with {
+    {% include 'pages/menu/dish/_dish_list.html.twig' with {
         starter: menu.starter,
         mainCourse: menu.mainCourse,
         dessert: menu.dessert
@@ -61,7 +61,7 @@
     {#  list of conditions if exist #}
     {% if menu.conditions is not empty %}
         <h2>Conditions de commande</h2>
-        {% include 'menu/_conditions.html.twig' with { menu: menu } %}
+        {% include 'pages/menu/_conditions.html.twig' with { menu: menu } %}
     {% endif %}
 
     {#  Buttons  #} 

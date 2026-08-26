@@ -8,7 +8,7 @@
     <p><strong>Nombre minimum de personnes :</strong> {{ menu.minimumNumberOfPeople }}</p>
     
     <h4>Plats du menu</h4>
-    {% include 'menu/dish/_dish_list.html.twig' with {
+    {% include 'pages/menu/dish/_dish_list.html.twig' with {
         starter: menu.starter,
         mainCourse: menu.mainCourse,
         dessert: menu.dessert
@@ -16,8 +16,8 @@
 
     {% if menu.conditions is not empty %}
         <h4>Conditions de commande</h4>
-        {% include 'menu/_conditions.html.twig' with { menu: menu } %}
-        {% include 'order/_conditions_checkbox.html.twig' %}
+        {% include 'pages/menu/_conditions.html.twig' with { menu: menu } %}
+        {% include 'pages/order/_conditions_checkbox.html.twig' %}
     {% endif %}
 
 </div>

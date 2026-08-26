@@ -1,19 +1,21 @@
 {% extends 'base.html.twig' %}
 
 
-{% block title %}Modifier une commande{% endblock %}
+{% block title %}Passer une commande{% endblock %}
 
 {% block body %}
-    <h1 class="h3 mb-3">Modifier une commande</h1>
+    <h1 class="h3 mb-3">Passer une commande</h1>
     {{ form_start(form, { attr: { 
         novalidate: 'novalidate',
         'data-controller': 'order-form',
         'data-times-url' : path('app_order_available_times'),
-        'data-edit': 'true',
-        'data-order-id': order.id,
-        'data-validate-number-of-people-url': path('app_order_validate_number_of_people'),
+        'data-edit': 'false',
+        'data-menu-url': path('app_order_menu_preview'),
+        'data-validate-menu-availability-url': path('app_order_validate_menu_availability'),
         'data-summary-url': path('app_order_summary'),
-        'data-cancel-url': path('app_order_show', { id: order.id }),
+        'data-cancel-url': menu
+            ? path('app_menu_show', { id: menu.id })
+            : path('app_order_new'),
         'data-action': 'submit->order-form#onSubmit keydown->order-form#handleKeydown',
         'data-turbo': 'false' 
     } })  }}    
@@ -28,29 +30,29 @@
         </div>
     {% endif %}
 
-
     {# stepper #}
-    {% include 'order/_steps/_stepper.html.twig' %}
+    {% include 'pages/order/_steps/_stepper.html.twig' %}
 
     {# step 1: customer info and service details #}
-    {% include 'order/_steps/_step1_customer_service.html.twig' with {
-         edit: true,
-         menu: order.menu
+    {% include 'pages/order/_steps/_step1_customer_service.html.twig' with {
+        edit: false,
+        menu: menu
     } %}
-
-    {# step 2: menu page #}
-    {% include 'order/_steps/_step2_menu.html.twig' with {
-        edit: true,
-        menu: order.menu
+    
+    {# step 2: menu selection #}
+    {% include 'pages/order/_steps/_step2_menu.html.twig' with {
+        edit: false,
+        menu: menu
     } %}
-
+    
     {# step 3: number of people #}
-    {% include 'order/_steps/_step3_people.html.twig' %}
+    {% include 'pages/order/_steps/_step3_people.html.twig' %}
 
     {# step 4: order summary and confirmation #}
-    {% include 'order/_steps/_step4_summary.html.twig' with {
-        edit: true
+    {% include 'pages/order/_steps/_step4_summary.html.twig' with {
+        edit: false
     } %}
+
     
     {{ form_row(form._token) }}
         
@@ -58,3 +60,4 @@
 
 {% endblock %}
 
+    

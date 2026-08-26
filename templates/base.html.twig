@@ -79,12 +79,40 @@
                 <br>
             </div>
         </main>
+
         <footer>
             <div class="container mt-3">
-                <p>© 2026 Vite et Gourmand. Tous droits réservés.</p>
-                    <p>horaires : du lundi au dimanche</p>
-                    <p><a href="#">Mentions légales</a></p>
-                    <p><a href="#">Conditions générales de vente</a></p>
+
+                <p>© 2026 Vite et Gourmand. Tous droits réservés</p>
+
+                <h2 class="h6">Horaires</h2>
+
+                {% set openingHours = opening_hours() %}
+
+                {% for day in openingHours %}
+                    <p class="mb-1">
+                        <strong>{{ day.day }}</strong> :
+                        {% if day.isClosed %}
+                            Fermé
+                        {% else %}
+                            {{ day.hours }}
+                        {% endif %}
+                    </p>
+                {% endfor %}
+
+                <p class="small">
+                    Les horaires peuvent varier exceptionnellement certains jours.
+                    Pensez à consulter les horaires affichés pour la date souhaitée.
+                </p>
+                
+                <p>
+                    <a href="{{ path('legal_notice') }}">Mentions légales</a>
+                </p>
+
+                <p>
+                    <a href="{{ path('terms') }}">Conditions générales de vente</a>
+                </p>
+
             </div>
         </footer>
     </body>

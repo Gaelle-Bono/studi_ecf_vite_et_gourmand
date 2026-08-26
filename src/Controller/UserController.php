@@ -44,7 +44,7 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_user_profile');
         }
 
-        return $this->render('user/profile.html.twig', [
+        return $this->render('pages/user/profile.html.twig', [
             'profileForm' => $form,
         ]);
     }

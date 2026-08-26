@@ -60,7 +60,7 @@ class ChangePasswordController extends AbstractController
             }
         }
 
-        return $this->render('user/change_password.html.twig', [
+        return $this->render('pages/user/change_password.html.twig', [
             'changePasswordForm' => $form,
         ]);
 

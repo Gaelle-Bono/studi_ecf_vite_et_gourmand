@@ -14,7 +14,7 @@
         <strong>Dernière modification :</strong> {{ order.updatedAt|date('d/m/Y à H:i') }}
     {% endif %}
 
-    {% include 'order/_status.html.twig' %}
+    {% include 'pages/order/_status.html.twig' %}
 
     {% if canEdit %}
         <div class="d-flex gap-2 mt-3">
@@ -39,13 +39,13 @@
 
     {# Status history #}
     {% if statusHistory|length > 1 %}
-        {% include 'order/_status_history.html.twig' with {
+        {% include 'pages/order/_status_history.html.twig' with {
             statusHistory: statusHistory
         } %}
     {% endif %}
     
     {# Customer #}
-    {% include 'order/_customer.html.twig' with {
+    {% include 'pages/order/_customer.html.twig' with {
         firstName: order.customerFirstNameAtOrder,
         lastName: order.customerLastNameAtOrder,
         email: order.customerEmailAtOrder,
@@ -53,7 +53,7 @@
     } %}
 
     {# Service Details #}
-    {% include 'order/_service_details.html.twig' with {
+    {% include 'pages/order/_service_details.html.twig' with {
         street: order.serviceAddress,
         complement: order.serviceAddressComplement,
         zip: order.serviceZipCode,
@@ -64,14 +64,14 @@
     } %}
 
     {# Order details #}
-    {% embed 'order/_order_menu_details.html.twig' with {
+    {% embed 'pages/order/_order_menu_details.html.twig' with {
         menuTitle: order.menuTitleAtOrder,
         menuDescription: order.menuDescriptionAtOrder,
         includedEquipmentDescription: order.includedEquipmentDescriptionAtOrder,
         numberOfPeople: order.numberOfPeople
     } %}
         {% block dishes %}
-            {% include 'order/_dish_list_at_order.html.twig' with {
+            {% include 'pages/order/_dish_list_at_order.html.twig' with {
                 starter: order.starterTitleAtOrder,
                 mainCourse: order.mainCourseTitleAtOrder,
                 dessert: order.dessertTitleAtOrder,
@@ -85,7 +85,7 @@
     {# Prices #}
     {% set discountAmount = order.servicePriceBeforeDiscountAtOrder - order.servicePriceAtOrder %}
 
-    {% include 'order/_prices_details.html.twig' with {
+    {% include 'pages/order/_prices_details.html.twig' with {
         servicePriceBeforeDiscount: order.servicePriceBeforeDiscountAtOrder,
         servicePrice: order.servicePriceAtOrder,
         deliveryPrice: order.deliveryPriceAtOrder,

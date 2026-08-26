@@ -146,7 +146,7 @@ class OrderController extends AbstractController
 
 
                 // sending a mail
-                $success = $this->mailService->sendMail($order->getCustomerEmailAtOrder(), 'Confirmation de votre commande', 'emails/order_confirmation.html.twig',
+                $success = $this->mailService->sendMail($order->getCustomerEmailAtOrder(), 'Confirmation de votre commande', 'emails/order/order_confirmation.html.twig',
                     ['order' => $order]
                 );
 
@@ -174,7 +174,7 @@ class OrderController extends AbstractController
             }
         }
 
-        return $this->render('order/new.html.twig', [
+        return $this->render('pages/order/new.html.twig', [
             'form' => $form->createView(),
             'order' => $order,
             'menu' => $menu,
@@ -202,7 +202,7 @@ class OrderController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'menu_html' => $this->renderView('menu/_menu_preview.html.twig', [
+            'menu_html' => $this->renderView('pages/menu/_menu_preview.html.twig', [
                 'menu' => $menu
             ]),
         ]);
@@ -378,7 +378,7 @@ class OrderController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'summary_html' => $this->renderView('order/_summary.html.twig', [
+            'summary_html' => $this->renderView('pages/order/_summary.html.twig', [
                 'customer' => $customer,    
                 'serviceAddress' => $serviceAddress,
                 'deliveryInstructions' => $deliveryInstructions,
@@ -451,7 +451,7 @@ class OrderController extends AbstractController
         
         $statusHistory = $orderStatusHistoryRepository->findByOrder($order);
         
-        return $this->render('order/show.html.twig', [
+        return $this->render('pages/order/show.html.twig', [
             'order' => $order,
             'canEdit' => $canEdit,
             'statusHistory' => $statusHistory
@@ -480,7 +480,7 @@ class OrderController extends AbstractController
         );
 
     
-        return $this->render('order/my_orders.html.twig', [
+        return $this->render('pages/order/my_orders.html.twig', [
             'orders' => $orders
         ]);
     }
@@ -589,7 +589,7 @@ class OrderController extends AbstractController
             }
         }
 
-        return $this->render('order/edit.html.twig', [
+        return $this->render('pages/order/edit.html.twig', [
             'order' => $order,
             'form' => $form,
         ]);
@@ -649,7 +649,9 @@ class OrderController extends AbstractController
             'La commande ' . $order->getOrderNumber() . ' a été annulée avec succès'
         );
 
-        return $this->redirectToRoute('app_order_my_orders');
+        return $this->redirectToRoute('app_order_show', [
+            'id' => $order->getId()
+        ]);
 
     }
 
