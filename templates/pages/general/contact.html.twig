@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block body %}
+<h1 class="h3 mb-3">Contact</h1>
+
+<p>
+    Une question ? Une demande d'information ?
+    Remplissez le formulaire ci-dessous.
+    Nous vous répondrons par e-mail dans les meilleurs délais.
+</p>
+
+{{ form_start(form, {
+    attr: {
+        novalidate: 'novalidate',
+        'data-turbo': 'false'
+    }
+}) }}
+
+    {{ form_errors(form) }}
+
+    {{ form_row(form.title) }}
+    
+    {{ form_row(form.description, {
+        label: 'Votre demande'
+    }) }}
+    
+    {{ form_row(form.email) }}
+
+    <button type="submit" class="btn btn-primary" 
+        data-controller="prevent-double-click"
+        data-action="click->prevent-double-click#disable"
+    >
+        <i class="bi bi-send me-2"></i> 
+        Envoyer
+    </button>
+
+{{ form_end(form) }}
+
+
+{% endblock %}
