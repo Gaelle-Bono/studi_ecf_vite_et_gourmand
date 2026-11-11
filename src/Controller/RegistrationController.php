@@ -48,9 +48,9 @@ class RegistrationController extends AbstractController
             );
 
             if (!$success) {
-                $this->addFlash('warning', 'Compte créé mais l’email de confirmation n’a pas pu être envoyé');
+                $this->addFlash('warning', 'Compte créé mais l’email de confirmation n’a pas pu être envoyé.');
             } else {
-                $this->addFlash('success', 'Compte créé avec succès. Un email de bienvenue vous a été envoyé');
+                $this->addFlash('success', 'Compte créé avec succès. Un email de bienvenue vous a été envoyé.');
             }
 
             return $this->redirectToRoute('app_login');

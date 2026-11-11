@@ -26,7 +26,7 @@ class GeocodingService
         $data = $response->toArray();
 
         if (empty($data)) {
-            throw new \RuntimeException('GEOCODING_ERROR: Adresse introuvable');
+            throw new \RuntimeException('GEOCODING_ERROR');
         }
 
         return [

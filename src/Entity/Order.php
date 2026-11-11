@@ -86,21 +86,20 @@ class Order
 
     ////////////////// LATITUDE, LONGITUDE AND DISTANCE (Company and delivery)/////////////////////
 
-    #[ORM\Column(nullable: true)]
-    private ?float $deliveryLatAtOrder = null;
+    #[ORM\Column]
+    private float $deliveryLatAtOrder;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $deliveryLngAtOrder = null;
+    #[ORM\Column]
+    private float $deliveryLngAtOrder;
 
-     #[ORM\Column(nullable: true)]
-    private ?float $companyLatAtOrder = null;
+     #[ORM\Column]
+    private float $companyLatAtOrder;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $companyLngAtOrder = null;
+    #[ORM\Column]
+    private float $companyLngAtOrder;
 
-
-    #[ORM\Column(nullable: true)]
-    private ?float $deliveryDistanceAtOrder = null;
+    #[ORM\Column]
+    private float $deliveryDistanceAtOrder;
 
 
 
@@ -147,7 +146,7 @@ class Order
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
     private string $pricePerPersonAtOrder;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private string $servicePriceBeforeDiscountAtOrder = '0';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
@@ -355,60 +354,60 @@ class Order
 
 
 
-    public function getDeliveryLatAtOrder(): ?float
+    public function getDeliveryLatAtOrder(): float
     {
         return $this->deliveryLatAtOrder;
     }
 
-    public function setDeliveryLatAtOrder(?float $deliveryLatAtOrder): static
+    public function setDeliveryLatAtOrder(float $deliveryLatAtOrder): static
     {
         $this->deliveryLatAtOrder = $deliveryLatAtOrder;
 
         return $this;
     }
 
-    public function getDeliveryLngAtOrder(): ?float
+    public function getDeliveryLngAtOrder(): float
     {
         return $this->deliveryLngAtOrder;
     }
 
-    public function setDeliveryLngAtOrder(?float $deliveryLngAtOrder): static
+    public function setDeliveryLngAtOrder(float $deliveryLngAtOrder): static
     {
         $this->deliveryLngAtOrder = $deliveryLngAtOrder;
 
         return $this;
     }
 
-    public function getCompanyLatAtOrder(): ?float
+    public function getCompanyLatAtOrder(): float
     {
         return $this->companyLatAtOrder;
     }
 
-    public function setCompanyLatAtOrder(?float $companyLatAtOrder): static
+    public function setCompanyLatAtOrder(float $companyLatAtOrder): static
     {
         $this->companyLatAtOrder = $companyLatAtOrder;
 
         return $this;
     }
 
-    public function getCompanyLngAtOrder(): ?float
+    public function getCompanyLngAtOrder(): float
     {
         return $this->companyLngAtOrder;
     }
 
-    public function setCompanyLngAtOrder(?float $companyLngAtOrder): static
+    public function setCompanyLngAtOrder(float $companyLngAtOrder): static
     {
         $this->companyLngAtOrder = $companyLngAtOrder;
 
         return $this;
     }
 
-    public function getDeliveryDistanceAtOrder(): ?float
+    public function getDeliveryDistanceAtOrder(): float
     {
         return $this->deliveryDistanceAtOrder;
     }
 
-    public function setDeliveryDistanceAtOrder(?float $deliveryDistanceAtOrder): static
+    public function setDeliveryDistanceAtOrder(float $deliveryDistanceAtOrder): static
     {
         $this->deliveryDistanceAtOrder = $deliveryDistanceAtOrder;
 

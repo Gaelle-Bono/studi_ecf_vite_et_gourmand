@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
@@ -37,7 +38,7 @@ class OrderFormType extends AbstractType
             ])
 
             ->add('customerPhoneAtOrder', TextType::class, [
-                'label' => 'Télephone',
+                'label' => 'Téléphone',
                 'attr' => ['maxlength' => 20],
                 'help' => "Le numéro de téléphone ne doit contenir que des chiffres, espaces ou +"
             ])
@@ -94,13 +95,11 @@ class OrderFormType extends AbstractType
                 'attr' => ['maxlength' => 50]
             ])
 
-            ->add('deliveryInstructionsAtOrder', TextType::class, [
+            ->add('deliveryInstructionsAtOrder', TextAreaType::class, [
                 'label' => 'Instructions de livraison',
                 'required' => false,
-                'attr' => ['maxlength' => 255],
                 'help' => 'Précisions sur l’arrivée dans les lieux'
             ])
-
 
             // --- Order section ---
             ->add('menu', EntityType::class, [
@@ -109,7 +108,13 @@ class OrderFormType extends AbstractType
                 'label' => 'Menu',
                 'placeholder' => 'Choisir un menu',
                 'required' => true,
-                'disabled' => $options['edit']
+                'disabled' => $options['edit'],
+                'invalid_message' => 'Ce menu n\'est pas ou n\'est plus disponible. Découvrez nos autres menus.',
+                'query_builder' => function ($repository) {
+                    return $repository->createQueryBuilder('m')
+                        ->andWhere('m.isActive = true')
+                        ->andWhere('m.remainingQuantity > 0');
+                }
             ])
 
             ->add('numberOfPeople', IntegerType::class, [

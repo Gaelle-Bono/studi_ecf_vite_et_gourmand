@@ -17,6 +17,15 @@ class OrderValidationService
     {
         $errors = [];
 
+        // Date validation : service date must be at least tomorrow
+        $tomorrow = new \DateTimeImmutable('tomorrow');
+        if ($serviceDate < $tomorrow) {
+            $errors[] = [
+                'field' => 'serviceDate',
+                'message' => 'La prestation doit être réservée au minimum pour demain'
+            ];
+        }
+                
         //Date validation : service date must be at least X days after order date, X being defined in menu details
         $today = new \DateTimeImmutable('today');
         $minimumDays = $menu->getMinimumDaysBeforeOrder();

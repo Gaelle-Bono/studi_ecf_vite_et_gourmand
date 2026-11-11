@@ -1,25 +1,26 @@
+
 {% set menuDishes = {
     'Entrée': {
-        title: order.starterTitleAtOrder,
-        allergens: order.starterAllergensAtOrder
+        title: starter,
+        allergens: starterAllergens
     },
     'Plat principal': {
-        title: order.mainCourseTitleAtOrder,
-        allergens: order.mainCourseAllergensAtOrder
+        title: mainCourse,
+        allergens: mainCourseAllergens
     },
     'Dessert': {
-        title: order.dessertTitleAtOrder,
-        allergens: order.dessertAllergensAtOrder
+        title: dessert,
+        allergens: dessertAllergens
     }
 } %}
 
 {% for label, dish in menuDishes %}
     {% if dish.title %}
         <p>
-            <strong>{{ label }} :</strong> 
+            <strong>{{ label }} :</strong>
             {{ dish.title }}
             {% if dish.allergens %}
-                (allergène{{ dish.allergens|length > 1 ? 's' : '' }} :
+                (allergène{{ dish.allergens|split(', ')|length > 1 ? 's' : '' }} :
                 {{ dish.allergens }})
             {% endif %}
         </p>

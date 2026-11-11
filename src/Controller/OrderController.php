@@ -11,8 +11,6 @@ use App\Form\OrderFormType;
 use App\Repository\MenuRepository;
 use App\Repository\OrderRepository;
 use App\Repository\OrderStatusHistoryRepository;
-use App\Repository\ReviewRepository;
-
 
 use App\Enum\OrderStatus;
 
@@ -71,6 +69,13 @@ class OrderController extends AbstractController
         }
 
         if ($menu) {
+
+            if (!$menu->isActive()) {
+                $this->addFlash('warning', 'Ce menu n’est plus disponible. Découvrez nos autres menus.');
+
+                return $this->redirectToRoute('app_menu_index');
+            }
+
             $stockAlert = $this->stockMenuService->getStockAlert($menu);
 
             if ($stockAlert) {
@@ -100,32 +105,47 @@ class OrderController extends AbstractController
         if ($form->isSubmitted()) {
 
             $order = $form->getData();
-            $menu = $order->getMenu();
-            
-            //nb people
-            $numberOfPeople = $order->getNumberOfPeople();
+            $menu = $form->get('menu')->getData();
 
-            //Requested Service Date
-            $serviceDate = $form->get('serviceDate')->getData();
-            $requestedTime = $form->get('requestedTime')->getData();
+            if ($menu) {
+                //nb people
+                $numberOfPeople = $order->getNumberOfPeople();
 
-            //Validation
-            $errors = $this->orderValidationService->validate(
-                $menu, 
-                $numberOfPeople, 
-                $serviceDate,
-                $requestedTime);
+                //Requested Service Date
+                $serviceDate = $form->get('serviceDate')->getData();
+                $requestedTime = $form->get('requestedTime')->getData();
 
-            foreach ($errors as $error) {
-                $form
-                    ->get($error['field'])
-                    ->addError(new FormError($error['message']));
+                //Validation
+                $errors = $this->orderValidationService->validate(
+                    $menu, 
+                    $numberOfPeople, 
+                    $serviceDate,
+                    $requestedTime);
+
+                foreach ($errors as $error) {
+                    $form
+                        ->get($error['field'])
+                        ->addError(new FormError($error['message']));
+                }
             }
 
-
+            
             if ($form->isValid()) {
 
+
                 $summary = $session->get('order_summary');
+
+                if (
+                    !$summary ||
+                    $summary['menuId'] != $menu->getId() ||
+                    $summary['numberOfPeople'] != $numberOfPeople ||
+                    $summary['serviceDate'] != $serviceDate->format('Y-m-d') ||
+                    $summary['requestedTime'] != substr($requestedTime, 0, 5)
+                ) {
+                    $this->addFlash('warning', 'Votre récapitulatif n’est plus à jour. Veuillez vérifier votre commande.');
+
+                    return $this->redirectToRoute('app_order_new');
+                }
 
                 $now = new \DateTimeImmutable();
 
@@ -199,6 +219,12 @@ class OrderController extends AbstractController
             ], 400);
         }
 
+        if (!$menu->isActive()) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Ce menu n’est plus disponible. Découvrez nos autres menus.'
+            ], 400);
+        }
 
         return $this->json([
             'success' => true,
@@ -208,98 +234,9 @@ class OrderController extends AbstractController
         ]);
     }
 
-    #[Route('/validate-menu-availability', name: 'app_order_validate_menu_availability', methods: ['POST'])]
-    
-    public function validate_menu_availability(Request $request, MenuRepository $menuRepository): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-
-        $menu = $menuRepository->find($data['menuId']);
-
-        if (!$menu) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Le menu sélectionné n\'existe plus'
-            ], 400);
-        }
-
-        $stockAlert = $this->stockMenuService->getStockAlert($menu);
-
-        
-        if ($stockAlert) {
-            return $this->json([
-                'success' => false,
-                'message' => $stockAlert['message']
-            ]);
-        }
-
-
-        return $this->json([
-            'success' => true
-        ]);
-    }
-
-
-    #[Route('/validate-number-of-people', name: 'app_order_validate_number_of_people', methods: ['POST'])]
-    public function validateNumberOfPeople( Request $request, OrderRepository $orderRepository): JsonResponse 
-    {
-
-        if (!$this->isGranted('ROLE_USER')) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Vous devez être connecté'
-            ], 403);
-        }
-
-        $data = json_decode($request->getContent(), true);
-
-        $orderId = $data['orderId'];
-
-        $order = $orderRepository->find($orderId);
-
-        if (!$order) {
-            return $this->json([
-                'success' => false,
-                'message' => 'La commande sélectionnée n\'existe plus'
-            ], 400);
-        }
-
-
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($order->getUser() !== $user) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Vous ne pouvez pas modifier cette commande'
-            ], 403);
-        }
-
-        $numberOfPeople = (int) $data['numberOfPeople'];
-        $menu = $order->getMenu();
-
-        $error = $this->orderValidationService->validateNumberOfPeople(
-            $menu,
-            $numberOfPeople,
-            $order->getNumberOfPeople()
-        );
-
-        if ($error) {
-            return $this->json([
-                'success' => false,
-                'message' => $error
-            ]);
-        }
-
-        return $this->json([
-            'success' => true
-        ]);
-
-    }
-
 
     #[Route('/summary', name: 'app_order_summary', methods: ['POST'])]
-    public function summary(Request $request, MenuRepository $menuRepository,  SessionInterface $session): JsonResponse 
+    public function summary(Request $request, MenuRepository $menuRepository, OrderRepository $orderRepository,  SessionInterface $session): JsonResponse 
     {
         if (!$this->isGranted('ROLE_USER')) {
             return $this->json([
@@ -309,26 +246,100 @@ class OrderController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
-        
-        $menuId = $data['menuId'];
-        $menu = $menuRepository->find($menuId);
-        
-        if (!$menu) {
+
+
+        $currentNumberOfPeople = 0;
+
+        if (!empty($data['orderId'])) {
+            $order = $orderRepository->find($data['orderId']);
+
+            if (!$order || $order->getUser() !== $this->getUser()) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Cette commande est introuvable'
+                ], 400);
+            }
+
+            if ($order->getOrderStatus() !== OrderStatus::PENDING) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Cette commande ne peut plus être modifiée'
+                ], 400);
+            }
+
+            $menu = $order->getMenu();
+
+            if (!$menu->isActive()) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Ce menu n’est plus disponible. Votre commande ne peut donc plus être modifiée. Pour toute question, veuillez contacter notre équipe.'
+                ], 400);
+            }
+
+            $currentNumberOfPeople = $order->getNumberOfPeople();
+
+        } else {
+            $menuId = $data['menuId'];
+            $menu = $menuRepository->find($menuId);
+
+            if (!$menu) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Le menu sélectionné n\'existe plus'
+                ], 400);
+            }
+
+            if (!$menu->isActive()) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Ce menu n’est plus disponible. Découvrez nos autres menus.'
+                ], 400);
+            }
+        }
+
+        $menuId = $menu->getId();
+
+        $serviceDate = new \DateTimeImmutable($data['serviceDate']);
+        $requestedTime = $data['requestedTime'];
+        $numberOfPeople = (int) $data['people'];
+    
+        $errors = $this->orderValidationService->validate(
+            $menu,
+            $numberOfPeople,
+            $serviceDate,
+            $requestedTime,
+            $currentNumberOfPeople
+        );
+
+        if ($errors) {
+            $messages = [];
+
+            foreach ($errors as $error) {
+                $messages[] = $error['message'];
+            }
+
             return $this->json([
                 'success' => false,
-                'message' => 'Le menu sélectionné n\'existe plus'
+                'message' => implode(' - ', $messages)
             ], 400);
         }
-                
+
+
         $serviceAddress = $data['address'];
 
         //calculate distance between company and service address
         try {
             $route = $this->deliveryRouteService->getRouteData($serviceAddress);
         } catch (\RuntimeException $e) {
+            $message = 'Le service de calcul de distance est momentanément indisponible';
+
+            if ($e->getMessage() === 'GEOCODING_ERROR') {
+                $message = 'Adresse introuvable. Veuillez vérifier l’adresse renseignée.';
+            }
+
             return $this->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $message,
                 'blocking' => true
             ], 400);
         }
@@ -346,15 +357,10 @@ class OrderController extends AbstractController
                 
         $customer = $data['customer'];
     
-        $serviceDate = new \DateTimeImmutable($data['serviceDate']);
-        $requestedTime = $data['requestedTime'];
-        
         $coordinates = $route['coordinates'];   
         $deliveryInstructions = $data['deliveryInstructions'] ?? null;
         
-        $numberOfPeople = (int) $data['people'];
     
-
         //calculate prices
         $pricing = $this->orderPricingService->calculatePricesForOrder(
             $menu,
@@ -364,6 +370,7 @@ class OrderController extends AbstractController
 
         //stock datas in session for next step (order confirmation)
         $session->set('order_summary', [
+            'orderId' => $data['orderId'] ?? null,
             'customer' => $customer,
             'serviceAddress' => $serviceAddress,
             'deliveryInstructions' => $deliveryInstructions,
@@ -427,7 +434,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_order_show',  requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function show(Order $order, OrderStatusHistoryRepository $orderStatusHistoryRepository, ReviewRepository $reviewRepository): Response
+    public function show(Order $order, OrderStatusHistoryRepository $orderStatusHistoryRepository): Response
     {
 
         if (!$this->isGranted('ROLE_USER')) {
@@ -460,7 +467,7 @@ class OrderController extends AbstractController
 
     
     #[Route('/my-orders', name: 'app_order_my_orders', methods: ['GET'])]
-    public function myOrders(OrderRepository $orderRepository, ReviewRepository $reviewRepository): Response
+    public function myOrders(OrderRepository $orderRepository): Response
     {
         if (!$this->isGranted('ROLE_USER')) {
             $this->addFlash(
@@ -558,6 +565,21 @@ class OrderController extends AbstractController
             if ($form->isValid()) {
 
                 $summary = $session->get('order_summary');
+                if (
+                    !$summary ||
+                    $summary['orderId'] != $order->getId() ||
+                    $summary['menuId'] != $menu->getId() ||
+                    $summary['numberOfPeople'] != $numberOfPeople ||
+                    $summary['serviceDate'] != $serviceDate->format('Y-m-d') ||
+                    $summary['requestedTime'] != substr($requestedTime, 0, 5)
+                ) {
+                    $this->addFlash('warning', 'Votre récapitulatif n’est plus à jour. Veuillez vérifier votre commande.');
+
+                    return $this->redirectToRoute('app_order_edit', [
+                        'id' => $order->getId()
+                    ]);
+                }
+
 
                 $this->orderUpdateService->updateOrder(
                     $order,
@@ -580,7 +602,7 @@ class OrderController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    "Votre commande n°" . $order->getOrderNumber() . " a bien été modifiée."
+                    "Votre commande n°" . $order->getOrderNumber() . " a bien été modifiée"
                 );
 
                 return $this->redirectToRoute('app_order_show', [
@@ -600,10 +622,7 @@ class OrderController extends AbstractController
     #[Route('/{id}/cancel', name: 'app_order_cancel', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function cancel(Order $order, Request $request, EntityManagerInterface $em): Response
     {
-        if (!$this->isCsrfTokenValid('cancel'.$order->getId(), $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException();
-        } 
-
+    
         if (!$this->isGranted('ROLE_USER')) {
             $this->addFlash(
                 'warning',
@@ -612,6 +631,11 @@ class OrderController extends AbstractController
 
             return $this->redirectToRoute('app_login');
         }
+
+        if (!$this->isCsrfTokenValid('cancel'.$order->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        } 
+        
 
         /** @var User $user */
         $user = $this->getUser();

@@ -28,13 +28,12 @@ class OrderBuilderService
     {
         $order
             ->setMenu($menu)
-
             ->setMenuTitleAtOrder($menu->getTitle())
             ->setMenuDescriptionAtOrder($menu->getDescription())
             ->setPricePerPersonAtOrder($menu->getPricePerPerson())
-            ->setStarterTitleAtOrder($menu->getStarter()->getTitle())
+            ->setStarterTitleAtOrder($menu->getStarter()?->getTitle())
             ->setMainCourseTitleAtOrder($menu->getMainCourse()->getTitle())
-            ->setDessertTitleAtOrder($menu->getDessert()->getTitle());
+            ->setDessertTitleAtOrder($menu->getDessert()?->getTitle());
     }
 
     public function buildRequestedDate(\DateTimeInterface $serviceDate, string $requestedTime): \DateTimeImmutable

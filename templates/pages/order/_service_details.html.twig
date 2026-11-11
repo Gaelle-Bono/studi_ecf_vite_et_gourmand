@@ -9,11 +9,11 @@
     {{ zip }} {{ city }}
 </p>
 
-<p>
     {% if deliveryInstructions %}
-        <strong>Instructions de livraison :</strong> {{ deliveryInstructions }}
+        <p>
+            <strong>Instructions de livraison :</strong> {{ deliveryInstructions }}
+        </p>
     {% endif %}
-</p>
 
 <p>
     <strong>Date souhaitée de la prestation :</strong> {{ serviceDate|date('d/m/Y') }} à {{ requestedTime }}

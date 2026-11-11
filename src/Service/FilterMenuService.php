@@ -51,7 +51,7 @@ class FilterMenuService
         }
 
         if ($type === 'int') {
-            if (!filter_var($value, FILTER_VALIDATE_INT)) {
+            if (filter_var($value, FILTER_VALIDATE_INT) === false) {
                 $errors[$fieldName] = 'La valeur doit être un nombre entier';
                 return null;
             }
@@ -59,7 +59,7 @@ class FilterMenuService
         }
 
         if ($type === 'float') {
-            if (!filter_var($value, FILTER_VALIDATE_FLOAT)) {
+            if (filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
                 $errors[$fieldName] = 'La valeur doit être un nombre';
                 return null;
             }

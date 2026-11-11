@@ -72,12 +72,14 @@
         Liste des menus
     </a>
     
-    <a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}"
-        class="btn btn-primary"
-        data-controller="prevent-double-click"
-        data-action="click->prevent-double-click#disable">
-        <i class="bi bi-cart4 me-2"></i>
-        Commander
-    </a>
+    {% if not stockAlert %}
+        <a href="{{ path('app_order_new_with_menu', {'id': menu.id}) }}"
+            class="btn btn-primary"
+            data-controller="prevent-double-click"
+            data-action="click->prevent-double-click#disable">
+            <i class="bi bi-cart4 me-2"></i>
+            Commander
+        </a>
+    {% endif %}
 {% endblock %}
 

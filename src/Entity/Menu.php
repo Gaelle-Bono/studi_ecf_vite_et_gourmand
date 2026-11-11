@@ -17,6 +17,11 @@ class Menu
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column]
+    private bool $isActive = true;
+
+
+
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: "Le nom du menu est obligatoire")]
     #[Assert\Length(
@@ -92,6 +97,19 @@ class Menu
     {
         return $this->id;
     }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
 
     public function getTitle(): string
     {

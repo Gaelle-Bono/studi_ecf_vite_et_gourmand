@@ -174,9 +174,9 @@ export default class extends Controller {
     }
 
 
-    renderError(container, message) {
+    renderError(container, message, type = 'danger') {
         container.innerHTML = `
-            <div class="alert alert-danger">
+            <div class="alert alert-${type}">
                 ${message}
             </div>
         `;
@@ -436,8 +436,7 @@ export default class extends Controller {
     }
 
 
-    goToStep2() {
-        
+    async goToStep2() {
         const clientErrors = this.getStep1ClientErrors();
 
         if (clientErrors.length > 0) {
@@ -450,7 +449,6 @@ export default class extends Controller {
         }
 
         this.showStep(2);
-        
     }
 
 
@@ -461,14 +459,6 @@ export default class extends Controller {
          if (clientError) {
             this.showErrors([clientError]);
             return;
-        }
-
-        if (this.element.dataset.edit === 'false') {
-            const menuAvailable = await this.validateMenuAvailability();
-
-            if (!menuAvailable) {
-                return;
-            }
         }
 
         const menuMinPeople = this.getMenuMinPeople();
@@ -489,14 +479,6 @@ export default class extends Controller {
         if (clientError) {
             this.showErrors([clientError]);
             return;
-        }
-
-        if (this.element.dataset.edit === 'true') {
-            const peopleAvailable = await this.validateNumberOfPeople();
-
-            if (!peopleAvailable) {
-                return;
-            }
         }
 
         this.setLoadingState(true, [this.previousButtonStep3Target, this.continueButtonStep3Target]);
@@ -553,12 +535,19 @@ export default class extends Controller {
 
             const data = await response.json();
 
-            if (!response.ok) {
-                console.error('Erreur backend', data);
+            if (!response.ok || !data.success) {
+
+                if (data.isClosed) {
+                    this.isCompanyClosed = true;
+                    this.availabilityInfoTarget.textContent = data.message;
+                    return;
+                }
+
                 this.renderError(
                     this.availabilityInfoTarget,
-                    "Impossible de charger les horaires. Veuillez réessayer plus tard"
+                    data.message ?? "Impossible de charger les horaires. Veuillez réessayer plus tard"
                 );
+
                 return;
             }
             
@@ -653,7 +642,7 @@ export default class extends Controller {
 
                 this.renderError(
                     this.availabilityInfoTarget,
-                    data.message ?? "Impossible de charger les horaires. Veuillez réessayer plus tard"
+                    data.message ?? "Impossible de charger les horaires. Veuillez réessayer plus tard."
                 );
 
                 return;
@@ -669,7 +658,7 @@ export default class extends Controller {
             console.error('Erreur réseau', error);
             this.renderError(
                 this.availabilityInfoTarget,
-                "Impossible de charger les horaires. Veuillez réessayer plus tard"
+                "Impossible de charger les horaires. Veuillez réessayer plus tard."
             );
         
         } finally {
@@ -735,83 +724,6 @@ export default class extends Controller {
 
     }
 
-    /////////////////////////////AJAX VALIDATE MENU AVAILABILITY ////////////////////////////////
-
-    async validateMenuAvailability() {
-
-        try {
-            const response = await fetch(this.element.dataset.validateMenuAvailabilityUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    menuId: this.menuSelectTarget.value
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                this.showErrors([{
-                    element: this.menuSelectTarget,
-                    message: data.message
-                }]);
-
-                return false;
-            }
-
-            return true;
-
-        } catch (error) {
-            console.error(error);
-
-           this.renderError(
-                this.menuPreviewTarget,
-                "Impossible de vérifier la disponibilité du menu. Veuillez réessayer"
-            );
-
-            return false;
-        }
-    }
-
-    /////////////////////////////AJAX FOR UPDATE ORDER : VALIDATE NB Of PEOPLE ////////////////////////////////
-    async validateNumberOfPeople() {
-
-        try {
-            const response = await fetch(this.element.dataset.validateNumberOfPeopleUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    orderId: this.element.dataset.orderId,
-                    numberOfPeople: Number(this.peopleTarget.value)
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                this.showErrors([{
-                    element: this.peopleTarget,
-                    message: data.message
-                }]);
-
-                return false;
-            }
-
-            return true;
-
-        } catch (error) {
-            console.error(error);
-            return true; // In case of network error, we don't block the user here, but we log the error
-        }
-
-    }
-
 
     /////////////////////////////AJAX SUMMARY ////////////////////////////////
 
@@ -849,6 +761,8 @@ export default class extends Controller {
         const menuId = this.menuSelectTarget.value;
         const people = Number(this.peopleTarget.value);
 
+        const orderId = this.element.dataset.orderId;
+
 
         try {
             const response = await fetch(this.element.dataset.summaryUrl, {
@@ -861,7 +775,8 @@ export default class extends Controller {
                     address,
                     deliveryInstructions,
                     serviceDate,
-                    requestedTime
+                    requestedTime,
+                    orderId
                 })
             });
 

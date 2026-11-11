@@ -25,7 +25,7 @@ class MenuController extends AbstractController
     { 
         return $this->render('pages/menu/index.html.twig', [
             // Get all menus, themes, and diets 
-            'menus' => $menuRepository->findAll(),
+            'menus' => $menuRepository->findAvailableMenus(),
             'diets' => $dietRepository->findAll(), 
             'themes' => $themeRepository->findAll(), 
         ]); 
@@ -86,19 +86,23 @@ class MenuController extends AbstractController
             'errors' => []
         ]);
             
-    } 
+    }
 
-    #[Route('/{id}', name: 'app_menu_show', requirements: ['id' => '\d+'], methods: ['GET'])] 
-    public function show(
-        Menu $menu, StockMenuService $stockMenuService): Response 
+    #[Route('/{id}', name: 'app_menu_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function show(Menu $menu, StockMenuService $stockMenuService): Response
     {
+        if (!$menu->isActive()) {
+            $this->addFlash('warning', 'Ce menu n’est plus disponible. Découvrez nos autres menus.');
+
+            return $this->redirectToRoute('app_menu_index');
+        }
 
         return $this->render('pages/menu/show.html.twig', [
             'menu' => $menu,
-            // stock
             'stockAlert' => $stockMenuService->getStockAlert($menu),
         ]);
     }
+
 
 }
 

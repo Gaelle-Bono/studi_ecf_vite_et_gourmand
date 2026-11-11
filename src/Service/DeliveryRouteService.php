@@ -59,9 +59,6 @@ class DeliveryRouteService
     {
         $apiKey = $this->openRouteApiKey;
 
-        dump(strlen($apiKey));
-
-
         $response = $this->httpClient->request('POST',
             'https://api.openrouteservice.org/v2/directions/driving-car',
             [
