@@ -11,6 +11,7 @@ use App\Form\OrderFormType;
 use App\Repository\MenuRepository;
 use App\Repository\OrderRepository;
 use App\Repository\OrderStatusHistoryRepository;
+use App\Repository\CompanyRepository;
 
 use App\Enum\OrderStatus;
 
@@ -93,6 +94,7 @@ class OrderController extends AbstractController
         $user = $this->getUser();
         $this->orderBuilderService->fillFromUser($order, $user);
     
+        $stockAlert = null;
 
         if ($menu) {
             $this->orderBuilderService->fillFromMenu($order,$menu);
@@ -198,13 +200,14 @@ class OrderController extends AbstractController
             'form' => $form->createView(),
             'order' => $order,
             'menu' => $menu,
+            'stockAlert' => $stockAlert,
             'groupDiscountPercent' => AppConstant::GROUP_DISCOUNT_PERCENT
         ]);
     }
 
 
     #[Route('/menu-preview', name: 'app_order_menu_preview', methods: ['POST'])]
-    public function menuPreview(Request $request, MenuRepository $menuRepository): JsonResponse
+    public function menuPreview(Request $request, MenuRepository $menuRepository, StockMenuService $stockMenuService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -229,14 +232,16 @@ class OrderController extends AbstractController
         return $this->json([
             'success' => true,
             'menu_html' => $this->renderView('pages/menu/_menu_preview.html.twig', [
-                'menu' => $menu
+                'menu' => $menu,
+                'order' => null,
+                'stockAlert' => $stockMenuService->getStockAlert($menu)
             ]),
         ]);
     }
 
 
     #[Route('/summary', name: 'app_order_summary', methods: ['POST'])]
-    public function summary(Request $request, MenuRepository $menuRepository, OrderRepository $orderRepository,  SessionInterface $session): JsonResponse 
+    public function summary(Request $request, MenuRepository $menuRepository, OrderRepository $orderRepository, CompanyRepository $companyRepository, SessionInterface $session): JsonResponse 
     {
         if (!$this->isGranted('ROLE_USER')) {
             return $this->json([
@@ -249,6 +254,8 @@ class OrderController extends AbstractController
 
 
         $currentNumberOfPeople = 0;
+
+        $order = null;
 
         if (!empty($data['orderId'])) {
             $order = $orderRepository->find($data['orderId']);
@@ -308,7 +315,8 @@ class OrderController extends AbstractController
             $numberOfPeople,
             $serviceDate,
             $requestedTime,
-            $currentNumberOfPeople
+            $currentNumberOfPeople,
+            $order
         );
 
         if ($errors) {
@@ -325,47 +333,78 @@ class OrderController extends AbstractController
         }
 
 
-        $serviceAddress = $data['address'];
-
+        
         //calculate distance between company and service address
-        try {
-            $route = $this->deliveryRouteService->getRouteData($serviceAddress);
-        } catch (\RuntimeException $e) {
-            $message = 'Le service de calcul de distance est momentanément indisponible';
 
-            if ($e->getMessage() === 'GEOCODING_ERROR') {
-                $message = 'Adresse introuvable. Veuillez vérifier l’adresse renseignée.';
+        $serviceAddress = $data['address'];
+        
+        $actualFullServiceAddress  = $data['address']['street'] . ' ' . $data['address']['zip'] . ' ' . $data['address']['city'];
+
+
+        $company = $companyRepository->getCompany();
+
+        if (
+            $order
+            && $actualFullServiceAddress === $order->getFullServiceAddress()
+            && $company->getAddress() === $order->getCompanyAddressAtOrder()
+            && $company->getZipCode() === $order->getCompanyZipCodeAtOrder()
+            && $company->getCity() === $order->getCompanyCityAtOrder()
+        ) {
+            $distance = $order->getDeliveryDistanceAtOrder();
+
+            $coordinates = [
+                'company' => [
+                    'lat' => $order->getCompanyLatAtOrder(),
+                    'lng' => $order->getCompanyLngAtOrder()
+                ],
+                'client' => [
+                    'lat' => $order->getDeliveryLatAtOrder(),
+                    'lng' => $order->getDeliveryLngAtOrder()
+                ]
+            ];
+
+        } else {
+            try {
+                $route = $this->deliveryRouteService->getRouteData($serviceAddress);
+            } catch (\RuntimeException $e) {
+                $message = 'Le service de calcul de distance est momentanément indisponible';
+
+                if ($e->getMessage() === 'GEOCODING_ERROR') {
+                    $message = 'Adresse introuvable. Veuillez vérifier l’adresse renseignée.';
+                }
+
+                return $this->json([
+                    'success' => false,
+                    'message' => $message,
+                    'blocking' => true
+                ], 400);
             }
-
-            return $this->json([
-                'success' => false,
-                'message' => $message,
-                'blocking' => true
-            ], 400);
+            
+            $distance = $route['distance'];   
+            
+            if ($distance > AppConstant::MAX_DELIVERY_DISTANCE_KM) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Nous livrons uniquement dans un rayon de '
+                    . AppConstant::MAX_DELIVERY_DISTANCE_KM . ' km autour de notre établissement',
+                    'blocking' => true
+                ],400);
+            }
+            $coordinates = $route['coordinates'];   
         }
+            
         
-        $distance = $route['distance'];   
-        
-        if ($distance > AppConstant::MAX_DELIVERY_DISTANCE_KM) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Nous livrons uniquement dans un rayon de '
-                . AppConstant::MAX_DELIVERY_DISTANCE_KM . ' km autour de notre établissement',
-                'blocking' => true
-            ],400);
-        }
-                
         $customer = $data['customer'];
-    
-        $coordinates = $route['coordinates'];   
         $deliveryInstructions = $data['deliveryInstructions'] ?? null;
         
     
+
         //calculate prices
         $pricing = $this->orderPricingService->calculatePricesForOrder(
             $menu,
             $numberOfPeople,
-            $distance
+            $distance,
+            $order
         );
 
         //stock datas in session for next step (order confirmation)
@@ -386,22 +425,23 @@ class OrderController extends AbstractController
         return $this->json([
             'success' => true,
             'summary_html' => $this->renderView('pages/order/_summary.html.twig', [
-                'customer' => $customer,    
+                'customer' => $customer,
                 'serviceAddress' => $serviceAddress,
                 'deliveryInstructions' => $deliveryInstructions,
                 'serviceDate' => $serviceDate,
                 'requestedTime' => $requestedTime,
                 'menu' => $menu,
+                'order' => $order,
                 'pricing' => $pricing,
                 'groupDiscountPercent' => AppConstant::GROUP_DISCOUNT_PERCENT,
-                'numberOfPeople' => $numberOfPeople
+                'numberOfPeople' => $numberOfPeople,
+
             ])
         ]);
-
     }
 
 
-    #[Route('/available_times', name: 'app_order_available_times', methods: ['POST'])]
+    #[Route('/available-times', name: 'app_order_available_times', methods: ['POST'])]
     public function availableTimes(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -553,7 +593,8 @@ class OrderController extends AbstractController
                 $numberOfPeople,
                 $serviceDate,
                 $requestedTime,
-                $currentNumberOfPeople
+                $currentNumberOfPeople, 
+                $order
             );
 
             foreach ($errors as $error) {
@@ -613,7 +654,7 @@ class OrderController extends AbstractController
 
         return $this->render('pages/order/edit.html.twig', [
             'order' => $order,
-            'form' => $form,
+            'form' => $form
         ]);
       
     }

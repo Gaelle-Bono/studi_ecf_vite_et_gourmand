@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un menu{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-3">Modifier le menu</h1>
+
+    {{ form_start(form, {
+        attr: {
+            novalidate: 'novalidate',
+            'data-controller': 'scroll-to-first-error',
+            'data-turbo': 'false'
+        }
+    }) }}
+
+        {% if form.vars.errors|length > 0 %}
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <div>
+                    <strong>Impossible de traiter votre demande</strong><br>
+                    {{ form_errors(form) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Menu presentation #}
+        <h2>Présentation du menu</h2>
+
+        {{ form_row(form.title) }}
+        {{ form_row(form.description) }}
+
+        <hr>
+
+        {# Menu dishes #}
+        <h2>Plats du menu</h2>
+
+        {{ form_row(form.starter) }}
+        {{ form_row(form.mainCourse) }}
+        {{ form_row(form.dessert) }}
+
+        <hr>
+
+        {# Practical information #}
+        <h2>Informations pratiques</h2>
+
+        {{ form_row(form.minimumNumberOfPeople) }}
+        {{ form_row(form.pricePerPerson) }}
+        {{ form_row(form.diet) }}
+        {{ form_row(form.theme) }}
+        {{ form_row(form.minimumDaysBeforeOrder) }}
+
+        <hr>
+
+        {# Remaining stock #}
+        <h2>Stock restant</h2>
+
+        {{ form_row(form.remainingQuantity) }}
+
+        <hr>
+
+        {# Equipment loan #}
+        <h2>Prêt de matériel inclus</h2>
+
+        <div data-controller="equipment-loan">
+            {{ form_row(form.requiresEquipmentLoan) }}
+
+            <div data-equipment-loan-target="description">
+                {{ form_row(form.includedEquipmentDescription) }}
+            </div>
+        </div>
+
+        <hr>
+
+        {# Order conditions #}
+        <h2>Conditions de commande</h2>
+
+        {{ form_row(form.conditionsText) }}
+
+        <hr>
+
+        <a href="{{ path('app_employee_menu_show', {id: menu.id}) }}" class="btn btn-secondary mt-3">
+            <i class="bi bi-x-circle me-2"></i>
+            Annuler
+        </a>
+
+        <button
+            type="submit"
+            class="btn btn-primary mt-3"
+            data-controller="prevent-double-click"
+            data-action="click->prevent-double-click#disable"
+        >
+            <i class="bi bi-floppy me-2"></i>
+            Mettre à jour
+        </button>
+
+    {{ form_end(form) }}
+
+{% endblock %}

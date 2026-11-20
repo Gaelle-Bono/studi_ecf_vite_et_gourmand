@@ -32,16 +32,20 @@
     {# stepper #}
     {% include 'pages/order/_steps/_stepper.html.twig' %}
 
+
     {# step 1: customer info and service details #}
     {% include 'pages/order/_steps/_step1_customer_service.html.twig' with {
         edit: false,
         menu: menu
     } %}
     
+
     {# step 2: menu selection #}
     {% include 'pages/order/_steps/_step2_menu.html.twig' with {
         edit: false,
-        menu: menu
+        menu: menu,
+        stockAlert: stockAlert,
+        order: null
     } %}
     
     {# step 3: number of people #}

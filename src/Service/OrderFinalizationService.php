@@ -8,13 +8,16 @@ use App\Entity\OrderStatusHistory;
 
 use App\Enum\OrderStatus;
 
+use App\Repository\CompanyRepository;
+
 
 
 class OrderFinalizationService
 {
 
     public function __construct(
-        private OrderBuilderService $orderBuilderService
+        private OrderBuilderService $orderBuilderService,
+        private CompanyRepository $companyRepository
     )
     {}
 
@@ -34,6 +37,14 @@ class OrderFinalizationService
 
         $this->setCoordinatesToOrder($order, $summary['coordinates']);
         $order->setDeliveryDistanceAtOrder($summary['distance']);
+
+        $company = $this->companyRepository->getCompany();
+
+        $order
+            ->setCompanyAddressAtOrder($company->getAddress())
+            ->setCompanyZipCodeAtOrder($company->getZipCode())
+            ->setCompanyCityAtOrder($company->getCity());
+
 
         $this->setPricesToOrder($order, $summary['pricing']);
 
@@ -96,7 +107,16 @@ class OrderFinalizationService
             ->setDessertTitleAtOrder($menu->getDessert()?->getTitle())
             ->setDessertAllergensAtOrder($menu->getDessert()?->getAllergensAsString()?: null)
 
-            ->setPricePerPersonAtOrder($menu->getPricePerPerson());
+            ->setPricePerPersonAtOrder($menu->getPricePerPerson())
+
+            ->setMinimumNumberOfPeopleAtOrder($menu->getMinimumNumberOfPeople())
+            ->setMinimumDaysBeforeOrderAtOrder($menu->getMinimumDaysBeforeOrder())
+
+            ->setConditionsAtOrder($menu->getConditions())
+            ->setDietNameAtOrder($menu->getDiet()->getName())
+            ->setThemeNameAtOrder($menu->getTheme()->getName());
+
+
     }
 
     public function createInitialStatusHistory(Order $order, \DateTimeImmutable $createdAt): OrderStatusHistory

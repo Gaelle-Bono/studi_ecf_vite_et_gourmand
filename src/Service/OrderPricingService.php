@@ -3,15 +3,29 @@
 namespace App\Service;
 
 use App\Entity\Menu;
+use App\Entity\Order;
 use App\Constant\AppConstant;
 
 
 class OrderPricingService
 {
 
-    public function calculatePricesForOrder(Menu $menu, int $numberOfPeople, float $distance): array
+    public function calculatePricesForOrder(Menu $menu, int $numberOfPeople, float $distance, ?Order $order = null): array
     {
-        $servicePriceData = $this->calculateServicePriceData($menu, $numberOfPeople);
+        if ($order) {
+            $pricePerPerson = $order->getPricePerPersonAtOrder();
+            $minimumNumberOfPeople = $order->getMinimumNumberOfPeopleAtOrder();
+        } else {
+            $pricePerPerson = $menu->getPricePerPerson();
+            $minimumNumberOfPeople = $menu->getMinimumNumberOfPeople();
+        }
+
+        $servicePriceData = $this->calculateServicePriceData(
+            $pricePerPerson,
+            $minimumNumberOfPeople,
+            $numberOfPeople
+        );
+
         $deliveryPrice = $this->calculateDeliveryPrice($distance);
         $totalPrice = $this->calculateTotalPrice($servicePriceData['servicePrice'], $deliveryPrice);
 
@@ -26,20 +40,16 @@ class OrderPricingService
     }
 
 
-    public function calculateServicePriceData(Menu $menu, int $numberOfPeople): array
+    public function calculateServicePriceData(string $pricePerPerson, int $minimumNumberOfPeople, int $numberOfPeople): array
     {
-        $pricePerPerson = $menu->getPricePerPerson();
-
-        $servicePriceBeforeDiscount = bcmul((string) $pricePerPerson, (string) $numberOfPeople, 2);
+        $servicePriceBeforeDiscount = bcmul($pricePerPerson, (string) $numberOfPeople, 2);
 
         $servicePrice = $servicePriceBeforeDiscount;
 
         $hasDiscount = false;
         $discountAmount = '0';
 
-        // Apply a DISCOUNT_MULTIPLIER% (today = 10%) discount on the service price if the number of people is DISCOUNT_EXTRA_PEOPLE_THRESHOLD (today = 5) or more above the menu minimum 
-        if ($numberOfPeople >= $menu->getMinimumNumberOfPeople() + AppConstant::DISCOUNT_EXTRA_PEOPLE_THRESHOLD) 
-        {
+        if ($numberOfPeople >= $minimumNumberOfPeople + AppConstant::DISCOUNT_EXTRA_PEOPLE_THRESHOLD) {
             $servicePrice = bcmul($servicePrice, AppConstant::DISCOUNT_MULTIPLIER, 2);
             $hasDiscount = true;
             $discountAmount = bcsub($servicePriceBeforeDiscount, $servicePrice, 2);
@@ -52,6 +62,7 @@ class OrderPricingService
             'discountAmount' => $discountAmount
         ];
     }
+
 
     public function calculateDeliveryPrice(float $distanceKm): string
     {

@@ -6,25 +6,26 @@
     <h1>{{ menu.title }}</h1>
     <p>{{ menu.description }}</p>
 
+    <hr>
 
     <h2>Plats du menu</h2>
     {# displaying dishes photos #}
-    <div class="gallery">
-        {% set menuDishes = [menu.starter, menu.mainCourse, menu.dessert] %}
-        {% for dish in menuDishes %}
-            {% if dish and dish.photoPath %}
-                <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    {# displaying dishes by dishes category with allergens for each dish #}
-    {% include 'pages/menu/dish/_dish_list.html.twig' with {
-        starter: menu.starter,
-        mainCourse: menu.mainCourse,
-        dessert: menu.dessert
+    {% include 'pages/menu/dish/_dish_gallery.html.twig' with {
+        menu: menu
     } %}
 
+    {# displaying dishes by dishes category #}
+    {% include 'pages/menu/dish/_dish_list.html.twig' with {
+        order : null, 
+        starter: menu.starter,
+        starterAllergens: null,
+        mainCourse: menu.mainCourse,
+        mainCourseAllergens: null,
+        dessert: menu.dessert,
+        dessertAllergens: null
+    } %}
+
+    <hr>
 
     <h2>Informations pratiques</h2>
 
@@ -34,38 +35,36 @@
     <p><strong>Régime :</strong> {{ menu.diet.name }}</p>
     <p><strong>Thème :</strong> {{ menu.theme.name }}</p>
     
-    <h2>Disponibilité</h2>
+    <hr>
+
     {#  remaining stocks #}
-    {% if stockAlert %}
-        <div class="alert alert-{{ stockAlert.type }}">
-            <i class="{{ stockAlert.icon }} me-2"></i>
-            <strong>{{ stockAlert.message }}</strong>
-        </div>
-    {% else %}
-        <p><strong>Quantité restante :</strong> {{ menu.remainingQuantity }}</p>
-    {% endif %}
+    <h2>Stock restant</h2>
+    {% include 'pages/menu/_availability.html.twig' with { 
+        remainingQuantity: menu.remainingQuantity,
+        stockAlert: stockAlert 
+    } %}
 
-
-    {# equipment loan information #}
+    {# Equipment loan information #}
     {% if menu.requiresEquipmentLoan %}
-        <h2>Informations complémentaires</h2>
-        <div class="alert alert-info">
-            <strong>Prêt de matériel inclus : </strong>
-
-            <p>{{ menu.includedEquipmentDescription }}<br>
-            Le matériel devra être restitué après utilisation</p>
-        </div>
+        <hr>
+        <h2>Prêt de matériel inclus</h2>
+        {% include 'pages/menu/_included_equipment.html.twig' with { 
+            includedEquipment: menu.includedEquipmentDescription
+        } %}
     {% endif %}
-
 
     {#  list of conditions if exist #}
     {% if menu.conditions is not empty %}
+        <hr>
         <h2>Conditions de commande</h2>
-        {% include 'pages/menu/_conditions.html.twig' with { menu: menu } %}
+        {% include 'pages/menu/_conditions.html.twig' with { 
+            conditions: menu.conditions
+        } %}
     {% endif %}
 
-    {#  Buttons  #} 
+    <hr>
 
+    {#  Buttons  #} 
     <a href="{{ path('app_menu_index') }}"
         class="btn btn-secondary">
         <i class="bi bi-card-list me-2"></i>

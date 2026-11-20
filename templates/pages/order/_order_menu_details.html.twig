@@ -5,6 +5,10 @@
 </p>
 
 <p>
+    <strong>Prix par personne :</strong> {{ menuPricePerPerson|number_format(2, ',', ' ') }} €
+</p>
+
+<p>
     <strong>Nombre de personnes :</strong> {{ numberOfPeople }}
 </p>
 
@@ -13,6 +17,7 @@
         <strong>Prêt de matériel inclus :</strong> {{ includedEquipmentDescription }}
     </p>
 {% endif %}
+
 
 <h4>Plats du menu</h4>
 

@@ -1,0 +1,8 @@
+{% if stockAlert %}
+    <div class="alert alert-{{ stockAlert.type }}">
+        <i class="{{ stockAlert.icon }} me-2"></i>
+        <strong>{{ stockAlert.message }}</strong>
+    </div>
+{% else %}
+    <p><strong>Quantité restante :</strong> {{ remainingQuantity }}</p>
+{% endif %}

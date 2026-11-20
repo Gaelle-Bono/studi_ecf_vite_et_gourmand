@@ -1,0 +1,9 @@
+<div class="gallery my-3">
+    {% set menuDishes = [menu.starter, menu.mainCourse, menu.dessert] %}
+
+    {% for dish in menuDishes %}
+        {% if dish and dish.photoPath %}
+            <img src="{{ asset('uploads/dishes/' ~ dish.photoPath) }}" alt="{{ dish.title }}">
+        {% endif %}
+    {% endfor %}
+</div>

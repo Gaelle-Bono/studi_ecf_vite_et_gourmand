@@ -8,6 +8,7 @@
         phone: customer.phone
     } %}
 
+    <hr>
     {# Service details #}
     {% include 'pages/order/_service_details.html.twig' with {
         street: serviceAddress.street,
@@ -19,23 +20,56 @@
         requestedTime: requestedTime
     } %}
 
+    <hr>
 
     {# Order details #}
+    {% if order %}
+        {% set menuTitle = order.menuTitleAtOrder %}
+        {% set menuDescription = order.menuDescriptionAtOrder %}
+        {% set menuPricePerPerson = order.pricePerPersonAtOrder %}
+        {% set includedEquipmentDescription = order.includedEquipmentDescriptionAtOrder %}
+    {% else %}
+        {% set menuTitle = menu.title %}
+        {% set menuDescription = menu.description %}
+        {% set menuPricePerPerson = menu.pricePerPerson %}
+        {% set includedEquipmentDescription = menu.includedEquipmentDescription %}
+    {% endif %}
+
     {% embed 'pages/order/_order_menu_details.html.twig' with {
-        menuTitle: menu.title,
-        menuDescription: menu.description,
-        includedEquipmentDescription: menu.includedEquipmentDescription,
+        menuTitle: menuTitle,
+        menuDescription: menuDescription,
+        menuPricePerPerson: menuPricePerPerson,
+        includedEquipmentDescription: includedEquipmentDescription,
         numberOfPeople: numberOfPeople
     } %}
         {% block dishes %}
-            {% include 'pages/menu/dish/_dish_list.html.twig' with {
-                starter: menu.starter,
-                mainCourse: menu.mainCourse,
-                dessert: menu.dessert
-            } %}
+            {% if order %}
+                {# Display the dishes as they were at the time of the order #}
+                {% include 'pages/menu/dish/_dish_list.html.twig' with {
+                    order: order,
+                    starter: order.starterTitleAtOrder,
+                    starterAllergens: order.starterAllergensAtOrder,
+                    mainCourse: order.mainCourseTitleAtOrder,
+                    mainCourseAllergens: order.mainCourseAllergensAtOrder,
+                    dessert: order.dessertTitleAtOrder,
+                    dessertAllergens: order.dessertAllergensAtOrder
+                } %}
+            {% else %}
+                {# Display the current dishes of the menu #}
+                {% include 'pages/menu/dish/_dish_list.html.twig' with {
+                    order : null, 
+                    starter: menu.starter,
+                    starterAllergens: null,
+                    mainCourse: menu.mainCourse,
+                    mainCourseAllergens: null,
+                    dessert: menu.dessert,
+                    dessertAllergens: null
+                } %}
+            {% endif %}
         {% endblock %}
     {% endembed %}
 
+    <hr>
 
     {# Prices #}
     {% include 'pages/order/_prices_details.html.twig' with {

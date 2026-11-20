@@ -101,7 +101,16 @@ class Order
     #[ORM\Column]
     private float $deliveryDistanceAtOrder;
 
+    //////////////////// COMPANY ADDRESS FIELDS (at the time of order) ///////////////////////
+    #[ORM\Column(length: 180)]
+    private string $companyAddressAtOrder;
 
+    #[ORM\Column(length: 10)]
+    private string $companyZipCodeAtOrder;
+
+    #[ORM\Column(length: 50)]
+    private string $companyCityAtOrder;
+    
 
     /////////////////MENU DETAILS //////////////////////////
     // at the time of order (to keep a record even if menu changes later)
@@ -111,7 +120,14 @@ class Order
 
     #[ORM\Column(type: Types::TEXT)]
     private string $menuDescriptionAtOrder;
-    
+
+    #[ORM\Column]
+    private int $minimumNumberOfPeopleAtOrder;
+
+    #[ORM\Column]
+    private int $minimumDaysBeforeOrderAtOrder = 1;
+
+
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $starterTitleAtOrder = null;
 
@@ -131,6 +147,15 @@ class Order
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $dessertAllergensAtOrder = null;
 
+    
+    #[ORM\Column(nullable: true)]
+    private ?array $conditionsAtOrder = null;
+
+    #[ORM\Column(length: 255)]
+    private string $dietNameAtOrder;
+
+    #[ORM\Column(length: 255)]
+    private string $themeNameAtOrder;
 
 
     ///////////Nb people /////////////////////////
@@ -353,7 +378,6 @@ class Order
     }
 
 
-
     public function getDeliveryLatAtOrder(): float
     {
         return $this->deliveryLatAtOrder;
@@ -414,7 +438,41 @@ class Order
         return $this;
     }
 
+    public function getCompanyAddressAtOrder(): string
+    {
+        return $this->companyAddressAtOrder;
+    }
 
+    public function setCompanyAddressAtOrder(string $companyAddressAtOrder): static
+    {
+        $this->companyAddressAtOrder = $companyAddressAtOrder;
+
+        return $this;
+    }
+
+    public function getCompanyZipCodeAtOrder(): string
+    {
+        return $this->companyZipCodeAtOrder;
+    }
+
+    public function setCompanyZipCodeAtOrder(string $companyZipCodeAtOrder): static
+    {
+        $this->companyZipCodeAtOrder = $companyZipCodeAtOrder;
+
+        return $this;
+    }
+
+    public function getCompanyCityAtOrder(): string
+    {
+        return $this->companyCityAtOrder;
+    }
+
+    public function setCompanyCityAtOrder(string $companyCityAtOrder): static
+    {
+        $this->companyCityAtOrder = $companyCityAtOrder;
+
+        return $this;
+    }
 
     public function getMenuTitleAtOrder(): string
     {
@@ -438,6 +496,31 @@ class Order
 
         return $this;
     }
+
+    public function getMinimumNumberOfPeopleAtOrder(): int
+    {
+        return $this->minimumNumberOfPeopleAtOrder;
+    }
+
+    public function setMinimumNumberOfPeopleAtOrder(int $minimumNumberOfPeopleAtOrder): static
+    {
+        $this->minimumNumberOfPeopleAtOrder = $minimumNumberOfPeopleAtOrder;
+
+        return $this;
+    }
+    
+    public function getMinimumDaysBeforeOrderAtOrder(): int
+    {
+        return $this->minimumDaysBeforeOrderAtOrder;
+    }
+
+    public function setMinimumDaysBeforeOrderAtOrder(int $minimumDaysBeforeOrderAtOrder): static
+    {
+        $this->minimumDaysBeforeOrderAtOrder = $minimumDaysBeforeOrderAtOrder;
+
+        return $this;
+    }
+
 
     public function getStarterTitleAtOrder(): ?string
     {
@@ -505,6 +588,43 @@ class Order
         $this->dessertAllergensAtOrder = $dessertAllergensAtOrder;
         return $this;
     }
+
+    public function getConditionsAtOrder(): ?array
+    {
+        return $this->conditionsAtOrder;
+    }
+
+    public function setConditionsAtOrder(?array $conditionsAtOrder): static
+    {
+        $this->conditionsAtOrder = $conditionsAtOrder;
+
+        return $this;
+    }
+
+    public function getDietNameAtOrder(): string
+    {
+        return $this->dietNameAtOrder;
+    }
+
+    public function setDietNameAtOrder(string $dietNameAtOrder): static
+    {
+        $this->dietNameAtOrder = $dietNameAtOrder;
+
+        return $this;
+    }
+
+    public function getThemeNameAtOrder(): string
+    {
+        return $this->themeNameAtOrder;
+    }
+
+    public function setThemeNameAtOrder(string $themeNameAtOrder): static
+    {
+        $this->themeNameAtOrder = $themeNameAtOrder;
+
+        return $this;
+    }
+
 
     public function getNumberOfPeople(): int
     {

@@ -5,40 +5,28 @@
 {% block body %}
     <h1 class="h3 mb-3">Mes informations personnelles</h1>
 
-    {{ form_start(profileForm, {
-        attr: {
-            novalidate: 'novalidate',
-            'data-turbo': 'false'
-        }
-    }) }}
+    <p><strong>Prénom :</strong> {{ user.firstName }}</p>
+    <p><strong>Nom :</strong> {{ user.lastName }}</p>
+    <p><strong>Téléphone :</strong> {{ user.phoneNumber }}</p>
+    <p><strong>Adresse :</strong> {{ user.address }}</p>
 
-        {{ form_errors(profileForm) }}
+    {% if user.addressComplement %}
+        <p><strong>Complément d'adresse :</strong> {{ user.addressComplement }}</p>
+    {% endif %}
 
-        {{ form_row(profileForm.firstName) }}
-        {{ form_row(profileForm.lastName) }}
-        {{ form_row(profileForm.phoneNumber) }}
-        {{ form_row(profileForm.address) }}
-        {{ form_row(profileForm.addressComplement) }}
-        {{ form_row(profileForm.zipCode) }}
-        {{ form_row(profileForm.city) }}
+    <p><strong>Code postal :</strong> {{ user.zipCode }}</p>
+    <p><strong>Ville :</strong> {{ user.city }}</p>
 
-        <a href="{{ path('app_change_password') }}"
-            class="btn btn-secondary mt-3"
-        ><i class="bi bi-key me-2"></i> 
-            Changer mon mot de passe
-        </a>
+    <hr>
 
-        <button
-            type="submit"
-            class="btn btn-primary mt-3"
-            data-controller="prevent-double-click"
-            data-action="click->prevent-double-click#disable"
-        >
-            <i class="bi bi-floppy me-2"></i>
-            Mettre à jour
-        </button>
+    <a href="{{ path('app_change_password') }}" class="btn btn-secondary mt-3">
+        <i class="bi bi-key me-2"></i>
+        Changer mon mot de passe
+    </a>
 
-    {{ form_end(profileForm) }}
-   
+    <a href="{{ path('app_user_profile_edit') }}" class="btn btn-primary mt-3">
+        <i class="bi bi-pencil me-2"></i>
+        Modifier mes informations
+    </a>
 
 {% endblock %}

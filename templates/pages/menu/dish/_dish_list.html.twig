@@ -1,18 +1,63 @@
-{% set menuDishes = {
-    'Entrée': starter,
-    'Plat principal': mainCourse,
-    'Dessert': dessert
-} %}
 
-{% for label, dish in menuDishes %}
-    {% if dish %}
-        <p>
-            <strong>{{ label }} :</strong> 
-            {{ dish.title }}
-            {% if dish.allergens is not empty %}
-                (allergène{{ dish.allergens|length > 1 ? 's' : '' }} :
-                {{ dish.getAllergensAsString }})
+{# Starter #}
+{% if starter %}
+    <p>
+        <strong>Entrée :</strong>
+
+        {% if order %}
+            {{ starter }}
+
+            {% if starterAllergens %}
+                (allergène{{ starterAllergens|split(',')|length > 1 ? 's' : '' }} : {{ starterAllergens }})
             {% endif %}
-        </p>
-    {% endif %}
-{% endfor %}
+        {% else %}
+            {{ starter.title }}
+
+            {% if starter.allergens is not empty %}
+                (allergène{{ starter.allergens|length > 1 ? 's' : '' }} : {{ starter.getAllergensAsString }})
+            {% endif %}
+        {% endif %}
+    </p>
+{% endif %}
+
+{# Main course #}
+{% if mainCourse %}
+    <p>
+        <strong>Plat principal :</strong>
+
+        {% if order %}
+            {{ mainCourse }}
+
+            {% if mainCourseAllergens %}
+                (allergène{{ mainCourseAllergens|split(',')|length > 1 ? 's' : '' }} : {{ mainCourseAllergens }})
+            {% endif %}
+        {% else %}
+            {{ mainCourse.title }}
+
+            {% if mainCourse.allergens is not empty %}
+                (allergène{{ mainCourse.allergens|length > 1 ? 's' : '' }} : {{ mainCourse.getAllergensAsString }})
+            {% endif %}
+        {% endif %}
+    </p>
+{% endif %}
+
+{# Dessert #}
+{% if dessert %}
+    <p>
+        <strong>Dessert :</strong>
+
+        {% if order %}
+            {{ dessert }}
+
+            {% if dessertAllergens %}
+                (allergène{{ dessertAllergens|split(',')|length > 1 ? 's' : '' }} : {{ dessertAllergens }})
+            {% endif %}
+        {% else %}
+            {{ dessert.title }}
+
+            {% if dessert.allergens is not empty %}
+                (allergène{{ dessert.allergens|length > 1 ? 's' : '' }} : {{ dessert.getAllergensAsString }})
+            {% endif %}
+        {% endif %}
+    </p>
+{% endif %}

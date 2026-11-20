@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ menu.title }}{% endblock %}
+
+{% block body %}
+    <h1>{{ menu.title }}</h1>
+    <p>{{ menu.description }}</p>
+
+    <hr>
+
+    <h2>Plats du menu</h2>
+    {% include 'pages/menu/dish/_dish_gallery.html.twig' with {
+        menu: menu
+    } %}
+
+    {# displaying dishes by dishes category #}
+    {% include 'pages/menu/dish/_dish_list.html.twig' with {
+        order: null,
+        starter: menu.starter,
+        starterAllergens: null,
+        mainCourse: menu.mainCourse,
+        mainCourseAllergens: null,
+        dessert: menu.dessert,
+        dessertAllergens: null
+    } %}
+
+    <hr>
+
+    <h2>Informations pratiques</h2>
+
+    <p><strong>Nombre minimum de personnes :</strong> {{ menu.minimumNumberOfPeople }}</p>
+    <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
+    <p><strong>Prix associé au nombre minimum de personnes :</strong> {{ menu.getTotalPriceForMinimumPeople()|number_format(2, ',', ' ') }} €</p>
+    <p><strong>Régime :</strong> {{ menu.diet.name }}</p>
+    <p><strong>Thème :</strong> {{ menu.theme.name }}</p>
+
+    {% if menu.minimumDaysBeforeOrder is null %}
+        <p><strong>Délai minimum de réservation :</strong> 1 jour (délai par défaut)</p>
+    {% else %}
+        <p>
+            <strong>Délai minimum de réservation :</strong>
+            {{ menu.minimumDaysBeforeOrder }} jour{% if menu.minimumDaysBeforeOrder > 1 %}s{% endif %}
+        </p>
+    {% endif %}
+
+    <hr>
+
+    {# remaining stocks #}
+    <h2>Stock restant</h2>
+
+    {% include 'pages/menu/_availability.html.twig' with {
+        remainingQuantity: menu.remainingQuantity,
+        stockAlert: stockAlert
+    } %}
+
+    <p>
+        <strong>Statut du menu :</strong>
+        {% if menu.isActive %}
+            Actif
+        {% else %}
+            Inactif
+        {% endif %}
+    </p>
+
+    {# Equipment loan information #}
+    {% if menu.requiresEquipmentLoan %}
+        <hr>
+        <h2>Prêt de matériel inclus</h2>
+
+        {% include 'pages/menu/_included_equipment.html.twig' with {
+            includedEquipment: menu.includedEquipmentDescription
+        } %}
+    {% endif %}
+
+    {# list of conditions if exist #}
+    {% if menu.conditions is not empty %}
+        <hr>
+        <h2>Conditions de commande</h2>
+
+        {% include 'pages/menu/_conditions.html.twig' with {
+            conditions: menu.conditions
+        } %}
+    {% endif %}
+
+    <hr>
+
+    {# Buttons #}
+    <a href="{{ path('app_employee_menu_index') }}" class="btn btn-secondary">
+        <i class="bi bi-card-list me-2"></i>
+        Liste des menus
+    </a>
+
+    <a href="{{ path('app_employee_menu_edit', {id: menu.id}) }}" class="btn btn-primary">
+        <i class="bi bi-pencil me-2"></i>
+        Modifier
+    </a>
+
+{% endblock %}

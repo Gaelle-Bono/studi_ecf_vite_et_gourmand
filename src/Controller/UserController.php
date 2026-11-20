@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Form\UserProfileFormType;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,11 +13,31 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 
-
 class UserController extends AbstractController
 {
-    #[Route('/profile', name: 'app_user_profile', methods: ['GET', 'POST'])]
-    public function profile(Request $request, EntityManagerInterface $em): Response
+    #[Route('/profile', name: 'app_user_profile', methods: ['GET'])]
+    public function profile(): Response
+    {
+        if (!$this->isGranted('ROLE_USER')) {
+            $this->addFlash(
+                'warning',
+                'Connectez-vous pour consulter vos informations personnelles'
+            );
+
+            return $this->redirectToRoute('app_login');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        return $this->render('pages/user/profile.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+
+    #[Route('/profile/edit', name: 'app_user_profile_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, EntityManagerInterface $em): Response
     {
         if (!$this->isGranted('ROLE_USER')) {
             $this->addFlash(
@@ -27,6 +48,7 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        /** @var User $user */
         $user = $this->getUser();
 
         $form = $this->createForm(UserProfileFormType::class, $user);
@@ -44,7 +66,7 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_user_profile');
         }
 
-        return $this->render('pages/user/profile.html.twig', [
+        return $this->render('pages/user/edit.html.twig', [
             'profileForm' => $form,
         ]);
     }

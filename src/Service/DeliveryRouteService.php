@@ -77,6 +77,9 @@ class DeliveryRouteService
 
         $data = json_decode($response->getContent(false), true);
 
+        dump($response->getContent(false));
+
+
         $distance = $data['routes'][0]['summary']['distance'] ?? null;
 
         if ($distance === null) {

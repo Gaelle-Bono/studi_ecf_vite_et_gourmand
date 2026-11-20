@@ -112,8 +112,7 @@ class OrderFormType extends AbstractType
                 'invalid_message' => 'Ce menu n\'est pas ou n\'est plus disponible. Découvrez nos autres menus.',
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('m')
-                        ->andWhere('m.isActive = true')
-                        ->andWhere('m.remainingQuantity > 0');
+                        ->andWhere('m.isActive = true');
                 }
             ])
 

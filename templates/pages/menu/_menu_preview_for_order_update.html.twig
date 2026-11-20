@@ -1,0 +1,43 @@
+<div class="menu-preview" 
+    data-menu-min-people="{{ order.minimumNumberOfPeopleAtOrder }}" 
+    data-menu-title="{{ order.menuTitleAtOrder }}">
+    <h3>{{ order.menuTitleAtOrder }}</h3>
+    <p>{{ order.menuDescriptionAtOrder }}</p>
+    <p><strong>Prix par personne :</strong> {{ order.pricePerPersonAtOrder|number_format(2, ',', ' ') }} €</p>
+    <p><strong>Nombre minimum de personnes :</strong> {{ order.minimumNumberOfPeopleAtOrder }}</p>
+    
+    <hr>
+
+    <h4>Plats du menu</h4>
+
+    {% include 'pages/menu/dish/_dish_list.html.twig' with {
+        order: order,
+        starter: order.starterTitleAtOrder,
+        starterAllergens: order.starterAllergensAtOrder,
+        mainCourse: order.mainCourseTitleAtOrder,
+        mainCourseAllergens: order.mainCourseAllergensAtOrder,
+        dessert: order.dessertTitleAtOrder,
+        dessertAllergens: order.dessertAllergensAtOrder
+    } %}
+
+    {# Equipment loan information #}
+    {% if order.requiresEquipmentLoanAtOrder %}
+        <hr>
+        <h4>Prêt de matériel inclus</h4>
+        {% include 'pages/menu/_included_equipment.html.twig' with {
+            includedEquipment: order.includedEquipmentDescriptionAtOrder
+        } %}
+    {% endif %}
+
+    {#  list of conditions if exist #}
+    {% if order.conditionsAtOrder is not empty %}
+        <hr>
+        <h4>Conditions de commande</h4>
+        {% include 'pages/menu/_conditions.html.twig' with {
+            conditions: order.conditionsAtOrder
+        } %}
+    {% endif %}
+
+  
+</div>
+   

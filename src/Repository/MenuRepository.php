@@ -16,22 +16,27 @@ class MenuRepository extends ServiceEntityRepository
         parent::__construct($registry, Menu::class);
     }
 
+
+    public function findAllMenus(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->getQuery()
+            ->getResult();
+    }
+
    public function findAvailableMenus(): array
     {
         return $this->createQueryBuilder('m')
             ->andWhere('m.isActive = true')
-            ->andWhere('m.remainingQuantity > 0')
             ->getQuery()
             ->getResult();
     }
     
-
    public function findWithFilters(?int $dietId, ?int $themeId, ?float $minPricePerPerson, ?float $maxPricePerPerson, ?int $minimumNumberOfPeople): array
     {
 
         $qb = $this->createQueryBuilder('m');
         $qb->andWhere('m.isActive = true');
-        $qb->andWhere('m.remainingQuantity > 0');
 
 
         if ($dietId !== null) {

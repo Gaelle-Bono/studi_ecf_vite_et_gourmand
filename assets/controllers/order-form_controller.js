@@ -516,6 +516,11 @@ export default class extends Controller {
     }
 
 
+    updateContinueButtonStep2() {
+        const stockAlert = this.menuPreviewTarget.querySelector('[data-stock-alert]');
+        this.continueButtonStep2Target.classList.toggle('d-none', stockAlert !== null);
+    }
+
 
     ////////////////////////////////AJAX DATE AND TIME HANDLER //////////////////////////////////
 
@@ -680,6 +685,7 @@ export default class extends Controller {
 
         if (!menuId) {
             this.menuPreviewTarget.innerHTML = '';
+            this.continueButtonStep2Target.classList.remove('d-none');
             return;
         }
 
@@ -712,6 +718,9 @@ export default class extends Controller {
             }
 
             this.menuPreviewTarget.innerHTML = data.menu_html;
+
+            this.updateContinueButtonStep2();
+
 
         } catch (error) {
             console.error(error);

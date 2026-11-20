@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\Menu;
+use App\Entity\Order;
+
 use App\Constant\AppConstant;
 
 
@@ -13,7 +15,7 @@ class OrderValidationService
         private OpeningHoursService $openingHoursService
     ) {}
 
-    public function validate(Menu $menu, int $numberOfPeople, \DateTimeInterface $serviceDate, string $requestedTime, int $currentNumberOfPeople = 0): array
+    public function validate(Menu $menu,int $numberOfPeople, \DateTimeInterface $serviceDate, string $requestedTime, int $currentNumberOfPeople = 0,  ?Order $order = null): array
     {
         $errors = [];
 
@@ -28,33 +30,48 @@ class OrderValidationService
                 
         //Date validation : service date must be at least X days after order date, X being defined in menu details
         $today = new \DateTimeImmutable('today');
-        $minimumDays = $menu->getMinimumDaysBeforeOrder();
-        if ($minimumDays !== null) {
-            $minimumDate = $today->modify("+{$minimumDays} days");
-            if ($serviceDate < $minimumDate) {
-                $errors[] = [
-                    'field' => 'serviceDate',
-                    'message' => "Ce menu doit être commandé au moins {$minimumDays} jours à l’avance"
-                ];
-            }
+
+        if ($order) {
+            $minimumDays = $order->getMinimumDaysBeforeOrderAtOrder();
+            $minimumPeople = $order->getMinimumNumberOfPeopleAtOrder();
+        } else {
+            $minimumDays = $menu->getMinimumDaysBeforeOrder();
+            $minimumPeople = $menu->getMinimumNumberOfPeople();
+        }
+
+        $minimumDate = $today->modify("+{$minimumDays} days");
+        if ($serviceDate < $minimumDate) {
+            $errors[] = [
+                'field' => 'serviceDate',
+                'message' => "Ce menu doit être commandé au moins {$minimumDays} jours à l’avance"
+            ];
         }
 
         //number of people validation : cannot be less than menu minimum nor more than remaining quantity
-        if ($numberOfPeople < $menu->getMinimumNumberOfPeople()) {
+        
+        if ($numberOfPeople < $minimumPeople) {
             $errors[] = [
                 'field' => 'numberOfPeople',
-                'message' => $menu->getMinimumNumberOfPeople() . ' personnes minimum pour ce menu'
+                'message' => $minimumPeople . ' personnes minimum pour ce menu'
             ];
         }
+        
               
-        // stock validation 
+        // Stock validation
         $availableQuantity = $menu->getRemainingQuantity() + $currentNumberOfPeople;
 
         if ($numberOfPeople > $availableQuantity) {
-            $errors[]= [
+
+            if ($availableQuantity === 0) {
+                $message = 'Ce menu est actuellement en rupture de stock. La commande est momentanément impossible.';
+            } else {
+                $message = 'Le stock disponible est insuffisant. Il permet actuellement de servir '
+                    . $availableQuantity . ' personne(s) maximum.';
+            }
+
+            $errors[] = [
                 'field' => 'numberOfPeople',
-                'message' => 'Ce menu est encore disponible pour ' 
-                    . $availableQuantity . ' personne(s) maximum'
+                'message' => $message
             ];
         }
 

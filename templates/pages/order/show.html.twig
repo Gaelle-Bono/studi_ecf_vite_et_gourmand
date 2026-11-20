@@ -37,6 +37,7 @@
         </div>
     {% endif %}
 
+
     {# Status history #}
     {% if statusHistory|length > 1 %}
         {% include 'pages/order/_status_history.html.twig' with {
@@ -44,6 +45,7 @@
         } %}
     {% endif %}
     
+    <hr>
     {# Customer #}
     {% include 'pages/order/_customer.html.twig' with {
         firstName: order.customerFirstNameAtOrder,
@@ -52,6 +54,7 @@
         phone: order.customerPhoneAtOrder
     } %}
 
+    <hr>
     {# Service Details #}
     {% include 'pages/order/_service_details.html.twig' with {
         street: order.serviceAddress,
@@ -63,10 +66,12 @@
         requestedTime: order.requestedDeliveryAt|date('H:i')
     } %}
 
+    <hr>
     {# Order details #}
     {% embed 'pages/order/_order_menu_details.html.twig' with {
         menuTitle: order.menuTitleAtOrder,
         menuDescription: order.menuDescriptionAtOrder,
+        menuPricePerPerson: order.pricePerPersonAtOrder,
         includedEquipmentDescription: order.includedEquipmentDescriptionAtOrder,
         numberOfPeople: order.numberOfPeople
     } %}
@@ -82,6 +87,7 @@
         {% endblock %}
     {% endembed %}
 
+    <hr>
     {# Prices #}
     {% set discountAmount = order.servicePriceBeforeDiscountAtOrder - order.servicePriceAtOrder %}
 
@@ -98,6 +104,7 @@
 
     {% if order.orderStatus == constant('App\\Enum\\OrderStatus::COMPLETED') %}
         {% if order.review %}
+            <hr>
             <h3 class="mt-4">Votre avis</h3>
             
             <p>

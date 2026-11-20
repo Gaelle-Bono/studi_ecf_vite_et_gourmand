@@ -3,20 +3,53 @@
     data-menu-title="{{ menu.title }}">
     <h3>{{ menu.title }}</h3>
     <p>{{ menu.description }}</p>
-    
     <p><strong>Prix par personne :</strong> {{ menu.pricePerPerson|number_format(2, ',', ' ') }} €</p>
     <p><strong>Nombre minimum de personnes :</strong> {{ menu.minimumNumberOfPeople }}</p>
     
+    <hr>
+
     <h4>Plats du menu</h4>
-    {% include 'pages/menu/dish/_dish_list.html.twig' with {
-        starter: menu.starter,
-        mainCourse: menu.mainCourse,
-        dessert: menu.dessert
+
+    {# displaying dishes photos #}
+    {% include 'pages/menu/dish/_dish_gallery.html.twig' with {
+        menu: menu
     } %}
 
+    {% include 'pages/menu/dish/_dish_list.html.twig' with {
+        order: null,
+        starter: menu.starter,
+        starterAllergens: null,
+        mainCourse: menu.mainCourse,
+        mainCourseAllergens: null,
+        dessert: menu.dessert,
+        dessertAllergens: null
+    } %}
+
+
+    <hr>
+    {#  remaining stocks #}
+    <h4>Stock restant</h4>
+    {% include 'pages/menu/_availability.html.twig' with { 
+        remainingQuantity: menu.remainingQuantity,
+        stockAlert: stockAlert
+    } %}
+
+    {# Equipment loan information #}
+    {% if menu.requiresEquipmentLoan %}
+        <hr>
+        <h4>Prêt de matériel inclus</h4>
+        {% include 'pages/menu/_included_equipment.html.twig' with { 
+            includedEquipment: menu.includedEquipmentDescription
+            } %}
+    {% endif %}
+
+    {#  list of conditions if exist #}
     {% if menu.conditions is not empty %}
+        <hr>
         <h4>Conditions de commande</h4>
-        {% include 'pages/menu/_conditions.html.twig' with { menu: menu } %}
+        {% include 'pages/menu/_conditions.html.twig' with { 
+            conditions: menu.conditions
+        } %}
         {% include 'pages/order/_conditions_checkbox.html.twig' %}
     {% endif %}
 

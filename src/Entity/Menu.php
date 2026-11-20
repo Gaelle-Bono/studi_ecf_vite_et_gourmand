@@ -28,7 +28,7 @@ class Menu
         max: 100,
         maxMessage: "Le nom du menu ne peut pas dépasser {{ limit }} caractères"
     )]
-    private string $title;
+    private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "La description du menu est obligatoire")]
@@ -36,35 +36,42 @@ class Menu
         max: 1000,
         maxMessage: "La description du menu ne peut pas dépasser {{ limit }} caractères"
     )]
-    private string $description;
+    private ?string $description = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: "Le nombre minimum de personnes est obligatoire")]
     #[Assert\GreaterThanOrEqual(
         value: 1,
         message: "Le menu doit être commandé pour au moins 1 personne"
     )]
-    private int $minimumNumberOfPeople = 1;
+    private ?int $minimumNumberOfPeople = 1;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    #[Assert\Positive(message: "Le prix par personne doit être positif")]
-    private string $pricePerPerson;
+    #[Assert\NotNull(message: "Le prix par personne est obligatoire")]
+    #[Assert\GreaterThan(
+        value: 0,
+        message: "Le prix par personne doit être supérieur à 0"
+    )]
+    private ?string $pricePerPerson = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: "La quantité restante est obligatoire")]
     #[Assert\PositiveOrZero(
         message: "La quantité restante doit être supérieure ou égale à zéro"
     )]
-    private int $remainingQuantity;
+    private ?int $remainingQuantity = 0;
+
 
     #[ORM\Column(nullable: true)]
     #[Assert\Type('array')]
     private ?array $conditions = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     #[Assert\GreaterThanOrEqual(
         value: 1,
         message: "Ce menu doit être commandé au moins 1 jour à l’avance"
     )]
-    private ?int $minimumDaysBeforeOrder = null;
+    private int $minimumDaysBeforeOrder = 1;
 
     #[ORM\Column(type: 'boolean')]
     private bool $requiresEquipmentLoan = false;
@@ -79,7 +86,8 @@ class Menu
     
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private Dish $mainCourse;
+    #[Assert\NotNull(message: "Veuillez choisir un plat principal")]
+    private ?Dish $mainCourse = null;
     
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
@@ -87,11 +95,13 @@ class Menu
     
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private Diet $diet;
+    #[Assert\NotNull(message: "Veuillez choisir un régime")]
+    private ?Diet $diet = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private Theme $theme;
+    #[Assert\NotNull(message: "Veuillez choisir un thème")]
+    private ?Theme $theme = null;
 
     public function getId(): ?int
     {
@@ -111,48 +121,48 @@ class Menu
     }
 
 
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(?string $title): static
     {
         $this->title = $title;
 
         return $this;
     }
 
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 
         return $this;
     }
 
-    public function getMinimumNumberOfPeople(): int
+    public function getMinimumNumberOfPeople(): ?int
     {
         return $this->minimumNumberOfPeople;
     }
 
-    public function setMinimumNumberOfPeople(int $minimumNumberOfPeople): static
+    public function setMinimumNumberOfPeople(?int $minimumNumberOfPeople): static
     {
         $this->minimumNumberOfPeople = $minimumNumberOfPeople;
 
         return $this;
     }
 
-    public function getPricePerPerson(): string
+    public function getPricePerPerson(): ?string
     {
         return $this->pricePerPerson;
     }
     
-    public function setPricePerPerson(string $pricePerPerson): static
+    public function setPricePerPerson(?string $pricePerPerson): static
     {
         $this->pricePerPerson = $pricePerPerson;
 
@@ -163,12 +173,12 @@ class Menu
         return bcmul($this->pricePerPerson, (string) $this->minimumNumberOfPeople, 2);
     }
 
-    public function getRemainingQuantity(): int
+    public function getRemainingQuantity(): ?int
     {
         return $this->remainingQuantity;
     }
 
-    public function setRemainingQuantity(int $remainingQuantity): static
+    public function setRemainingQuantity(?int $remainingQuantity): static
     {
         $this->remainingQuantity = $remainingQuantity;
 
@@ -187,12 +197,12 @@ class Menu
         return $this;
     }
 
-    public function getMinimumDaysBeforeOrder(): ?int
+    public function getMinimumDaysBeforeOrder(): int
     {
         return $this->minimumDaysBeforeOrder;
     }
 
-    public function setMinimumDaysBeforeOrder(?int $minimumDaysBeforeOrder): static
+    public function setMinimumDaysBeforeOrder(int $minimumDaysBeforeOrder): static
     {
         $this->minimumDaysBeforeOrder = $minimumDaysBeforeOrder;
 
@@ -235,12 +245,12 @@ class Menu
         return $this;
     }
 
-    public function getMainCourse(): Dish
+    public function getMainCourse(): ?Dish
     {
         return $this->mainCourse;
     }
 
-    public function setMainCourse(Dish $mainCourse): static
+    public function setMainCourse(?Dish $mainCourse): static
     {
         $this->mainCourse = $mainCourse;
 
@@ -259,24 +269,24 @@ class Menu
         return $this;
     }
 
-    public function getDiet(): Diet
+    public function getDiet(): ?Diet
     {
         return $this->diet;
     }
 
-    public function setDiet(Diet $diet): static
+    public function setDiet(?Diet $diet): static
     {
         $this->diet = $diet;
 
         return $this;
     }
 
-    public function getTheme(): Theme
+    public function getTheme(): ?Theme
     {
         return $this->theme;
     }
 
-    public function setTheme(Theme $theme): static
+    public function setTheme(?Theme $theme): static
     {
         $this->theme = $theme;
 
